@@ -1,0 +1,18 @@
+{
+  "name": "AllMyPPL Parse Server",
+  "description": "An example of how you can integrate twilio and parse-server-mailgun, parse-node and parse-server modules with a heroku-hosted nodejs / express server.",
+  "repository": "https://github.com/apatrickstar/AllMyPPL-Server",
+  "keywords": ["node", "express", "parse","twilio","parse-server","parse-server-mailgun","mailgun","parse-node","email","text","message","messaging","sms","contact","contacts","AllMyPPL","heroku"],
+  "env": {
+    "PARSE_MOUNT": {
+      "description": "Configure Parse API route.",
+      "value": "/parse"
+    },
+    "ENVIRONMENT_VARIABLE": {
+      "description": "Use an enviroment variable like this to set your keys, secrets and credentials without exposing them to the public, they can be accessed in your code as process.env.ENVIRONMENT_VARIABLE",
+      "value": "SECRET_KEY"
+    }
+  },
+  "image": "heroku/nodejs",
+  "addons": ["mongolab"]
+}

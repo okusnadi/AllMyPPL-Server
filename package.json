@@ -1,0 +1,25 @@
+{
+  "name": "AllMyPPL",
+  "version": "1.0.0",
+  "description": "A text message based contact storage service",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apatrickstar/AllMyPeople-Server"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "~4.11.x",
+    "kerberos": "~0.0.x",
+    "parse": "~1.8.0",
+    "parse-server": "~2.2.12",
+    "parse-server-mailgun": "~2.1.16",
+    "twilio": "~2.9.3"
+  },
+  "scripts": {
+    "start": "node index.js"
+  },
+  "engines": {
+    "node": ">=4.3"
+  }
+}
