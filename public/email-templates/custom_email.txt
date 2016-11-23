@@ -1,6 +1,5 @@
 Hi {{username}},
 
-Thanks for using AllMyPeople.
-
-The AllMyPeople Team
-https://apatrickstar.github.io
+Thanks for using {{appName}}.
+The {{appName}} Team
+www.allmyppl.com

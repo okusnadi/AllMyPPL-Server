@@ -1,9 +1,9 @@
 Hi {{username}},
 
-Thanks for signing up for AllMyPeople!
+Thanks for signing up for {{appName}}!
 Please confirm your account by clicking on the link below.
 
 {{link}}
 
-The AllMyPeople Team
-https://apatrickstar.github.io
+The {{appName}} Team
+www.allmyppl.com
