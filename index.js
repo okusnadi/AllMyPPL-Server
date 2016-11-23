@@ -309,7 +309,8 @@ app.post('/smsReceived', function(req, res) {
 
           console.log("name " + result.get("name") + "\nphone " + result.get("phone")+"\nuid "+result.id);
 
-          result.save({commandData.key:commandData.value},{sessionToken:commandData.user.getSessionToken()}).then(function(savedObject){
+          var key = commandData.key;
+          result.save({key:commandData.value},{sessionToken:commandData.user.getSessionToken()}).then(function(savedObject){
             var resultData = {user:commandData.user, results:[], result:savedObject, command: commandData.command};
             commandPromise.resolve(resultData);
           }, function (error) {
