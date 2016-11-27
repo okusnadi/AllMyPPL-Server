@@ -469,7 +469,7 @@ app.post('/smsReceived', function(req, res) {
                                     var word = wordList[i];
                                     if (i >= 4) {
                                         if (!isNumeric(word)) {
-                                            var resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, ""));
+                                            resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, ""));
                                             rejected = true;
                                             break;
                                         } else {
