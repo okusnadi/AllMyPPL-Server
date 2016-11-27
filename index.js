@@ -146,12 +146,14 @@ app.post('/smsReceived', function(req, res) {
     }
 
   }).then(function(user) {
-
-    if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
+    if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD) {
+      return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA,"You've never subscribed to the SMS service, subscribing will allow you to manage and retrieve your contacts by text messaging."));
+    } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA,"Your account is not in good standing, please make sure all outstanding charges have been paid."));
-    } else if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
-      return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service."));
+    } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED) {
+      return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service, please activate a subscription to enable managing and retrieval of contacts by text messaging."));
     } else {
+    // SUBSCRIPTION_STATUS_ACTIVE
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] || "";
 
