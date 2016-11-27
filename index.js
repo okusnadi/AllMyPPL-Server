@@ -10,6 +10,7 @@ var path = require('path');
 var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
 var http = require('http');
 var querystring = require('querystring');
+var stripe = require('stripe')(process.env.STRIPE_API_KEY);
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
@@ -200,6 +201,8 @@ app.post('/smsReceived', function(req, res) {
       return Parse.Promise.as({command: enteredCommand, user: user});
     } else if (enteredCommand == "signup") {
       return Parse.Promise.as({command: enteredCommand, username:wordList[0], password:wordList[1], email: wordList[3], user: user});
+    } else if (enteredCommand == "payment") {
+      return Parse.Promise.as({command: enteredCommand, user: user});
     } else {
       return Parse.Promise.as({command: enteredCommand, user: user});
     }
@@ -210,9 +213,19 @@ app.post('/smsReceived', function(req, res) {
     var wordList = latestMessage.body.split(" ");
 
     var enteredCommand = wordList[2] || "";
-    var resultData = {results:[], result:{}, command: commandData.command, user: commandData.user};
+    var resultData = {results:[], result:{}, command: commandData.command, user: commandData.user, paymentCommand: ""};
 
-    switch (enteredCommand) {
+    switch (enteredCommand.toLowerCase()) {
+      case "payment":
+            if (wordList[3] == "set") {
+              resultData.paymentCommand = wordList[3];
+            } else if (wordList[3] == "delete") {
+                resultData.paymentCommand = wordList[3];
+            } else {
+
+            }
+            commandPromise.resolve(resultData);
+            break;
       case "menu":
             commandPromise.resolve(resultData);
             break;
@@ -353,6 +366,104 @@ app.post('/smsReceived', function(req, res) {
       var enteredCommand = wordList[2] || "";
 
       switch (enteredCommand) {
+        case "payment":
+
+            if (resultData.paymentCommand == "") {
+
+            stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
+            // asynchronously called
+                if (cards.length == 0) {
+                  twilio.sendMessage({
+
+                        to: latestMessage.from, // Any number Twilio can deliver to
+                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                        body: "You currently have no payment methods on file.  Type USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+
+                      }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+                        if (!err) {
+                          console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                        } else {
+                          console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                        }
+                      });
+                      resultPromise.resolve(resultData);
+                    } else if (cards.length == 1) {
+                      twilio.sendMessage({
+
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "The last 4 digits of your active payment method are " + cards[0].last4 + ".  To set a new payment method, type USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+
+                          }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+                            if (!err) {
+                              console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                              console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                            }
+                          });
+                          resultPromise.resolve(resultData);
+                    }
+              });
+
+          } else if (resultData.paymentCommand == "set") {
+              // TODO take in USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV and create customer and save card for future use and save customerId on user if not already saved
+          } else if (resultData.paymentCommand == "delete") {
+            stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
+            // asynchronously called
+                if (cards.length == 0) {
+                  twilio.sendMessage({
+
+                        to: latestMessage.from, // Any number Twilio can deliver to
+                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                        body: "You currently have no payment methods on file.  Type USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+
+                      }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+                        if (!err) {
+                          console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                        } else {
+                          console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                        }
+                      });
+                      esultPromise.resolve(resultData);
+                    } else if (cards.length == 1) {
+                          stripe.customers.deleteCard(
+                          resultData.user.get("customerId"),
+                          cards[0].id,
+                          function(err, confirmation) {
+                            // asynchronously called
+                            if (err) {
+                              console.log(err + " error deleting customer "+ resultData.user.get("customerId")+ " card " + cards[0].id);
+                              resultPromise.reject(err);
+                            } else {
+                              twilio.sendMessage({
+
+                                    to: latestMessage.from, // Any number Twilio can deliver to
+                                    from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                                    body: "Card deleted successfully, you will not have a payment method on file to pay for your subscription when it expires, if you would like to auto-renew your subscription, add another payment method.  Type USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+
+                                  }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+                                    if (!err) {
+                                      console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                    } else {
+                                      console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    }
+                              });
+                              resultPromise.resolve(resultData);
+                            }
+                          }
+                        );
+
+                    } else {
+                      resultPromise.reject(new Parse.Error(Parse.Error.OTHER_CAUSE,
+                                  "You currently have too many payment methods on file.  Please contact support@allmyppl.com for further assistance."));
+                    }
+              });
+          }
+            break;
         case "menu":
         twilio.sendMessage({
 
