@@ -4,17 +4,9 @@
   "repository": "https://github.com/apatrickstar/AllMyPPL-Server",
   "keywords": ["node", "express", "parse","twilio","parse-server","parse-server-mailgun","mailgun","parse-node","email","text","message","messaging","sms","contact","contacts","AllMyPPL","heroku"],
   "env": {
-    "PARSE_MOUNT": {
-      "description": "Configure Parse API route.",
-      "value": "/parse"
-    },
-    "APP_NAME": {
-      "description": "appName is used in email templates.",
-      "value": "AllMyPPL"
-    },
     "ENVIRONMENT_VARIABLE": {
-      "description": "Use an enviroment variable like this to set your keys, secrets and credentials without exposing them to the public, they can be accessed in your code as process.env.ENVIRONMENT_VARIABLE",
-      "value": "SECRET_KEY"
+      "description": "Use an enviroment variable like this to set your keys, secrets and credentials for Node.js without exposing them to the public, they can be accessed in your code as process.env.ENVIRONMENT_VARIABLE, on Heroku-hosted sites, these are changed not here but in Settings > Reveal Config Vars.",
+      "value": "SECRET"
     }
   },
   "image": "heroku/nodejs",
