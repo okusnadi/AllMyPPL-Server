@@ -503,34 +503,14 @@ app.post('/smsReceived', function(req, res) {
                                 // TODO add stripe code to store card and assign confirmation to resultData.result
                                 resultPromise.resolve(resultData);
                             }
-                        }
-                } else if (resultData.paymentCommand == "delete") {
-                    stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
-                        // asynchronously called
-                        if (cards.length == 0) {
-                            twilio.sendMessage({
-                                to: latestMessage.from, // Any number Twilio can deliver to
-                                from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                body: "You currently have no payment methods on file.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
-                            }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                                if (!err) {
-                                    console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                                } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                                }
-                            });
-                            esultPromise.resolve(resultData);
-                        } else if (cards.length == 1) {
-                            stripe.customers.deleteCard(resultData.user.get("customerId"), cards[0].id, function(err, confirmation) {
+                        } else if (resultData.paymentCommand == "delete") {
+                            stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
                                 // asynchronously called
-                                if (err) {
-                                    console.log(err + " error deleting customer " + resultData.user.get("customerId") + " card " + cards[0].id);
-                                    resultPromise.reject(err);
-                                } else {
+                                if (cards.length == 0) {
                                     twilio.sendMessage({
                                         to: latestMessage.from, // Any number Twilio can deliver to
                                         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                        body: "Card deleted successfully, you will not have a payment method on file to pay for your subscription when it expires, if you would like to auto-renew your subscription, add another payment method.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
+                                        body: "You currently have no payment methods on file.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
                                     }, function(err, responseData) { //this function is executed when a response is received from Twilio
                                         if (!err) {
                                             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -538,106 +518,79 @@ app.post('/smsReceived', function(req, res) {
                                             console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                         }
                                     });
-                                    resultPromise.resolve(resultData);
-                                }
-                            });
-                        } else {
-                            resultPromise.reject(new Parse.Error(Parse.Error.OTHER_CAUSE, "You currently have too many payment methods on file.  Please contact support@allmyppl.com for further assistance."));
-                        }
-                    });
-                }
-                break;
-                case "menu":
-                    twilio.sendMessage({
-                        to: latestMessage.from, // Any number Twilio can deliver to
-                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "Available Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
-                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                        if (!err) {
-                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                        } else {
-                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                        }
-                    });
-                    resultPromise.resolve(resultData);
-                    break;
-                case "signup":
-                    twilio.sendMessage({
-                        to: latestMessage.from, // Any number Twilio can deliver to
-                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  The most utility of our service is found when you don\'t have your phone available, that means authenticating on another\'s device, which might give you pause, our authentication has a lifetime of a single texted command and reply, instead of sessions that have to be explicitly closed or else leaving you vulnerable until its expiration, authentication is required with every texted command, first, your username, second, your password, you will be logged in and the command following PASSWORD will run.  Make note that the sequence expected of text message commands is \'USERNAME PASSWORD command\', the latter being a command selected from the \"Available Commands\" shown when you text in the command \"menu\".  Please be aware that all commands and keys are case-sensitive (i.e. 'USERNAME PASSWORD menu')"
-                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                        if (!err) {
-                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                        } else {
-                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                        }
-                    });
-                    resultPromise.resolve(resultData);
-                    break;
-                case "add":
-                    twilio.sendMessage({
-                        to: latestMessage.from, // Any number Twilio can deliver to
-                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "Contact created for\n" + resultData.result.get("phone") + "\n\"" + resultData.result.get("name") + "\"." // body of the SMS message
-                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                        if (!err) {
-                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                        } else {
-                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                        }
-                    });
-                    resultPromise.resolve(resultData);
-                    break;
-                case "all":
-                    if (resultData) {
-                        for (var index in resultData.results) {
-                            console.log("\nname: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: " + resultData.results[index].id);
-                            twilio.sendMessage({
-                                to: latestMessage.from, // Any number Twilio can deliver to
-                                from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                body: "name: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: " + resultData.results[index].id // body of the SMS message
-                            }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                                if (!err) {
-                                    console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                    esultPromise.resolve(resultData);
+                                } else if (cards.length == 1) {
+                                    stripe.customers.deleteCard(resultData.user.get("customerId"), cards[0].id, function(err, confirmation) {
+                                        // asynchronously called
+                                        if (err) {
+                                            console.log(err + " error deleting customer " + resultData.user.get("customerId") + " card " + cards[0].id);
+                                            resultPromise.reject(err);
+                                        } else {
+                                            twilio.sendMessage({
+                                                to: latestMessage.from, // Any number Twilio can deliver to
+                                                from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                                                body: "Card deleted successfully, you will not have a payment method on file to pay for your subscription when it expires, if you would like to auto-renew your subscription, add another payment method.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
+                                            }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                                                if (!err) {
+                                                    console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                                } else {
+                                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                                }
+                                            });
+                                            resultPromise.resolve(resultData);
+                                        }
+                                    });
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    resultPromise.reject(new Parse.Error(Parse.Error.OTHER_CAUSE, "You currently have too many payment methods on file.  Please contact support@allmyppl.com for further assistance."));
                                 }
                             });
                         }
-                        if (!resultData || !resultData.results) {
-                            resultPromise.reject(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE, "There are no contacts to display."));
-                        } else {
-                            resultPromise.resolve(resultData);
-                        }
-                    }
-                    break;
-                case "search":
-                    var count = 0;
-                    var searchString = "";
-                    for (var index in wordList) {
-                        if (index >= 3) {
-                            searchString += wordList[index];
-                            if (index != wordList.length - 1) {
-                                searchString += " ";
+                        break;
+                    case "menu":
+                        twilio.sendMessage({
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "Available Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
+                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            if (!err) {
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
-                        }
-                    }
-                    if (resultData) {
-                        // perform a startsWith search
-                        var wasFound = true;
-                        for (var index in resultData.results) {
-                            var nameLowercase = resultData.results[index].get("name")
-                                .toLowerCase();
-                            var searchStringLowercase = searchString.toLowerCase();
-                            for (var i = 0; i < searchStringLowercase.length; i++) {
-                                if (i >= searchStringLowercase.length || nameLowercase[i] != searchStringLowercase[i]) {
-                                    wasFound = false;
-                                    break;
-                                }
+                        });
+                        resultPromise.resolve(resultData);
+                        break;
+                    case "signup":
+                        twilio.sendMessage({
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  The most utility of our service is found when you don\'t have your phone available, that means authenticating on another\'s device, which might give you pause, our authentication has a lifetime of a single texted command and reply, instead of sessions that have to be explicitly closed or else leaving you vulnerable until its expiration, authentication is required with every texted command, first, your username, second, your password, you will be logged in and the command following PASSWORD will run.  Make note that the sequence expected of text message commands is \'USERNAME PASSWORD command\', the latter being a command selected from the \"Available Commands\" shown when you text in the command \"menu\".  Please be aware that all commands and keys are case-sensitive (i.e. 'USERNAME PASSWORD menu')"
+                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            if (!err) {
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
-                            if (wasFound) {
-                                count = index + 1;
+                        });
+                        resultPromise.resolve(resultData);
+                        break;
+                    case "add":
+                        twilio.sendMessage({
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "Contact created for\n" + resultData.result.get("phone") + "\n\"" + resultData.result.get("name") + "\"." // body of the SMS message
+                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            if (!err) {
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                            }
+                        });
+                        resultPromise.resolve(resultData);
+                        break;
+                    case "all":
+                        if (resultData) {
+                            for (var index in resultData.results) {
                                 console.log("\nname: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: " + resultData.results[index].id);
                                 twilio.sendMessage({
                                     to: latestMessage.from, // Any number Twilio can deliver to
@@ -651,58 +604,104 @@ app.post('/smsReceived', function(req, res) {
                                     }
                                 });
                             }
+                            if (!resultData || !resultData.results) {
+                                resultPromise.reject(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE, "There are no contacts to display."));
+                            } else {
+                                resultPromise.resolve(resultData);
+                            }
                         }
-                        if (count == 0 || !resultData || !resultData.results) {
-                            resultPromise.reject(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE, "There are no contacts to display."));
-                        } else {
-                            resultPromise.resolve(resultData);
+                        break;
+                    case "search":
+                        var count = 0;
+                        var searchString = "";
+                        for (var index in wordList) {
+                            if (index >= 3) {
+                                searchString += wordList[index];
+                                if (index != wordList.length - 1) {
+                                    searchString += " ";
+                                }
+                            }
                         }
-                    }
-                    break;
-                case "delete":
-                    twilio.sendMessage({
-                        to: latestMessage.from, // Any number Twilio can deliver to
-                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "Contact successfully deleted." // body of the SMS message
-                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                        if (!err) {
-                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                        } else {
-                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                        if (resultData) {
+                            // perform a startsWith search
+                            var wasFound = true;
+                            for (var index in resultData.results) {
+                                var nameLowercase = resultData.results[index].get("name")
+                                    .toLowerCase();
+                                var searchStringLowercase = searchString.toLowerCase();
+                                for (var i = 0; i < searchStringLowercase.length; i++) {
+                                    if (i >= searchStringLowercase.length || nameLowercase[i] != searchStringLowercase[i]) {
+                                        wasFound = false;
+                                        break;
+                                    }
+                                }
+                                if (wasFound) {
+                                    count = index + 1;
+                                    console.log("\nname: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: " + resultData.results[index].id);
+                                    twilio.sendMessage({
+                                        to: latestMessage.from, // Any number Twilio can deliver to
+                                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                                        body: "name: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: " + resultData.results[index].id // body of the SMS message
+                                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                                        if (!err) {
+                                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                        } else {
+                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                        }
+                                    });
+                                }
+                            }
+                            if (count == 0 || !resultData || !resultData.results) {
+                                resultPromise.reject(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE, "There are no contacts to display."));
+                            } else {
+                                resultPromise.resolve(resultData);
+                            }
                         }
-                    });
-                    resultPromise.resolve(resultData);
-                    break;
-                case "edit":
-                    console.log("\nname: " + resultData.result.get("name") + "\nphone: " + resultData.result.get("phone") + "\nuid: " + resultData.result.id);
-                    twilio.sendMessage({
-                        to: latestMessage.from, // Any number Twilio can deliver to
-                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : \"" + resultData.result.get(latestMessage.body.split(" ")[4]) + "\"."
-                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                        if (!err) {
-                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                        } else {
-                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                        }
-                    });
-                    resultPromise.resolve(resultData);
-                    break;
-                default:
-                    twilio.sendMessage({
-                        to: latestMessage.from, // Any number Twilio can deliver to
-                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "Log in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them, edit and search them through texting.\n\nAvailable Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
-                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                        if (!err) {
-                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                        } else {
-                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                        }
-                    });
-                    resultPromise.resolve(resultData);
-            }
-            return resultPromise;
+                        break;
+                    case "delete":
+                        twilio.sendMessage({
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "Contact successfully deleted." // body of the SMS message
+                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            if (!err) {
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                            }
+                        });
+                        resultPromise.resolve(resultData);
+                        break;
+                    case "edit":
+                        console.log("\nname: " + resultData.result.get("name") + "\nphone: " + resultData.result.get("phone") + "\nuid: " + resultData.result.id);
+                        twilio.sendMessage({
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : \"" + resultData.result.get(latestMessage.body.split(" ")[4]) + "\"."
+                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            if (!err) {
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                            }
+                        });
+                        resultPromise.resolve(resultData);
+                        break;
+                    default:
+                        twilio.sendMessage({
+                            to: latestMessage.from, // Any number Twilio can deliver to
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                            body: "Log in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them, edit and search them through texting.\n\nAvailable Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
+                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            if (!err) {
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                            } else {
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                            }
+                        });
+                        resultPromise.resolve(resultData);
+                }
+                return resultPromise;
         })
 .then(function(resultData) {
     Parse.User.logOut();
