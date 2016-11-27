@@ -8,7 +8,6 @@
       "description": "Configure Parse API route.",
       "value": "/parse"
     },
-    {
     "APP_NAME": {
       "description": "appName is used in email templates.",
       "value": "AllMyPPL"
