@@ -77,11 +77,6 @@ AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE = "SUBSCRIPTION_STATUS_ACTIVE";
 AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
 AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
 
-console.log(AllMyPPL.NAME + ".PHONE_NUMBER = " + AllMyPPL.PHONE_NUMBER);
-console.log(AllMyPPL.NAME + ".WEBSITE = " + AllMyPPL.WEBSITE);
-console.log(AllMyPPL.NAME + ".CREATED_BY = " + AllMyPPL.CREATED_BY);
-console.log(AllMyPPL.NAME + ".Error.SUBSCRIPTION_UNPAID == 1000? " + AllMyPPL.Error.SUBSCRIPTION_UNPAID);
-
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
@@ -153,9 +148,9 @@ app.post('/smsReceived', function(req, res) {
   }).then(function(user) {
 
     if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
-      return Parse.Error.error(EXCEEDED_QUOTA,"Your account is not in good standing, please make sure all outstanding charges have been paid.");
+      return Parse.Error.error(Parse.Error.EXCEEDED_QUOTA,"Your account is not in good standing, please make sure all outstanding charges have been paid.");
     } else if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
-      return Parse.Error.error(EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service.");
+      return Parse.Error.error(Parse.Error.EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service.");
     } else {
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] || "";
