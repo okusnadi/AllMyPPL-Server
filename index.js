@@ -26,7 +26,7 @@ var api = new ParseServer({
   liveQuery: {
     classNames: ["Contact"] // List of classes to support for query subscriptions
   },
-  publicServerURL: process.env.PUBLIC_SERVER_URL || 'https://localhost:1337/parse',
+  publicServerURL: process.env.SERVER_URL || 'https://localhost:1337/parse',
   appName: process.env.APP_NAME || 'appName',
   verifyUserEmails:true,
   emailAdapter: {
