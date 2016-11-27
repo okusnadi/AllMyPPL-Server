@@ -66,7 +66,7 @@ Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
 var AllMyPPL = new Object();
-AllMyPPL.prototype.Error = Parse._.extend({SUBSCRIPTION_UNPAID:{code:1000,error:"The user's subscription has an outstanding debt."},{SUBSCRIPTION_EXPIRED:{code:1001,error:"The user's subscription has expired."}}},Parse.Error);
+AllMyPPL.prototype.Error = Parse._.extend({SUBSCRIPTION_UNPAID:{code:1000,error:"The user's subscription has an outstanding debt."},SUBSCRIPTION_EXPIRED:{code:1001,error:"The user's subscription has expired."}},Parse.Error);
 AllMyPPL.prototype.PHONE_NUMBER = "+16502062610";
 AllMyPPL.prototype.WEBSITE = "www.allmyppl.com";
 AllMyPPL.prototype.CREATED_BY = "Patrick Blaine";
