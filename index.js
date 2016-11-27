@@ -148,9 +148,9 @@ app.post('/smsReceived', function(req, res) {
   }).then(function(user) {
 
     if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
-      return Parse.Error(Parse.Error.EXCEEDED_QUOTA,"Your account is not in good standing, please make sure all outstanding charges have been paid.");
+      return Parse.Error(new Parse.Error.EXCEEDED_QUOTA,"Your account is not in good standing, please make sure all outstanding charges have been paid.");
     } else if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
-      return Parse.Error(Parse.Error.EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service.");
+      return Parse.Error(new Parse.Error.EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service.");
     } else {
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] || "";
