@@ -372,7 +372,7 @@ app.post('/smsReceived', function(req, res) {
 
             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
             // asynchronously called
-                if (cards.length == 0) {
+                if (!cards || cards.length == 0) {
                   twilio.sendMessage({
 
                         to: latestMessage.from, // Any number Twilio can deliver to
