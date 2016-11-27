@@ -456,11 +456,12 @@ app.post('/smsReceived', function(req, res) {
                             });
                         } else if (resultData.paymentCommand == "set") {
                             var isNumeric = function(string) {
-                                if (ParseInt(string) + "")
-                                    .length == string.length) {
+                              var intString = ParseInt(string) + "";
+                                if (intString.length == string.length) {
                                 return true;
+                              }
+                              return false;
                             }
-                            return false;
                             var rejected = false;
                             var wordKeys = ["USERNAME", "PASSWORD", "payment", "set", "CARD_NUMBER", "EXP_MONTH", "EXP_YEAR", "CVC"];
                             if (wordList.length == 8) {
