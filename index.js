@@ -65,17 +65,22 @@ Parse.initialize(process.env.APP_ID || "appId");
 Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
+// setup AllMyPPL
 var AllMyPPL = new Object();
 AllMyPPL.Error = {SUBSCRIPTION_UNPAID:1000,SUBSCRIPTION_EXPIRED:1001};
 AllMyPPL.PHONE_NUMBER = "+16502062610";
 AllMyPPL.WEBSITE = "www.allmyppl.com";
 AllMyPPL.CREATED_BY = "Patrick Blaine";
 AllMyPPL.NAME = "AllMyPPL";
+AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD = undefined;
+AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE = "SUBSCRIPTION_STATUS_ACTIVE";
+AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
+AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
 
-console.log("AllMyPPL.PHONE_NUMBER = " + AllMyPPL.PHONE_NUMBER);
-console.log("AllMyPPL.WEBSITE = " + AllMyPPL.WEBSITE);
-console.log("AllMyPPL.CREATED_BY = " + AllMyPPL.CREATED_BY);
-console.log("AllMyPPL.Error.SUBSCRIPTION_UNPAID == 1000? " + AllMyPPL.Error.SUBSCRIPTION_UNPAID);
+console.log(AllMyPPL.NAME + ".PHONE_NUMBER = " + AllMyPPL.PHONE_NUMBER);
+console.log(AllMyPPL.NAME + ".WEBSITE = " + AllMyPPL.WEBSITE);
+console.log(AllMyPPL.NAME + ".CREATED_BY = " + AllMyPPL.CREATED_BY);
+console.log(AllMyPPL.NAME + ".Error.SUBSCRIPTION_UNPAID == 1000? " + AllMyPPL.Error.SUBSCRIPTION_UNPAID);
 
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
@@ -97,14 +102,13 @@ app.get('/', function(req, res) {
 
 app.post('/smsReceived', function(req, res) {
 
-  var allMyPPLPhoneNumber = '+16502062610';
   var latestMessage = {}; // needed in multiple steps
 
   Parse.Promise.as().then(function(){
     var twilioListSmsPromise = new Parse.Promise();
 
     twilio.listSms({
-        to: allMyPPLPhoneNumber
+        to: AllMyPPL.PHONE_NUMBER
     }, function(err, responseData) {
         if (!err) {
             res.status(200).send();
@@ -148,6 +152,11 @@ app.post('/smsReceived', function(req, res) {
 
   }).then(function(user) {
 
+    if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
+      return Parse.Error.error(EXCEEDED_QUOTA,"Your account is not in good standing, please make sure all outstanding charges have been paid.");
+    } else if (user.get("subscriptionStatus") != AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
+      return Parse.Error.error(EXCEEDED_QUOTA,"You are not currently subscribed to the SMS service.");
+    } else {
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] || "";
 
@@ -197,6 +206,7 @@ app.post('/smsReceived', function(req, res) {
     } else {
       return Parse.Promise.as({command: enteredCommand, user: user});
     }
+  }
 
   }).then(function(commandData) {
     var commandPromise = new Parse.Promise();
@@ -350,7 +360,7 @@ app.post('/smsReceived', function(req, res) {
         twilio.sendMessage({
 
                   to: latestMessage.from, // Any number Twilio can deliver to
-                  from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                  from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                   body: "Available Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
 
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -367,7 +377,7 @@ app.post('/smsReceived', function(req, res) {
             twilio.sendMessage({
 
                       to: latestMessage.from, // Any number Twilio can deliver to
-                      from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                      from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                       body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  The most utility of our service is found when you don\'t have your phone available, that means authenticating on another\'s device, which might give you pause, our authentication has a lifetime of a single texted command and reply, instead of sessions that have to be explicitly closed or else leaving you vulnerable until its expiration, authentication is required with every texted command, first, your username, second, your password, you will be logged in and the command following PASSWORD will run.  Make note that the sequence expected of text message commands is \'USERNAME PASSWORD command\', the latter being a command selected from the \"Available Commands\" shown when you text in the command \"menu\".  Please be aware that all commands and keys are case-sensitive (i.e. 'USERNAME PASSWORD menu')"
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -384,7 +394,7 @@ app.post('/smsReceived', function(req, res) {
             twilio.sendMessage({
 
                       to: latestMessage.from, // Any number Twilio can deliver to
-                      from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                      from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                       body: "Contact created for\n" + resultData.result.get("phone") + "\n\"" + resultData.result.get("name") + "\"."  // body of the SMS message
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -404,7 +414,7 @@ app.post('/smsReceived', function(req, res) {
               twilio.sendMessage({
 
                         to: latestMessage.from, // Any number Twilio can deliver to
-                        from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                         body: "name: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: "+resultData.results[index].id   // body of the SMS message
 
               }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -453,7 +463,7 @@ app.post('/smsReceived', function(req, res) {
                   twilio.sendMessage({
 
                             to: latestMessage.from, // Any number Twilio can deliver to
-                            from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                             body: "name: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: "+resultData.results[index].id   // body of the SMS message
 
                   }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -479,7 +489,7 @@ app.post('/smsReceived', function(req, res) {
                 twilio.sendMessage({
 
                   to: latestMessage.from, // Any number Twilio can deliver to
-                  from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                  from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                   body: "Contact successfully deleted."   // body of the SMS message
 
                 }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -499,7 +509,7 @@ app.post('/smsReceived', function(req, res) {
           twilio.sendMessage({
 
             to: latestMessage.from, // Any number Twilio can deliver to
-            from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+            from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
             body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : \"" + resultData.result.get(latestMessage.body.split(" ")[4]) + "\"."
 
           }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -517,7 +527,7 @@ app.post('/smsReceived', function(req, res) {
             twilio.sendMessage({
 
               to: latestMessage.from, // Any number Twilio can deliver to
-              from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+              from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
               body: "Log in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them, edit and search them through texting.\n\nAvailable Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
@@ -540,7 +550,7 @@ app.post('/smsReceived', function(req, res) {
         twilio.sendMessage({
 
                   to: latestMessage.from, // Any number Twilio can deliver to
-                  from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                  from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
                   body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. USERNAME PASSWORD signup EMAIL)"  // body of the SMS message
 
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
