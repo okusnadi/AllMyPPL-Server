@@ -70,6 +70,9 @@ AllMyPPL.prototype.Error = {SUBSCRIPTION_UNPAID:1000,SUBSCRIPTION_EXPIRED:1001};
 AllMyPPL.prototype.PHONE_NUMBER = "+16502062610";
 AllMyPPL.prototype.WEBSITE = "www.allmyppl.com";
 AllMyPPL.prototype.CREATED_BY = "Patrick Blaine";
+AllMyPPL.prototype.NAME = "AllMyPPL" {
+
+};
 
 console.log("AllMyPPL.PHONE_NUMBER = " + AllMyPPL.PHONE_NUMBER);
 console.log("AllMyPPL.WEBSITE = " + AllMyPPL.WEBSITE);
