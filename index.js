@@ -67,7 +67,7 @@ Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
 // setup AllMyPPL
 var AllMyPPL = new Object();
-AllMyPPL.Error = {SUBSCRIPTION_UNPAID:1000,SUBSCRIPTION_EXPIRED:1001};
+AllMyPPL.Error = {};
 AllMyPPL.PHONE_NUMBER = "+16502062610";
 AllMyPPL.WEBSITE = "www.allmyppl.com";
 AllMyPPL.CREATED_BY = "Patrick Blaine";
