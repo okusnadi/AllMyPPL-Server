@@ -66,7 +66,7 @@ Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
 var AllMyPPL = new Object();
-AllMyPPL.prototype.Error = Parse._.extend({SUBSCRIPTION_UNPAID:{code:1000,error:"The user's subscription has an outstanding debt."},SUBSCRIPTION_EXPIRED:{code:1001,error:"The user's subscription has expired."}},Parse.Error);
+AllMyPPL.prototype.Error = {SUBSCRIPTION_UNPAID:1000,SUBSCRIPTION_EXPIRED:1001};
 AllMyPPL.prototype.PHONE_NUMBER = "+16502062610";
 AllMyPPL.prototype.WEBSITE = "www.allmyppl.com";
 AllMyPPL.prototype.CREATED_BY = "Patrick Blaine";
@@ -74,7 +74,7 @@ AllMyPPL.prototype.CREATED_BY = "Patrick Blaine";
 console.log("AllMyPPL.PHONE_NUMBER = " + AllMyPPL.PHONE_NUMBER);
 console.log("AllMyPPL.WEBSITE = " + AllMyPPL.WEBSITE);
 console.log("AllMyPPL.CREATED_BY = " + AllMyPPL.CREATED_BY);
-console.log("AllMyPPL.Error.SUBSCRIPTION_UNPAID.error = " + AllMyPPL.Error.SUBSCRIPTION_UNPAID.error);
+console.log("AllMyPPL.Error.SUBSCRIPTION_UNPAID == 1000? " + AllMyPPL.Error.SUBSCRIPTION_UNPAID);
 
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
