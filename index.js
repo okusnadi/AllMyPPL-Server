@@ -377,7 +377,7 @@ app.post('/smsReceived', function(req, res) {
 
                         to: latestMessage.from, // Any number Twilio can deliver to
                         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "You currently have no payment methods on file.\n\nType USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+                        body: "You currently have no payment methods on file.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
 
                       }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -417,7 +417,7 @@ app.post('/smsReceived', function(req, res) {
 
                         to: latestMessage.from, // Any number Twilio can deliver to
                         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                        body: "You currently have no payment methods on file.\n\nType USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+                        body: "You currently have no payment methods on file.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
 
                       }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -442,7 +442,7 @@ app.post('/smsReceived', function(req, res) {
 
                                     to: latestMessage.from, // Any number Twilio can deliver to
                                     from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                    body: "Card deleted successfully, you will not have a payment method on file to pay for your subscription when it expires, if you would like to auto-renew your subscription, add another payment method.\n\nType USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+                                    body: "Card deleted successfully, you will not have a payment method on file to pay for your subscription when it expires, if you would like to auto-renew your subscription, add another payment method.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
 
                                   }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
