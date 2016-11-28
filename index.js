@@ -473,7 +473,13 @@ app.post('/smsReceived', function(req, res) {
                                             rejected = true;
                                             break;
                                         } else {
-                                            if ("EXP_MONTH" == wordKeys[i]) {
+                                            if ("CARD_NUMBER" == wordKeys[i]) {
+                                                if (wordList[i].length >= 13 && wordList[i].length <= 16) {
+                                                  resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "CARD_NUMBER must be between 13 and 16 digits.  Type 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
+                                                  rejected = true;
+                                                  break;
+                                                }
+                                            } else if ("EXP_MONTH" == wordKeys[i]) {
                                                 if (wordList[i].length != 2) {
                                                     resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "EXP_MONTH must be 2 digits.  Type 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
                                                     rejected = true;
