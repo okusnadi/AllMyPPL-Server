@@ -524,7 +524,7 @@ app.post('/smsReceived', function(req, res) {
                                             console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                         }
                                     });
-                                    esultPromise.resolve(resultData);
+                                    resultPromise.resolve(resultData);
                                 } else if (cards.length == 1) {
                                     stripe.customers.deleteCard(resultData.user.get("customerId"), cards[0].id, function(err, confirmation) {
                                         // asynchronously called
