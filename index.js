@@ -438,7 +438,7 @@ app.post('/smsReceived', function(req, res) {
                                             console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                         }
                                     });
-                                    resultPromise.resolve(resultData);
+                                    resultPromise.resolve();
                                 } else {
                                     twilio.sendMessage({
                                         to: latestMessage.from, // Any number Twilio can deliver to
@@ -451,7 +451,7 @@ app.post('/smsReceived', function(req, res) {
                                             console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                         }
                                     });
-                                    resultPromise.resolve(resultData);
+                                    resultPromise.resolve();
                                 }
                             });
                         } else if (resultData.paymentCommand == "set") {
@@ -521,7 +521,7 @@ app.post('/smsReceived', function(req, res) {
                                     twilio.sendMessage({
                                         to: latestMessage.from, // Any number Twilio can deliver to
                                         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                        body: status + "\n" + response;
+                                        body: status + "\n" + response
                                     }, function(err, responseData) { //this function is executed when a response is received from Twilio
                                         if (!err) {
                                             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -534,7 +534,7 @@ app.post('/smsReceived', function(req, res) {
                                   return Parse.Promise.as(response);
                                 }).then(function(response) {
 
-                                  
+
 
                                   resultPromise.resolve();
                                 });
