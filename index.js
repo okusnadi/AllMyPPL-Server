@@ -460,6 +460,8 @@ app.post('/smsReceived', function(req, res) {
 
                             if (!wordList[4] || wordList[4].length < 13 || wordList[4].length > 16) {
                               verificationPromise.reject("Card number for payment method must be between 13 & 16 digits long with no spaces.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
+                            } else if (!wordList[5] || wordList[5].length != 2) {
+                              verificationPromise.reject("Expiration month must be 2 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
                             } else {
                               verificationPromise.resolve();
                             }
