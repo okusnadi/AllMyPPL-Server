@@ -456,21 +456,33 @@ app.post('/smsReceived', function(req, res) {
                             });
                         } else if (resultData.paymentCommand == "set") {
 
-                                  console.log("Card verified successfully.");
+                            var verificationPromise = new Parse.Promise();
 
-                                  twilio.sendMessage({
-                                      to: latestMessage.from, // Any number Twilio can deliver to
-                                      from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                      body: "Card verified successfully."
-                                  }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                                      if (!err) {
-                                          console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                                      } else {
-                                          console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                                      }
-                                  });
+                            if (!wordList[4] || wordList[4].length < 13 || wordList[4].length > 16) {
+                              verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Card number for payment method must be between 13 & 16 digits long with no spaces.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
+                            } else {
+                              verificationPromise.resolve();
+                            }
 
-                                  resultPromise.resolve();
+                              Parse.Promise.when(verificationPromise).then(function(){
+                                console.log("Card verified successfully.");
+
+                                twilio.sendMessage({
+                                    to: latestMessage.from, // Any number Twilio can deliver to
+                                    from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                                    body: "Card verified successfully."
+                                }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                                    if (!err) {
+                                        console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                    } else {
+                                        console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    }
+                                });
+                                resultPromise.resolve();
+                              }, function (err) {
+                                console.log("Card verification failed.");
+                                resultPromise.reject(err);
+                              });
 
                         } else if (resultData.paymentCommand == "delete") {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
