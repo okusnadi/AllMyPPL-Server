@@ -459,7 +459,7 @@ app.post('/smsReceived', function(req, res) {
                             var verificationPromise = new Parse.Promise();
 
                             if (!wordList[4] || wordList[4].length < 13 || wordList[4].length > 16) {
-                              verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Card number for payment method must be between 13 & 16 digits long with no spaces.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
+                              verificationPromise.reject("Card number for payment method must be between 13 & 16 digits long with no spaces.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
                             } else {
                               verificationPromise.resolve();
                             }
@@ -479,9 +479,9 @@ app.post('/smsReceived', function(req, res) {
                                     }
                                 });
                                 resultPromise.resolve();
-                              }, function (err) {
+                              }, function (message) {
                                 console.log("Card verification failed.");
-                                resultPromise.reject(err);
+                                resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, message));
                               });
 
                         } else if (resultData.paymentCommand == "delete") {
