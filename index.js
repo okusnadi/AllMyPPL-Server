@@ -507,7 +507,38 @@ app.post('/smsReceived', function(req, res) {
                             }
                             if (rejected == false) {
                                 // TODO add stripe code to store card and assign confirmation to resultData.result
-                                resultPromise.resolve(resultData);
+
+                                Parse.Promise.as(function() {
+                                  stripe.card.createToken({
+                                    number: wordList[4],
+                                    exp_month: wordList[5],
+                                    exp_year: wordList[6],
+                                    cvc: wordList[7]
+                                  }, function(status, response) {
+                                    console.log(status);
+                                    console.log(response);
+
+                                    twilio.sendMessage({
+                                        to: latestMessage.from, // Any number Twilio can deliver to
+                                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                                        body: status + "\n" + response;
+                                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                                        if (!err) {
+                                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                        } else {
+                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                        }
+                                    });
+
+                                  });
+                                  return Parse.Promise.as(response);
+                                }).then(function(response) {
+
+                                  
+
+                                  resultPromise.resolve();
+                                });
+
                             }
                         } else if (resultData.paymentCommand == "delete") {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
@@ -524,7 +555,7 @@ app.post('/smsReceived', function(req, res) {
                                             console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                         }
                                     });
-                                    resultPromise.resolve(resultData);
+                                    resultPromise.resolve();
                                 } else if (cards.length == 1) {
                                     stripe.customers.deleteCard(resultData.user.get("customerId"), cards[0].id, function(err, confirmation) {
                                         // asynchronously called
@@ -543,7 +574,7 @@ app.post('/smsReceived', function(req, res) {
                                                     console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                                 }
                                             });
-                                            resultPromise.resolve(resultData);
+                                            resultPromise.resolve();
                                         }
                                     });
                                 } else {
@@ -564,7 +595,7 @@ app.post('/smsReceived', function(req, res) {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
-                        resultPromise.resolve(resultData);
+                        resultPromise.resolve();
                         break;
                     case "signup":
                         twilio.sendMessage({
@@ -578,7 +609,7 @@ app.post('/smsReceived', function(req, res) {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
-                        resultPromise.resolve(resultData);
+                        resultPromise.resolve();
                         break;
                     case "add":
                         twilio.sendMessage({
@@ -592,7 +623,7 @@ app.post('/smsReceived', function(req, res) {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
-                        resultPromise.resolve(resultData);
+                        resultPromise.resolve();
                         break;
                     case "all":
                         if (resultData) {
@@ -613,7 +644,7 @@ app.post('/smsReceived', function(req, res) {
                             if (!resultData || !resultData.results) {
                                 resultPromise.reject(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE, "There are no contacts to display."));
                             } else {
-                                resultPromise.resolve(resultData);
+                                resultPromise.resolve();
                             }
                         }
                         break;
@@ -660,7 +691,7 @@ app.post('/smsReceived', function(req, res) {
                             if (count == 0 || !resultData || !resultData.results) {
                                 resultPromise.reject(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE, "There are no contacts to display."));
                             } else {
-                                resultPromise.resolve(resultData);
+                                resultPromise.resolve();
                             }
                         }
                         break;
@@ -676,7 +707,7 @@ app.post('/smsReceived', function(req, res) {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
-                        resultPromise.resolve(resultData);
+                        resultPromise.resolve();
                         break;
                     case "edit":
                         console.log("\nname: " + resultData.result.get("name") + "\nphone: " + resultData.result.get("phone") + "\nuid: " + resultData.result.id);
@@ -691,7 +722,7 @@ app.post('/smsReceived', function(req, res) {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
-                        resultPromise.resolve(resultData);
+                        resultPromise.resolve();
                         break;
                     default:
                         twilio.sendMessage({
@@ -705,11 +736,11 @@ app.post('/smsReceived', function(req, res) {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
-                        resultPromise.resolve(resultData);
+                        resultPromise.resolve();
                 }
                 return resultPromise;
         })
-.then(function(resultData) {
+.then(function() {
     Parse.User.logOut();
 }, function(error) {
     console.log("error code " + error.code + " message " + error.message);
