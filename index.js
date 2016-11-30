@@ -505,7 +505,7 @@ app.post('/smsReceived', function(req, res) {
                                 resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "Incorrect number of inputs, please type your request as 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
                                 rejected = true;
                             }
-                            if (rejected == false) {
+                            if (!rejected) {
                                 // TODO add stripe code to store card and assign confirmation to resultData.result
 
                                   console.log("Card verified successfully.");
