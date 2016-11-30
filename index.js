@@ -473,16 +473,6 @@ app.post('/smsReceived', function(req, res) {
                               Parse.Promise.when(verificationPromise).then(function(){
                                 console.log("Card verified successfully.");
 
-                                stripe.card.createToken({
-                                  number:wordList[4],
-                                  exp_month:wordList[5],
-                                  exp_year:wordList[6],
-                                  cvc:wordList[7]
-                                }, function(status,response) {
-                                  console.log(status);
-                                  console.log(response);
-                                })
-
                                 twilio.sendMessage({
                                     to: latestMessage.from, // Any number Twilio can deliver to
                                     from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
@@ -494,7 +484,6 @@ app.post('/smsReceived', function(req, res) {
                                         console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                                     }
                                 });
-
                                 resultPromise.resolve();
                               }, function (message) {
                                 console.log("Card verification failed.");
