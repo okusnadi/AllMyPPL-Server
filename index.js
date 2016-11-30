@@ -508,36 +508,7 @@ app.post('/smsReceived', function(req, res) {
                             if (rejected == false) {
                                 // TODO add stripe code to store card and assign confirmation to resultData.result
 
-                                Parse.Promise.as(function() {
-                                  stripe.card.createToken({
-                                    number: wordList[4],
-                                    exp_month: wordList[5],
-                                    exp_year: wordList[6],
-                                    cvc: wordList[7]
-                                  }, function(status, response) {
-                                    console.log(status);
-                                    console.log(response);
-
-                                    twilio.sendMessage({
-                                        to: latestMessage.from, // Any number Twilio can deliver to
-                                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                        body: status + "\n" + response
-                                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                                        if (!err) {
-                                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                                        } else {
-                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                                        }
-                                    });
-
-                                  });
-                                  return Parse.Promise.as(response);
-                                }).then(function(response) {
-
-
-
                                   resultPromise.resolve();
-                                });
 
                             }
                         } else if (resultData.paymentCommand == "delete") {
