@@ -423,7 +423,7 @@ app.post('/smsReceived', function(req, res) {
                 var enteredCommand = wordList[2] || "";
                 switch (enteredCommand) {
                     case "payment":
-                        if (resultData.paymentCommand == "") {
+                        if (resultData.paymentCommand == "" || !resultData.paymentCommand) {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
                                 // asynchronously called
                                 if (!cards || cards.length == 0) {
@@ -455,58 +455,6 @@ app.post('/smsReceived', function(req, res) {
                                 }
                             });
                         } else if (resultData.paymentCommand == "set") {
-                            var isNumeric = function(string) {
-                              var intString = ParseInt(string) + "";
-                                if (intString.length == string.length) {
-                                return true;
-                              }
-                              return false;
-                            }
-                            var rejected = false;
-                            var wordKeys = ["USERNAME", "PASSWORD", "payment", "set", "CARD_NUMBER", "EXP_MONTH", "EXP_YEAR", "CVC"];
-                            if (wordList.length == 8) {
-                                for (var i = 0; i < wordList.length; i) {
-                                    var word = wordList[i];
-                                    if (i >= 4) {
-                                        if (!isNumeric(word)) {
-                                            resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, ""));
-                                            rejected = true;
-                                            break;
-                                        } else {
-                                            if ("CARD_NUMBER" == wordKeys[i]) {
-                                                if (wordList[i].length >= 13 && wordList[i].length <= 16) {
-                                                  resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "CARD_NUMBER must be between 13 and 16 digits.  Type 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
-                                                  rejected = true;
-                                                  break;
-                                                }
-                                            } else if ("EXP_MONTH" == wordKeys[i]) {
-                                                if (wordList[i].length != 2) {
-                                                    resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "EXP_MONTH must be 2 digits.  Type 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
-                                                    rejected = true;
-                                                    break;
-                                                }
-                                            } else if (wordKeys[i] == "EXP_YEAR") {
-                                                if (wordList[i].length != 4) {
-                                                    resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "EXP_YEAR must be 4 digits.  Type 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
-                                                    rejected = true;
-                                                    break;
-                                                }
-                                            } else if (wordKeys[i] == "CVC") {
-                                                if (wordList[i].length != 3) {
-                                                    resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "CVC must be 3 digits.  Type 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
-                                                    rejected = true;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            } else {
-                                resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR, "Incorrect number of inputs, please type your request as 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC' to add a payment method."));
-                                rejected = true;
-                            }
-                            if (!rejected) {
-                                // TODO add stripe code to store card and assign confirmation to resultData.result
 
                                   console.log("Card verified successfully.");
 
@@ -524,7 +472,6 @@ app.post('/smsReceived', function(req, res) {
 
                                   resultPromise.resolve();
 
-                            }
                         } else if (resultData.paymentCommand == "delete") {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
                                 // asynchronously called
