@@ -485,18 +485,6 @@ app.post('/smsReceived', function(req, res) {
                                     }
                                 });
 
-                                stripe.setPublishableKey('pk_test_tBmxNsqmg0jOJe988X8ue8Wg');
-
-                                stripe.card.createToken({
-                                    number:"4444333322221111",exp_month:"12",exp_year:"2016",cvc:"321"},
-                                    function (status, response) {
-                                      if (response.error) { // Problem!
-                                        console.log("token not created");
-                                      } else {
-                                        console.log("token created");
-                                      }
-                                    });
-
                                 resultPromise.resolve();
                               }, function (message) {
                                 console.log("Card verification failed.");
