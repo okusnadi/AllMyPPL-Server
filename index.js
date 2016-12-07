@@ -94,7 +94,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/createPlan', function(req,res) {
-  var plan = stripe.plans.create({
+  stripe.plans.create({
   name: "Basic Plan",
   id: "basic-monthly",
   interval: "month",
@@ -103,14 +103,13 @@ app.get('/createPlan', function(req,res) {
   }, function(err, plan) {
   // asynchronously called
     console.log(err + "\n\n"+plan);
-    res.status(200).send(err + "\n\n"+plan);
   });
-  var plan = stripe.plans.create({
+  stripe.plans.create({
   name: "Text Messaging Plan",
   id: "text-messaging",
   interval: "month",
   currency: "usd",
-  amount: 0.99,
+  amount: 1,
   }, function(err, plan) {
   // asynchronously called
     console.log(err + "\n\n"+plan);
