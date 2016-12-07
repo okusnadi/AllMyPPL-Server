@@ -10,7 +10,7 @@ var path = require('path');
 var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
 var http = require('http');
 var querystring = require('querystring');
-var stripe = require('stripe')(process.env.STRIPE_API_KEY);
+var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 if (!databaseUri) {
     console.log('DATABASE_URI not specified, falling back to localhost.');
@@ -61,6 +61,10 @@ var api = new ParseServer({
 Parse.initialize(process.env.APP_ID || "appId");
 Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
+
+// initialize Stripe
+stripe.setPublishableKey('pk_test_tBmxNsqmg0jOJe988X8ue8Wg');
+
 // setup AllMyPPL
 var AllMyPPL = new Object();
 AllMyPPL.Error = {};
@@ -68,10 +72,12 @@ AllMyPPL.PHONE_NUMBER = "+16502062610";
 AllMyPPL.WEBSITE = "www.allmyppl.com";
 AllMyPPL.CREATED_BY = "Patrick Blaine";
 AllMyPPL.NAME = "AllMyPPL";
+
 AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD = undefined;
 AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE = "SUBSCRIPTION_STATUS_ACTIVE";
 AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
 AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
+
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
@@ -86,6 +92,20 @@ app.get('/', function(req, res) {
     res.status(200)
         .send(''); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
 });
+
+app.get('/createPlan', function(req,res) {
+  var plan = stripe.plans.create({
+  name: "Basic Plan",
+  id: "basic-monthly",
+  interval: "month",
+  currency: "usd",
+  amount: 0.99,
+  }, function(err, plan) {
+  // asynchronously called
+    res.status(200).send(err + "\n\n"+plan);
+  });
+});
+
 app.post('/smsReceived', function(req, res) {
     var latestMessage = {}; // needed in multiple steps
     Parse.Promise.as()
