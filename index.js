@@ -99,9 +99,21 @@ app.get('/createPlan', function(req,res) {
   id: "basic-monthly",
   interval: "month",
   currency: "usd",
+  amount: 0,
+  }, function(err, plan) {
+  // asynchronously called
+    console.log(err + "\n\n"+plan);
+    res.status(200).send(err + "\n\n"+plan);
+  });
+  var plan = stripe.plans.create({
+  name: "Text Messaging Plan",
+  id: "text-messaging",
+  interval: "month",
+  currency: "usd",
   amount: 0.99,
   }, function(err, plan) {
   // asynchronously called
+    console.log(err + "\n\n"+plan);
     res.status(200).send(err + "\n\n"+plan);
   });
 });
