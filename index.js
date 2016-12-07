@@ -63,7 +63,7 @@ Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
 // initialize Stripe
-stripe.setPublishableKey('pk_test_tBmxNsqmg0jOJe988X8ue8Wg');
+// stripe.setPublishableKey('pk_test_tBmxNsqmg0jOJe988X8ue8Wg');
 
 // setup AllMyPPL
 var AllMyPPL = new Object();
