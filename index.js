@@ -93,7 +93,7 @@ app.get('/', function(req, res) {
         .send(''); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
 });
 
-app.get('/createPlan', function(req,res) {
+app.get('/createPlans', function(req,res) {
   stripe.plans.create({
   name: "Basic Plan",
   id: "basic-monthly",
@@ -102,18 +102,17 @@ app.get('/createPlan', function(req,res) {
   amount: 0,
   }, function(err, plan) {
   // asynchronously called
-    console.log(err + "\n\n"+plan);
+    console.log(err);
   });
   stripe.plans.create({
   name: "Text Messaging Plan",
   id: "text-messaging",
   interval: "month",
   currency: "usd",
-  amount: 1,
+  amount: 99,
   }, function(err, plan) {
   // asynchronously called
-    console.log(err + "\n\n"+plan);
-    res.status(200).send(err + "\n\n"+plan);
+    console.log(err);
   });
 });
 
