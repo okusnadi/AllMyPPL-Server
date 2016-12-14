@@ -5,8 +5,8 @@
  * as its too costly without a prepared field.  Calling res.success() is required.
  */
 
-
-var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
+// import stripe module
+var Stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
 
 /*
 switch (err.type) {
@@ -43,12 +43,18 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   Parse.Promise.as({
     // setup to chain through beforeSave(Parse.User)
     // create a customer in stripe if the id is blank
+
+    if (obj.get('emailVerified')) { return Parse.Promise.as() }
+    else { return Parse.Promise.error(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "AllMyPPL requires that you verify your email address before proceeding with the sign up process, please do so, then text back in \"USERNAME PASSWORD payment\" to access the payment method options and finish setting up the service."))}
+
   }).then(function(){
     var customerCreationPromise = new Parse.Promise();
 
     if (!obj.get("customerId")) {
       stripe.customers.create({
-          email : obj.get("email")
+          email : obj.get("email"),
+          description: obj.id,
+          plan: "basic-monthly"
         }, function(err, customer) {
           // asynchronously called
           if (err) {
@@ -66,7 +72,7 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   }).then(function(customer){
 
     console.log(JSON.stringify(customer));
-    
+
     // now we have the stripe customer object passed on from the last block
     // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 

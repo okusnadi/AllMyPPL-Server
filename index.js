@@ -62,9 +62,6 @@ Parse.initialize(process.env.APP_ID || "appId");
 Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
-// initialize Stripe
-// stripe.setPublishableKey('pk_test_tBmxNsqmg0jOJe988X8ue8Wg');
-
 // setup AllMyPPL
 var AllMyPPL = new Object();
 AllMyPPL.Error = {};
@@ -95,11 +92,11 @@ app.get('/', function(req, res) {
 
 app.get('/createPlans', function(req,res) {
   stripe.plans.create({
-  name: "Basic Plan",
-  id: "basic-monthly",
-  interval: "month",
-  currency: "usd",
-  amount: 0,
+    name: "Basic Plan",
+    id: "basic-monthly",
+    interval: "month",
+    currency: "usd",
+    amount: 0,
   }, function(err, plan) {
   // asynchronously called
     console.log(err);
