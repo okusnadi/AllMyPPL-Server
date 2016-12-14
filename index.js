@@ -75,6 +75,8 @@ AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE = "SUBSCRIPTION_STATUS_ACTIVE";
 AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
 AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
 
+AllMyPPL.STRIPE_ERROR_MESSAGE = "AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time.";
+
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
@@ -497,13 +499,86 @@ app.post('/smsReceived', function(req, res) {
                               verificationPromise.resolve();
                             }
 
-                              Parse.Promise.when(verificationPromise).then(function(){
+                            Parse.Promise.when(verificationPromise).then(function(){
+
+                              /*
+                                                              var tokenCreationPromise = new Parse.Promise();
+
+                                                              stripe.tokens.create({
+                                                                  card: {
+                                                                    "number": wordList[4],
+                                                                    "exp_month": wordList[5],
+                                                                    "exp_year": wordList[6],
+                                                                    "cvc": wordList[7]
+                                                                  }
+                                                                }, function(err, token) {
+                                                                  // asynchronously called
+                                                                  if (err) {
+                                                                    tokenCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                                                                  } else {
+                                                                    tokenCreationPromise.resolve(token);
+                                                                  }
+                                                                });
+
+                                                              return tokenCreationPromise;
+
+                                                            }).then(function(cardToken) {
+
+                                                              var sourceCreationPromise = new Parse.Promise();
+
+                                                              stripe.sources.create({
+                                                                    token:cardToken
+                                                                  }, function(err, source) {
+                                                                    // asynchronously called
+                                                                    if (err) {
+                                                                      sourceCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                                                                    } else {
+                                                                      sourceCreationPromise.resolve(source);
+                                                                    }
+                                                                  });
+
+                                                              return sourceCreationPromise;
+
+                                                            }).then(function(source) {
+                              */
+
+                                var customerUpdatePromise = new Parse.Promise();
+
+                                if (resultData.user.get('customerId')) {
+
+                                stripe.customers.update(resultData.user.get('customerId') {
+                                      source: {
+                                        object: 'card',
+                                        number: wordList[4],
+                                        exp_month: wordList[5],
+                                        exp_year: wordList[6],
+                                        cvc: wordList[7],
+                                        currency: 'usd',
+                                      }
+                                    }, function(err, customer) {
+                                      // asynchronously called
+                                      if (err) {
+                                        customerUpdatePromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                                      } else {
+                                        customerUpdatePromise.resolve(customer);
+                                      }
+                                });
+
+                              } else {
+                                customerUpdatePromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                              }
+
+                                return customerUpdatePromise;
+
+                              }).then(function(customer) {
+
                                 console.log("Card verified successfully.");
+                                console.log("updated customer " + customer);
 
                                 twilio.sendMessage({
                                     to: latestMessage.from, // Any number Twilio can deliver to
                                     from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                    body: "Card verified successfully."
+                                    body: "Card verified successfully and added to the customer's account as the default payment method."
                                 }, function(err, responseData) { //this function is executed when a response is received from Twilio
                                     if (!err) {
                                         console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
