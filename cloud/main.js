@@ -35,75 +35,74 @@ switch (err.type) {
 }
 */
 
-Parse.Cloud.beforeSave(Parse.User, (req, res) => {
+Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
-  const obj = req.object;
-  console.log('[beforeSave] object: ', obj.toJSON());
+    const obj = req.object;
+    console.log('[afterSave] object: ', obj.toJSON());
 
-  Parse.Promise.as().then(function() {
-    // setup to chain through beforeSave(Parse.User)
-    // create a customer in stripe if the id is blank
-    // if everything is good just skip through and save
-    // throw out a special warning if the email isn't verified
+    Parse.Promise.as().then(function() {
+      // setup to chain through beforeSave(Parse.User)
+      // create a customer in stripe if the id is blank
+      // if everything is good just skip through and save
+      // throw out a special warning if the email isn't verified
 
-    if (obj.get('emailVerified')) { return Parse.Promise.as(true) }
-    else {
-      return Parse.Promise.as(false);
-    };
+    if (obj.get('emailVerified')) {  return Parse.Promise.as(true);  }
+    else {  return Parse.Promise.as(false);  }
 
-  }).then(function(emailVerified){
-    var customerCreationPromise = new Parse.Promise();
+    }).then(function(emailVerified){
 
-    if (emailVerified && !obj.get("customerId")) {
+      var customerCreationPromise = new Parse.Promise();
 
-      stripe.customers.create({
-          email : obj.get("email"),
-          description: obj.id,
-          plan: "basic-monthly"
-        }, function(err, customer) {
-          // asynchronously called
-          if (err) {
-            console.log("error " + err);
-            customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
-          } else {
-            console.log("customer created " + customer);
-            customerCreationPromise.resolve(customer);
-          }
-      });
+      if (emailVerified && !req.obj.get('customerId')) {
 
-    } else {
-       customerCreationPromise.resolve({});
-    }
+        stripe.customers.create({
+            email : obj.get("email"),
+            description: obj.id,
+            plan: "basic-monthly"
+          }, function(err, customer) {
+            // asynchronously called
+            if (err) {
+              console.log("error " + err);
+              customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
+            } else {
+              console.log("customer created " + customer);
+              customerCreationPromise.resolve(customer);
+            }
+        });
 
-    return customerCreationPromise;
+      } else {
+         customerCreationPromise.resolve({});
+      }
+
+      return customerCreationPromise;
 
 
-  }).then(function(customer){
+    }).then(function(customer){
 
-    console.log(JSON.stringify(customer));
+      console.log(JSON.stringify(customer));
 
-    // now we have the stripe customer object passed on from the last block
-    // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
+      // now we have the stripe customer object passed on from the last block
+      // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
-    if (customer && customer.id) {
-      obj.set("customerId",customer.id);
-    }
+      if (customer && customer.id) {
+        obj.set("customerId",customer.id);
+      }
 
-    return Parse.Promise.as();
+      return Parse.Promise.as();
 
-  }).then(function() {
+    }).then(function() {
 
-    res.success();
+      res.success();
 
-  },function(err){
+    },function(err){
 
-    console.log("error " + err);
+      console.log(err);
 
-    res.error(err);
+      res.error(err);
 
-  });
-
+    });
 });
+
 
 Parse.Cloud.beforeSave("Contact", (req, res) => {
   const obj = req.object;
