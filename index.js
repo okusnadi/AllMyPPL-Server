@@ -596,9 +596,9 @@ app.post('/smsReceived', function(req, res) {
                               }, function (error) {
                                 console.log("Card verification failed.");
                                 if (error.type) {
-                                  resultPromise.reject(new Parse.Error(error.type,error.message));
+                                  resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,error.type));
                                 } else {
-                                  resultPromise.reject(new Parse.Error(error.code,error.message));
+                                  resultPromise.reject(error);
                                 }
                               });
 
