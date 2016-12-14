@@ -98,13 +98,13 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
       if (customer && customer.id) {
-        obj.save({ customerId : customer.id }, { sessionToken : req.object.getSessionToken()});
+        req.object.save({ customerId : customer.id }, { sessionToken : req.object.getSessionToken()});
       }
 
-      if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
-        stripe.customers.update(obj.get('customerId'), {
-            email: obj.get('email'),
-            description: obj.get('username')
+      if (req.object.get('email') != customer.email || req.object.get('username') != customer.description) {
+        stripe.customers.update(customer.id, {
+            email: req.object.get('email'),
+            description: req.object.get('username')
           }, function(err, customer) {
             // asynchronously called
             if (err) {
