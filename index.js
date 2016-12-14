@@ -206,13 +206,13 @@ app.post('/smsReceived', function(req, res) {
         })
         .then(function(userData) {
             var wordList = latestMessage.body.split(" ");
-            var enteredCommand = wordList[2] || "";
-            if (enteredCommand.toLowerCase() == "signup") {
+            var enteredCommand = wordList[2].toLowerCase() || "";
+            if (enteredCommand == "signup") {
                 var user = new Parse.User();
                 user.set("username", wordList[0].toLowerCase());
                 user.set("password", wordList[1]);
                 user.set("email", wordList[3].toLowerCase());
-                return user.signUp({null});
+                return user.signUp(null);
             } else {
                 return Parse.User.logIn(userData.username, userData.password);
             }
