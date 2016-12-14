@@ -5,5 +5,7 @@ Thanks for using {{appName}}, and for your recent message to AllMyPPL Support.
 MESSAGE:
 {{messageBody}}
 
+A member of our team will follow up with you about your issue, and work with you to bring it to a close.
+
 {{appName}} Support
 www.allmyppl.com
