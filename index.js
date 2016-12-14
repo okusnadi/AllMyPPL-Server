@@ -181,7 +181,7 @@ app.post('/smsReceived', function(req, res) {
                       if (!err) {
                           console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                       } else {
-                          console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                          console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                       }
                   });
                   const { AppCache } = require('parse-server/lib/cache');
@@ -530,7 +530,7 @@ app.post('/smsReceived', function(req, res) {
                                   if (!err) {
                                       console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                   } else {
-                                      console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                      console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                   }
                               });
                             } else if (resultData.paymentCommand == "status") {
@@ -550,7 +550,7 @@ app.post('/smsReceived', function(req, res) {
                                             if (!err) {
                                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                             } else {
-                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                             }
                                         });
                                         resultPromise.resolve();
@@ -564,7 +564,7 @@ app.post('/smsReceived', function(req, res) {
                                             if (!err) {
                                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                             } else {
-                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                             }
                                         });
                                           resultPromise.resolve();
@@ -637,7 +637,7 @@ app.post('/smsReceived', function(req, res) {
                                         if (!err) {
                                             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                         } else {
-                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                         }
                                     });
 
@@ -658,7 +658,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
@@ -672,7 +672,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
@@ -686,7 +686,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
@@ -703,7 +703,7 @@ app.post('/smsReceived', function(req, res) {
                                         if (!err) {
                                             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                         } else {
-                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                         }
                                     });
                                 }
@@ -749,7 +749,7 @@ app.post('/smsReceived', function(req, res) {
                                             if (!err) {
                                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                             } else {
-                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                             }
                                         });
                                     }
@@ -770,7 +770,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
@@ -785,7 +785,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: \"" + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
@@ -800,7 +800,7 @@ app.post('/smsReceived', function(req, res) {
                             if (!err) {
                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                             } else {
-                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                             }
                         });
                         const { AppCache } = require('parse-server/lib/cache');
@@ -835,7 +835,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
@@ -855,7 +855,7 @@ app.post('/smsReceived', function(req, res) {
               if (!err) {
                   console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
               } else {
-                  console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                  console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
               }
           });
       } else {
@@ -867,7 +867,7 @@ app.post('/smsReceived', function(req, res) {
             if (!err) {
                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
             } else {
-                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
             }
         });
       }
