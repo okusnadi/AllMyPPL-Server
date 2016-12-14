@@ -53,39 +53,18 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
     }).then(function(emailVerified){
 
       var customerCreationPromise = new Parse.Promise();
-      var customerRetrievalPromise = new Parse.Promise();
-      if (emailVerified && obj.get('customerId')) {
+        if (emailVerified && obj.get('customerId')) {
 
           stripe.customers.retrieve(obj.get('customerId'), function(err, customer) {
           // asynchronously called
             if (err) {
               console.log("error " + err);
-              customerRetrievalPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
+              customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
             } else {
               console.log("customer received " + customer);
-              customerRetrievalPromise.resolve(customer);
+              customerCreationPromise.resolve(customer);
             }
           });
-
-          Parse.Promise.when(customerRetrievalPromise).then(function (customer) {
-            if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
-              stripe.customers.update(obj.get('customerId'), {
-                  email: obj.get('email'),
-                  description: obj.get('username')
-                }, function(err, customer) {
-                  // asynchronously called
-                  if (err) {
-                    console.log("error " + err);
-                    customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
-                  } else {
-                    console.log("customer email updated " + customer);
-                    customerCreationPromise.resolve(customer);
-                  }
-                });
-              } else {
-              customerCreationPromise.resolve({});
-              }
-            });
 
           } else if (emailVerified && !obj.get('customerId')) {
 
@@ -122,7 +101,25 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
         obj.save({ customerId : customer.id }, { sessionToken : req.object.getSessionToken()});
       }
 
-      return Parse.Promise.as(customer);
+      if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
+        stripe.customers.update(obj.get('customerId'), {
+            email: obj.get('email'),
+            description: obj.get('username')
+          }, function(err, customer) {
+            // asynchronously called
+            if (err) {
+              console.log("error " + err);
+              return Parse.Promise.error(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+
+            } else {
+              console.log("customer email updated " + customer);
+              return Parse.Promise.as(customer);
+            }
+          });
+        } else {
+          return Parse.Promise.as(customer);
+        }
+
 
     }).then(function(customer) {
 
@@ -135,7 +132,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
       twilio.sendMessage({
           to: "+16505878510", // Any number Twilio can deliver to
           from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-          body: "AllMyPPL had an error:\n\n" + err
+          body: err
       }, function(err, responseData) { //this function is executed when a response is received from Twilio
           if (!err) {
               console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
