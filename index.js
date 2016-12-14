@@ -595,7 +595,7 @@ app.post('/smsReceived', function(req, res) {
                                 resultPromise.resolve();
                               }, function (error) {
                                 console.log("Card verification failed.");
-                                resultPromise.reject(error);
+                                resultPromise.reject(error.message);
                               });
 
                         } else if (resultData.paymentCommand == "delete") {
