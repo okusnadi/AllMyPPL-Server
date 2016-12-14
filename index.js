@@ -492,13 +492,13 @@ app.post('/smsReceived', function(req, res) {
                             var verificationPromise = new Parse.Promise();
 
                             if (!wordList[4] || wordList[4].length < 13 || wordList[4].length > 16) {
-                              verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Card number for payment method must be between 13 & 16 digits long with no spaces.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
+                              verificationPromise.reject("Card number for payment method must be between 13 & 16 digits long with no spaces.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
                             } else if (!wordList[5] || wordList[5].length != 2) {
-                              verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Expiration month must be 2 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
+                              verificationPromise.reject("Expiration month must be 2 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
                             } else if (!wordList[6] || wordList[6].length != 4) {
-                              verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Expiration year must be 4 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
+                              verificationPromise.reject("Expiration year must be 4 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
                             } else if (!wordList[7] || wordList[7].length != 3) {
-                              verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"CVC must be 3 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
+                              verificationPromise.reject("CVC must be 3 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'.");
                             } else {
                               verificationPromise.resolve({
                                 object: 'card',
@@ -564,14 +564,14 @@ app.post('/smsReceived', function(req, res) {
                                     }, function(err, customer) {
                                       // asynchronously called
                                       if (err) {
-                                        customerUpdatePromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                                        customerUpdatePromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
                                       } else {
                                         customerUpdatePromise.resolve(customer);
                                       }
                                 });
 
                                 } else {
-                                  customerUpdatePromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                                  customerUpdatePromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
                                 }
 
                                 return customerUpdatePromise;
@@ -593,9 +593,9 @@ app.post('/smsReceived', function(req, res) {
                                 });
 
                                 resultPromise.resolve();
-                              }, function (error) {
+                              }, function (message) {
                                 console.log("Card verification failed.");
-                                resultPromise.reject(error.message);
+                                resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,message));
                               });
 
                         } else if (resultData.paymentCommand == "delete") {
