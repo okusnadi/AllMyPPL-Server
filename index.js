@@ -172,13 +172,16 @@ app.post('/smsReceived', function(req, res) {
             }
         })
         .then(function(user) {
-            if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD) {
+
+            if (!user.get("emailVerified")) { return Parse.Promise.error(Parse.Error.INVALID_EMAIL_ADDRESS,"Welcome to AllMyPPL, "+user.username+", before continuing, you'll need to verify the email address provided at sign up.  After you successfully verify, you'll be able to manage your account, subscriptions and payment methods.\n\nIf you want to use the SMS interface to retrieve and manage your contacts, you'll need an active subscription.  To activate your subscription, first attach a payment method to your account with 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC'."); }
+            else {
+              if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD) {
                 return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You've never subscribed to the SMS service, subscribing will allow you to manage and retrieve your contacts by text messaging."));
-            } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
-                return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "Your account is not in good standing, please make sure all outstanding charges have been paid and that your subscription is reactivated."));
-            } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED) {
-                return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You are not currently subscribed to the SMS service, please activate your subscription to enable managing and retrieval of contacts by text messaging."));
-            } else {
+              } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
+                  return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "Your account is not in good standing, please make sure all outstanding charges have been paid and that your subscription is reactivated."));
+              } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED) {
+                  return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You are not currently subscribed to the SMS service, please activate your subscription to enable managing and retrieval of contacts by text messaging."));
+              } else {
                 // SUBSCRIPTION_STATUS_ACTIVE
                 var wordList = latestMessage.body.split(" ");
                 var enteredCommand = wordList[2] || "";
@@ -266,6 +269,7 @@ app.post('/smsReceived', function(req, res) {
                         user: user
                     });
                 }
+              }
             }
         })
         .then(function(commandData) {
