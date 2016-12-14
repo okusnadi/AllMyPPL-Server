@@ -1,3 +1,8 @@
+// TODO add a subscription management menu section
+// TODO decide which text message replies send out on the free plan, and which require an active subscription for use of the feature
+// all payment & subscription management does not require a subscription, neither does signup
+// TODO write a tutorial for the onboarding process, first all messages just tell you to signup or login to your existing account, after signup, you must verify the email, then it makes a customer in stripe, you must then attach a card, and activate the subscription and pay for the current month, once receipt of a successfully paid subscription registers with stripe, then all of the sms service opens up
+
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
 const resolve = require('path')
