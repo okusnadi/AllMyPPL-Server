@@ -65,9 +65,13 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
             customerCreationPromise.resolve(customer);
           }
       });
+
+    } else {
+       customerCreationPromise.resolve();
     }
 
     return customerCreationPromise;
+
 
   }).then(function(customer){
 
@@ -76,7 +80,11 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
     // now we have the stripe customer object passed on from the last block
     // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
-    obj.set("customerId",customer.id);
+    if (customer.id) {
+      obj.set("customerId",customer.id);
+    }
+
+    return Parse.Promise.as()
 
   }).then(function() {
 
