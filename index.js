@@ -151,11 +151,11 @@ app.post('/smsReceived', function(req, res) {
             }, function(err, responseData) {
                 if (!err) {
                     res.status(200)
-                        .send();
+                        .send(responseData.sms_messages[0].body);
                     twilioListSmsPromise.resolve(responseData.sms_messages[0]);
                 } else {
                     res.status(404)
-                        .send();
+                        .send('Cannot access latestMessage.');
                     twilioListSmsPromise.reject(err);
                 }
             });
@@ -164,14 +164,14 @@ app.post('/smsReceived', function(req, res) {
         .then(function(latestMsg) {
             latestMessage = latestMsg;
             var wordList = latestMessage.body.split(" ");
-            var enteredUsername = wordList[0] || "";
+            var enteredUsername = wordList[0].toLowerCase() || "";
             var enteredPassword = wordList[1] || "";
-            var enteredCommand = wordList[2] || "";
+            var enteredCommand = wordList[2].toLowerCase() || "";
             if (!enteredUsername) {
                 return Parse.Promise.error(new Parse.Error(Parse.Error.USERNAME_MISSING, "All requests must begin with a username, then the password then a command. Structure your next SMS as 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')."));
             } else if (!enteredPassword) {
                 return Parse.Promise.error(new Parse.Error(Parse.Error.PASSWORD_MISSING, "Welcome to AllMyPPL, the textable contact storage service, you can create a new account with 'USERNAME PASSWORD signup EMAIL_ADDRESS' or you can either log in to an existing account and view the commands available by typing 'USERNAME PASSWORD menu'"));
-            } else if (wordList[0].toLowerCase() == "support" || wordList[0].toLowerCase() == "help") {
+            } else if (enteredUsername == "support" || enteredUsername == "help") {
               twilio.sendMessage({
                   to: latestMessage.from, // Any number Twilio can deliver to
                   from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
@@ -186,7 +186,7 @@ app.post('/smsReceived', function(req, res) {
               const { AppCache } = require('parse-server/lib/cache');
               // Get a reference to the MailgunAdapter
               // NOTE: It's best to do this inside the Parse.Cloud.define(...) method body and not at the top of your file with your other imports. This gives Parse Server time to boot, setup cloud code and the email adapter.
-              const MailgunAdapter = AppCache.get('yourAppId')['userController']['adapter'];
+              const MailgunAdapter = AppCache.get(process.env.APP_ID)['userController']['adapter'];
 
               // Invoke the send method with an options object
               MailgunAdapter.send({
@@ -212,15 +212,23 @@ app.post('/smsReceived', function(req, res) {
                 user.set("username", wordList[0].toLowerCase());
                 user.set("password", wordList[1]);
                 user.set("email", wordList[3].toLowerCase());
-                return user.signUp(null);
+                return user.signUp({null});
             } else {
                 return Parse.User.logIn(userData.username, userData.password);
             }
         })
         .then(function(user) {
 
-            if (!user.get("emailVerified")) { return Parse.Promise.error(Parse.Error.INVALID_EMAIL_ADDRESS,"Welcome to AllMyPPL, "+user.username+", before continuing, you'll need to verify the email address provided at sign up.  After you successfully verify, you'll be able to manage your account, subscriptions and payment methods.\n\nIf you want to use the SMS interface to retrieve and manage your contacts, you'll need an active subscription.  To activate your subscription, first attach a payment method to your account with 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC'."); }
-            else {
+            console.log(JSON.stringify(user));
+
+            if (!user.get("emailVerified")) {
+              return Parse.Promise.error(
+                new Parse.Error(
+                  Parse.Error.INVALID_EMAIL_ADDRESS,
+                  "Welcome to AllMyPPL, "+user.get('username')+", before continuing, you'll need to verify the email address provided at sign up.  After you successfully verify, you'll be able to manage your account, subscriptions and payment methods.\n\nIf you want to use the SMS interface to retrieve and manage your contacts, you'll need an active subscription.  To activate your subscription, first attach a payment method to your account with 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC'."
+                )
+              );
+            } else {
 
               if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
                 // SUBSCRIPTION_STATUS_ACTIVE
@@ -798,7 +806,7 @@ app.post('/smsReceived', function(req, res) {
                     const { AppCache } = require('parse-server/lib/cache');
                     // Get a reference to the MailgunAdapter
                     // NOTE: It's best to do this inside the Parse.Cloud.define(...) method body and not at the top of your file with your other imports. This gives Parse Server time to boot, setup cloud code and the email adapter.
-                    const MailgunAdapter = AppCache.get('yourAppId')['userController']['adapter'];
+                    const MailgunAdapter = AppCache.get(process.env.APP_ID)['userController']['adapter'];
 
                     // Invoke the send method with an options object
                     MailgunAdapter.send({
@@ -833,15 +841,14 @@ app.post('/smsReceived', function(req, res) {
                         resultPromise.resolve();
                 }
                 return resultPromise;
-        })
-.then(function() {
+        }).then(function() {
     Parse.User.logOut();
 }, function(error) {
-    console.log(error)
-    twilio.sendMessage({
+    console.log(JSON.stringify(error));
+      twilio.sendMessage({
         to: latestMessage.from, // Any number Twilio can deliver to
         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-        body: error + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
+        body: JSON.stringify(error) + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
     }, function(err, responseData) { //this function is executed when a response is received from Twilio
         if (!err) {
             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
