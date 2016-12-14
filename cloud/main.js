@@ -118,13 +118,11 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
           if (req.object.get('email') != customer.email || req.object.get('username') != customer.description) {
             stripe.customers.update(customer.id, {
-              email: req.object.get('email'),
-              description: req.object.get('username')
             }, function(err, customer) {
               // asynchronously called
               if (err) {
                 console.log("error " + err);
-                return Parse.Promise.error(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                return Parse.Promise.error(AllMyPPL.STRIPE_ERROR_MESSAGE);
 
               } else {
                 console.log("customer email updated " + customer);
@@ -151,7 +149,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
       twilio.sendMessage({
           to: "+16505878510", // Any number Twilio can deliver to
           from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-          body: err
+          body: JSON.stringify(err)
       }, function(err, responseData) { //this function is executed when a response is received from Twilio
           if (!err) {
               console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
