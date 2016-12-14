@@ -35,18 +35,14 @@ switch (err.type) {
 }
 */
 
-Parse.Cloud.beforeSave("Contact", (req, res) => {
+Parse.Cloud.beforeSave(Parse.User, (req, res) => {
+
   const obj = req.object;
   console.log('[beforeSave] object: ', obj.toJSON());
 
   Parse.Promise.as({
-    // setup to chain through beforeSave('Contact')
-    // will need to make a lowercase copy of name
-    // and create a customer in stripe if the id is blank
-  }).then(function(){
-    // copy name field to
-    obj.set('nameLowercase', obj.get("name").toLowerCase());
-
+    // setup to chain through beforeSave(Parse.User)
+    // create a customer in stripe if the id is blank
   }).then(function(){
     var customerCreationPromise = new Parse.Promise();
 
@@ -68,10 +64,39 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
     return customerCreationPromise;
 
   }).then(function(customer){
-    // set the customerId on the user so as to not lose the stripe customer object
+
     console.log(JSON.stringify(customer));
+    
+    // now we have the stripe customer object passed on from the last block
+    // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
     obj.set("customerId",customer.id);
+
+  }).then(function() {
+
+    res.success();
+
+  },function(err){
+
+    console.log("error " + err);
+
+    res.error(err);
+
+  });
+
+});
+
+Parse.Cloud.beforeSave("Contact", (req, res) => {
+  const obj = req.object;
+  console.log('[beforeSave] object: ', obj.toJSON());
+
+  Parse.Promise.as({
+    // setup to chain through beforeSave('Contact')
+    // will need to make a lowercase copy of name
+    // and create a customer in stripe if the id is blank
+  }).then(function(){
+    // copy name field to
+    obj.set('nameLowercase', obj.get("name").toLowerCase());
 
   }).then(function() {
 
