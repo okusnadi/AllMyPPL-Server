@@ -38,7 +38,7 @@ switch (err.type) {
 
 Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
-    const obj = req.object;
+    obj = req.object;
     console.log('[afterSave] object: ', obj.toJSON());
 
     Parse.Promise.as().then(function() {
