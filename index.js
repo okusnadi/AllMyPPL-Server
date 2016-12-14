@@ -63,9 +63,19 @@ var api = new ParseServer({
                     pathHtml: resolve(__dirname, 'public/email-templates/verification_email.html')
                 },
                 customEmailAlert: {
-                    subject: 'Urgent notification!',
+                    subject: 'Your recent message to AllMyPPL Support',
                     pathPlainText: resolve(__dirname, 'public/email-templates/custom_alert.txt'),
-                    pathHtml: resolve(__dirname, 'public/email-templates/custom_alert.html'),
+                    pathHtml: resolve(__dirname, 'public/email-templates/custom_alert.html')
+                },
+                supportReply: {
+                  subject: 'Your recent message to AllMyPPL Support',
+                  pathPlainText: resolve(__dirname, 'public/email-templates/support-reply.txt'),
+                  pathHtml: resolve(__dirname, 'public/email-templates/support-reply.html'),
+                },
+                supportIncoming: {
+                  subject: 'A user sent AllMyPPL Support a message',
+                  pathPlainText: resolve(__dirname, 'public/email-templates/support-incoming.txt'),
+                  pathHtml: resolve(__dirname, 'public/email-templates/support-incoming.html'),
                 }
             }
         }
@@ -90,6 +100,8 @@ AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
 AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
 
 AllMyPPL.STRIPE_ERROR_MESSAGE = "AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time.";
+AllMyPPL.SUPPORT_SMS_RESPONSE = "Thank you for writing AllMyPPL Support, you'll be receiving an email from us addressing your concerns.  Starting off any text with 'support' or 'help' means that you're sending a message from the phone you text from directly to AllMyPPL Support, you can also send a support message with your account information by typing 'USERNAME PASSWORD support MESSAGE'.";
+
 
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
@@ -156,9 +168,34 @@ app.post('/smsReceived', function(req, res) {
             var enteredPassword = wordList[1] || "";
             var enteredCommand = wordList[2] || "";
             if (!enteredUsername) {
-                return Parse.Promise.error(new Parse.Error(Parse.Error.USERNAME_MISSING, "All requests must begin with a username, then the password then a command. Structure your next SMS as 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL')."));
+                return Parse.Promise.error(new Parse.Error(Parse.Error.USERNAME_MISSING, "All requests must begin with a username, then the password then a command. Structure your next SMS as 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')."));
             } else if (!enteredPassword) {
-                return Parse.Promise.error(new Parse.Error(Parse.Error.PASSWORD_MISSING, "A password is required, then a command. Structure your next SMS in the following syntax, 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL')."));
+                return Parse.Promise.error(new Parse.Error(Parse.Error.PASSWORD_MISSING, "Welcome to AllMyPPL, the textable contact storage service, you can create a new account with 'USERNAME PASSWORD signup EMAIL_ADDRESS' or you can either log in to an existing account and view the commands available by typing 'USERNAME PASSWORD menu'"));
+            } else if (wordList[0].toLowerCase() == "support" || wordList[0].toLowerCase() == "help") {
+              twilio.sendMessage({
+                  to: latestMessage.from, // Any number Twilio can deliver to
+                  from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                  body: AllMyPPL.SUPPORT_SMS_RESPONSE
+              }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                  if (!err) {
+                      console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                  } else {
+                      console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                  }
+              });
+              const { AppCache } = require('parse-server/lib/cache');
+              // Get a reference to the MailgunAdapter
+              // NOTE: It's best to do this inside the Parse.Cloud.define(...) method body and not at the top of your file with your other imports. This gives Parse Server time to boot, setup cloud code and the email adapter.
+              const MailgunAdapter = AppCache.get('yourAppId')['userController']['adapter'];
+
+              // Invoke the send method with an options object
+              MailgunAdapter.send({
+                templateName: 'supportIncoming',
+                // Optional override of the adapter's fromAddress
+                fromAddress: 'AllMyPPL Support <support@allmyppl.com>',
+                recipient: 'AllMyPPL Incoming Support Messages <inbox@allmyppl.com>',
+                variables: { fromPhone: latestMessage.from, messageBody: latestMessage.body } // {{alert}} will be compiled to 'New posts'
+              });
             } else {
                 return Parse.Promise.as({
                     username: enteredUsername,
@@ -170,11 +207,11 @@ app.post('/smsReceived', function(req, res) {
         .then(function(userData) {
             var wordList = latestMessage.body.split(" ");
             var enteredCommand = wordList[2] || "";
-            if (enteredCommand == "signup") {
+            if (enteredCommand.toLowerCase() == "signup") {
                 var user = new Parse.User();
-                user.set("username", wordList[0]);
+                user.set("username", wordList[0].toLowerCase());
                 user.set("password", wordList[1]);
-                user.set("email", wordList[3]);
+                user.set("email", wordList[3].toLowerCase());
                 return user.signUp(null);
             } else {
                 return Parse.User.logIn(userData.username, userData.password);
@@ -188,7 +225,7 @@ app.post('/smsReceived', function(req, res) {
               if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
                 // SUBSCRIPTION_STATUS_ACTIVE
                 var wordList = latestMessage.body.split(" ");
-                var enteredCommand = wordList[2] || "";
+                var enteredCommand = wordList[2].toLowerCase() || "";
                 console.log("user " + user.id + " logged in");
                 if (enteredCommand == "add") {
                     var nameString = "";
@@ -215,7 +252,7 @@ app.post('/smsReceived', function(req, res) {
                     var searchString = "";
                     for (var index in wordList) {
                         if (index >= 3) {
-                            searchString += wordList[index];
+                            searchString += wordList[index].toLowerCase();
                             if (index != wordList.length - 1) {
                                 searchString += " ";
                             }
@@ -239,7 +276,7 @@ app.post('/smsReceived', function(req, res) {
                     return Parse.Promise.as({
                         command: enteredCommand,
                         contactId: wordList[3],
-                        key: wordList[4],
+                        key: wordList[4].toLowerCase(),
                         value: valueString,
                         user: user
                     });
@@ -257,9 +294,9 @@ app.post('/smsReceived', function(req, res) {
                 } else if (enteredCommand == "signup") {
                     return Parse.Promise.as({
                         command: enteredCommand,
-                        username: wordList[0],
+                        username: wordList[0].toLowerCase(),
                         password: wordList[1],
-                        email: wordList[3],
+                        email: wordList[3].toLowerCase(),
                         user: user
                     });
                 } else if (enteredCommand == "payment") {
@@ -287,7 +324,7 @@ app.post('/smsReceived', function(req, res) {
         .then(function(commandData) {
             var commandPromise = new Parse.Promise();
             var wordList = latestMessage.body.split(" ");
-            var enteredCommand = wordList[2] || "";
+            var enteredCommand = wordList[2].toLowerCase() || "";
             var resultData = {
                 results: [],
                 result: {},
@@ -297,7 +334,7 @@ app.post('/smsReceived', function(req, res) {
             };
             switch (enteredCommand.toLowerCase()) {
                 case "payment":
-                    resultData.paymentCommand = wordList[3];
+                    resultData.paymentCommand = wordList[3].toLowerCase();
                     commandPromise.resolve(resultData);
                     break;
                 case "menu":
@@ -415,9 +452,9 @@ app.post('/smsReceived', function(req, res) {
                         return false;
                     }
                     if (!commandData.email || commandData.email.length < 1) {
-                        commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "An email address is required following the 'signup' command. 'USERNAME PASSWORD signup EMAIL'"));
+                        commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "An email address is required following the 'signup' command. 'USERNAME PASSWORD signup EMAIL_ADDRESS'"));
                     } else if (!validateEmail(commandData.email)) {
-                        commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "An invalid email address was entered, please make sure the email address has a valid format. 'USERNAME PASSWORD signup EMAIL'"));
+                        commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "An invalid email address was entered, please make sure the email address has a valid format. 'USERNAME PASSWORD signup EMAIL_ADDRESS'"));
                     } else {
                         commandPromise.resolve(resultData);
                     }
@@ -473,7 +510,7 @@ app.post('/smsReceived', function(req, res) {
                 // resultData == {results:[], result:{}, command: commandData.command, user: commandData.user}
                 var resultPromise = new Parse.Promise();
                 var wordList = latestMessage.body.split(" ");
-                var enteredCommand = wordList[2] || "";
+                var enteredCommand = wordList[2].toLowerCase() || "";
                 switch (enteredCommand) {
                     case "payment":
                         if (resultData.paymentCommand == "" || !resultData.paymentCommand) {
@@ -608,7 +645,7 @@ app.post('/smsReceived', function(req, res) {
                         twilio.sendMessage({
                             to: latestMessage.from, // Any number Twilio can deliver to
                             from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                            body: "Available Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
+                            body: "Available Commands:\n\n'signup EMAIL_ADDRESS'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
                         }, function(err, responseData) { //this function is executed when a response is received from Twilio
                             if (!err) {
                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -622,7 +659,7 @@ app.post('/smsReceived', function(req, res) {
                         twilio.sendMessage({
                             to: latestMessage.from, // Any number Twilio can deliver to
                             from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                            body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  The most utility of our service is found when you don\'t have your phone available, that means authenticating on another\'s device, which might give you pause, our authentication has a lifetime of a single texted command and reply, instead of sessions that have to be explicitly closed or else leaving you vulnerable until its expiration, authentication is required with every texted command, first, your username, second, your password, you will be logged in and the command following PASSWORD will run.  Make note that the sequence expected of text message commands is \'USERNAME PASSWORD command\', the latter being a command selected from the \"Available Commands\" shown when you text in the command \"menu\".  Please be aware that all commands and keys are case-sensitive (i.e. 'USERNAME PASSWORD menu')"
+                            body: "Your sign up attempt was successful, "+resultData.user.get('username')+".\n\nWelcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  The most utility of our service is found when you don\'t have your phone available, that means authenticating on another\'s device, which might give you pause, our authentication has a lifetime of a single texted command and reply, instead of sessions that have to be explicitly closed or else leaving you vulnerable until its expiration, authentication is required with every texted command, first, your username, second, your password, you will be logged in and the command following PASSWORD will run.  Make note that the sequence expected of text message commands is \'USERNAME PASSWORD command\', the latter being a command selected from the \"Available Commands\" shown when you text in the command \"menu\".\n\nPlease be aware that all commands and keys are case-sensitive (i.e. 'USERNAME PASSWORD menu').\n\nNow, before continuing on, you'll need to verify your email address.  Follow the link in your email to verify the address, it is necessary to ensure a working address for us to contact you before setting up your payment methods or subscriptions and are able to manage or retrieve your contacts by text while your subscription is active, without a subscription you will be able to manage your contacts through the AllMyPPL app, but you will not be able to manage or retrieve your contacts via text without an active subscription.\n\nPlease check your email now, the address on file is " + resultData.user.get('email') +", if this email address is incorrect, please contact support@allmyppl.com and we'll be able to help you change it."
                         }, function(err, responseData) { //this function is executed when a response is received from Twilio
                             if (!err) {
                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -674,7 +711,7 @@ app.post('/smsReceived', function(req, res) {
                         var searchString = "";
                         for (var index in wordList) {
                             if (index >= 3) {
-                                searchString += wordList[index];
+                                searchString += wordList[index].toLowerCase();
                                 if (index != wordList.length - 1) {
                                     searchString += " ";
                                 }
@@ -735,21 +772,57 @@ app.post('/smsReceived', function(req, res) {
                         twilio.sendMessage({
                             to: latestMessage.from, // Any number Twilio can deliver to
                             from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : \"" + resultData.result.get(latestMessage.body.split(" ")[4]) + "\"."
-                        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : \"" + resultData.result.get(latestMessage.body.split(" ")[4]) + '".'
+                          }, function(err, responseData) { //this function is executed when a response is received from Twilio
                             if (!err) {
-                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                                console.log("Successfully sent sms to " + latestMessage.from + ". Body: \"" + responseData);
                             } else {
                                 console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
                             }
                         });
                         resultPromise.resolve();
                         break;
+                    case 'support':
+                    case 'help':
+                    twilio.sendMessage({
+                        to: latestMessage.from, // Any number Twilio can deliver to
+                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                        body: AllMyPPL.SUPPORT_SMS_RESPONSE
+                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                        if (!err) {
+                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                        } else {
+                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                        }
+                    });
+                    const { AppCache } = require('parse-server/lib/cache');
+                    // Get a reference to the MailgunAdapter
+                    // NOTE: It's best to do this inside the Parse.Cloud.define(...) method body and not at the top of your file with your other imports. This gives Parse Server time to boot, setup cloud code and the email adapter.
+                    const MailgunAdapter = AppCache.get('yourAppId')['userController']['adapter'];
+
+                    // Invoke the send method with an options object
+                    MailgunAdapter.send({
+                      templateName: 'supportIncoming',
+                      // Optional override of the adapter's fromAddress
+                      fromAddress: resultData.user.get('email'),
+                      recipient: 'AllMyPPL Incoming Support Messages <inbox@allmyppl.com>',
+                      variables: { fromPhone: latestMessage.from, messageBody: latestMessage.body }
+                    });
+
+                    // Invoke the send method with an options object
+                    MailgunAdapter.send({
+                      templateName: 'supportReply',
+                      // Optional override of the adapter's fromAddress
+                      fromAddress: 'AllMyPPL Support <support@allmyppl.com>',
+                      recipient: resultData.user.get('email'),
+                      variables: { username: resultData.user.get('username'), messageBody: latestMessage.body }
+                    });
+                        break;
                     default:
                         twilio.sendMessage({
                             to: latestMessage.from, // Any number Twilio can deliver to
                             from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                            body: "Log in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them, edit and search them through texting.\n\nAvailable Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
+                            body: "Available Commands:\n\n'signup EMAIL_ADDRESS'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)\n\n'support MESSAGE'\n(Sends a message directly to AllMyPPL Support, this is also available without being signed into an account, just start off your text with 'support' and you'll reach us) "
                         }, function(err, responseData) { //this function is executed when a response is received from Twilio
                             if (!err) {
                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -768,7 +841,7 @@ app.post('/smsReceived', function(req, res) {
     twilio.sendMessage({
         to: latestMessage.from, // Any number Twilio can deliver to
         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-        body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. USERNAME PASSWORD signup EMAIL)" // body of the SMS message
+        body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
     }, function(err, responseData) { //this function is executed when a response is received from Twilio
         if (!err) {
             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);

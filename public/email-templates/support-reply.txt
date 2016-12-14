@@ -1,0 +1,9 @@
+Hi {{username}},
+
+Thanks for using {{appName}}, and for your recent message to AllMyPPL Support.
+
+MESSAGE:
+{{messageBody}}
+
+{{appName}} Support
+www.allmyppl.com
