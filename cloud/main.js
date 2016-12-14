@@ -53,30 +53,63 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
     }).then(function(emailVerified){
 
       var customerCreationPromise = new Parse.Promise();
+      var customerRetrievalPromise = new Parse.Promise();
+      if (emailVerified && obj.get('customerId')) {
 
-      if (emailVerified && !obj.get('customerId')) {
-
-        stripe.customers.create({
-            email : obj.get("email"),
-            description: obj.id,
-            plan: "basic-monthly"
-          }, function(err, customer) {
-            // asynchronously called
+          stripe.customers.retrieve(obj.get('customerId'), function(err, customer) {
+          // asynchronously called
             if (err) {
               console.log("error " + err);
-              customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
+              customerRetrievalPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
             } else {
-              console.log("customer created " + customer);
-              customerCreationPromise.resolve(customer);
+              console.log("customer received " + customer);
+              customerRetrievalPromise.resolve(customer);
             }
-        });
+          });
 
-      } else {
-         customerCreationPromise.resolve({});
-      }
+          Parse.Promise.when(customerRetrievalPromise).then(function (customer) {
+            if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
+              stripe.customers.update(obj.get('customerId'), {
+                  email: obj.get('email'),
+                  description: obj.get('username')
+                }, function(err, customer) {
+                  // asynchronously called
+                  if (err) {
+                    console.log("error " + err);
+                    customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
+                  } else {
+                    console.log("customer email updated " + customer);
+                    customerCreationPromise.resolve(customer);
+                  }
+                });
+              } else {
+              customerCreationPromise.resolve({});
+              }
+            });
 
-      return customerCreationPromise;
+          } else if (emailVerified && !obj.get('customerId')) {
 
+            stripe.customers.create({
+                email : obj.get("email"),
+                description: obj.get("username"),
+                metadata: {parseId : obj.id},
+                plan: "basic-monthly"
+              }, function(err, customer) {
+                // asynchronously called
+                if (err) {
+                  console.log("error " + err);
+                  customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
+                } else {
+                  console.log("customer created " + customer);
+                  customerCreationPromise.resolve(customer);
+                }
+            });
+
+          } else {
+             customerCreationPromise.resolve({});
+          }
+
+          return customerCreationPromise;
 
     }).then(function(customer){
 
