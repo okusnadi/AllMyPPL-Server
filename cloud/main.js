@@ -55,7 +55,6 @@ switch (err.type) {
 Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
     var obj = req.object;
-    console.log('[afterSave] object: ', obj.toJSON());
 
     Parse.Promise.as().then(function() {
       // setup to chain through beforeSave(Parse.User)
@@ -68,16 +67,18 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
     }).then(function(emailVerified){
 
-      console.log(obj.toJSON());
+        var customerCreationPromise = new Parse.Promise();
 
-      var customerCreationPromise = new Parse.Promise();
         if (emailVerified && obj.get('customerId')) {
 
-          stripe.customers.retrieve(obj.get('customerId'), function(err, customer) {
+          console.log("emailVerified, customerId");
+
+          stripe.customers.retrieve(obj.get('customerId'),
+          function(err, customer) {
           // asynchronously called
             if (err) {
               console.log("error " + err);
-              customerCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,"AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time."));
+              customerCreationPromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
             } else {
               console.log("customer received " + customer);
               customerCreationPromise.resolve(customer);
@@ -86,10 +87,11 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
           } else if (emailVerified && !obj.get('customerId')) {
 
+            console.log("emailVerified, !customerId");
+
             stripe.customers.create({
                 email : obj.get("email"),
                 description: obj.get("username"),
-                metadata: {parseId : obj.get('objectId')},
                 plan: "basic-monthly"
               }, function(err, customer) {
                 // asynchronously called
@@ -102,10 +104,9 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
                 }
             });
 
-          } else if (!emailVerified && obj.get('customerId')) {
-             customerCreationPromise.reject("Please verify your email address before continuing.");
-          } else if (!emailVerified && !obj.get('customerId')) {
-            customerCreationPromise.reject("Please verify your email address before continuing.");
+          } else if (!emailVerified) {
+            console.log("!emailVerified");
+            customerCreationPromise.resolve("Please verify your email address before continuing.");
           }
 
           return customerCreationPromise;
@@ -118,7 +119,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
       if (customer && customer.id) {
-          req.object.save({ customerId : customer.id }, { sessionToken : req.object.getSessionToken()});
+          req.object.save({ customerId : customer.id }, { useMasterKey: true});
 
           if (req.object.get('email') != customer.email || req.object.get('username') != customer.description) {
             stripe.customers.update(customer.id, {
