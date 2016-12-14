@@ -142,6 +142,51 @@ app.get('/createPlans', function(req,res) {
 });
 
 app.post('/smsReceived', function(req, res) {
+
+  var messagesPromise = new Parse.Promise();
+
+  twilio.listSms({
+      to: AllMyPPL.PHONE_NUMBER
+  }, function(err, responseData) {
+      if (!err) {
+          res.status(200)
+              .send(responseData.sms_messages[0].body);
+          messagesPromise.resolve(responseData.sms_messages[0]);
+      } else {
+          res.status(404)
+              .send('Cannot access latestMessage.');
+          messagesPromise.reject(err);
+      }
+  });
+
+  Parse.Promise.when(messagesPromise)
+  .then(function(message) {
+
+      console.log(message);
+
+      twilio.sendMessage({
+          to: message.from, // Any number Twilio can deliver to
+          from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+          body: message.body
+      }, function(err, responseData) { //this function is executed when a response is received from Twilio
+          if (!err) {
+              console.log("Successfully sent sms to " + message.from + ". Response: " + responseData);
+          } else {
+              console.error("Could not send sms to " + message.from + ". Error: \"" + err);
+          }
+      });
+
+      return Parse.Promise.as(message);
+
+  }).then(function(message) {
+        console.log(message);
+  }, function(err) {
+        console.error(err);
+  });
+
+});
+
+app.post('/smsReceivedBROKEN', function(req, res) {
         var latestMessage = {}; // needed in multiple steps
         Parse.Promise.as()
             .then(function() {

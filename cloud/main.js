@@ -52,64 +52,51 @@ switch (err.type) {
 }
 */
 
-Parse.Cloud.afterSave(Parse.User, (req) => {
-
-    var obj = req.object;
+Parse.Cloud.afterSave(Parse.User, function(req) {
 
     Parse.Promise.as().then(function() {
-      // setup to chain through beforeSave(Parse.User)
-      // create a customer in stripe if the id is blank
-      // if everything is good just skip through and save
-      // throw out a special warning if the email isn't verified
 
-    if (obj.get('emailVerified')) {  return Parse.Promise.as(true);  }
-    else {  return Parse.Promise.as(false);  }
+    var customerCreationPromise = new Parse.Promise();
 
-    }).then(function(emailVerified){
+            if (req.object.get('emailVerified')) {
 
-        var customerCreationPromise = new Parse.Promise();
+                if (!req.object.get('customerId')) {
 
-        if (emailVerified) {
+                 console.log("emailVerified, !customerId");
 
-         if (obj.get('customerId') && obj.get('customerId').length > 0) {
+                 stripe.customers.create({
+                     email : req.object.get("email"),
+                     description: req.object.get("username"),
+                     plan: "basic-monthly"
+                   }, function(err, customer) {
+                     // asynchronously called
+                     if (err) {
+                       if (err.code  && err.message) {
+                       console.log("error " + err.code + " : " + err.message);
+                       }
+                       customerCreationPromise.reject(err);
+                     } else {
+                       customerCreationPromise.resolve(customer);
+                     }
+                   });
 
-          console.log("emailVerified, customerId");
+                 } else {
 
-          stripe.customers.retrieve(obj.get('customerId'),
-          function(err, customer) {
-          // asynchronously called
-            if (err) {
-              console.log("error " + err);
-              customerCreationPromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
-            } else {
-              console.log("customer received " + JSON.stringify(customer));
-              customerCreationPromise.resolve(customer);
-            }
-          });
+                    console.log("emailVerified, customerId");
 
-          } else if (!obj.get('customerId')) {
-
-            console.log("emailVerified, !customerId");
-
-            stripe.customers.create({
-                email : obj.get("email"),
-                description: obj.get("username"),
-                plan: "basic-monthly"
-              }, function(err, customer) {
-                // asynchronously called
-                if (err) {
-                  console.log("error " + err);
-                  customerCreationPromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
-                } else {
-                  console.log("customer created " + JSON.stringify(customer));
-                  customerCreationPromise.resolve(customer);
-                }
-              });
-            }
-          } else {
-            console.log("!emailVerified");
-            customerCreationPromise.resolve("Please verify your email before preceding.");
-          }
+                    stripe.customers.retrieve(req.object.get('customerId'),
+                    function(err, customer) {
+                    // asynchronously called
+                      if (err) {
+                        customerCreationPromise.reject(err);
+                      } else {
+                        customerCreationPromise.resolve(customer);
+                      }
+                    });
+                  }
+              } else {
+                customerCreationPromise.resolve(null);
+              }
 
           return customerCreationPromise;
 
@@ -118,37 +105,17 @@ Parse.Cloud.afterSave(Parse.User, (req) => {
       console.log(JSON.stringify(customer));
       // now we have the stripe customer object passed on from the last block
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
+      if (!customer || !customer.id) {
+          return req.object;
+      } else {
 
-      if (customer && customer.id) {
+          return req.object.save({ customerId : customer.id }, { useMasterKey : true });
 
-          obj.set("customerId", customer.id);
+      }
 
-          return obj.save(null, { useMasterKey : true });
+    }).then(function(user) {
 
-          /*if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
-            stripe.customers.update(customer.id, {
-            }, function(err, customer) {
-              // asynchronously called
-              if (err) {
-                console.log("error " + err);
-                return Parse.Promise.error(AllMyPPL.STRIPE_ERROR_MESSAGE);
-
-              } else {
-                console.log("customer updated " + JSON.stringify(customer));
-                return Parse.Promise.as(customer);
-              }
-            });
-          } else {
-            return Parse.Promise.as(customer);
-          }*/
-
-        } else {
-          return Parse.Promise.as(customer);
-        }
-
-    }).then(function(customer) {
-
-      console.log(customer);
+      console.log(user);
 
     },function(err){
 
@@ -158,9 +125,7 @@ Parse.Cloud.afterSave(Parse.User, (req) => {
 });
 
 
-Parse.Cloud.beforeSave("Contact", (req, res) => {
-  const obj = req.object;
-  console.log('[beforeSave] object: ', obj.toJSON());
+Parse.Cloud.beforeSave("Contact", function(req, res) {
 
   Parse.Promise.as({
     // setup to chain through beforeSave('Contact')
@@ -168,7 +133,7 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
     // and create a customer in stripe if the id is blank
   }).then(function(){
     // copy name field to
-    obj.set('nameLowercase', obj.get("name").toLowerCase());
+    req.object.set('nameLowercase', req.object.get("name").toLowerCase());
 
   }).then(function() {
 
