@@ -546,7 +546,7 @@ app.post('/smsReceived', function(req, res) {
 
                                 if (resultData.user.get('customerId')) {
 
-                                stripe.customers.update(resultData.user.get('customerId') {
+                                stripe.customers.update(resultData.user.get('customerId'), {
                                       source: {
                                         object: 'card',
                                         number: wordList[4],
