@@ -114,24 +114,27 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
       if (customer && customer.id) {
-        req.object.save({ customerId : customer.id }, { sessionToken : req.object.getSessionToken()});
-      }
+          req.object.save({ customerId : customer.id }, { sessionToken : req.object.getSessionToken()});
 
-      if (req.object.get('email') != customer.email || req.object.get('username') != customer.description) {
-        stripe.customers.update(customer.id, {
-            email: req.object.get('email'),
-            description: req.object.get('username')
-          }, function(err, customer) {
-            // asynchronously called
-            if (err) {
-              console.log("error " + err);
-              return Parse.Promise.error(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
+          if (req.object.get('email') != customer.email || req.object.get('username') != customer.description) {
+            stripe.customers.update(customer.id, {
+              email: req.object.get('email'),
+              description: req.object.get('username')
+            }, function(err, customer) {
+              // asynchronously called
+              if (err) {
+                console.log("error " + err);
+                return Parse.Promise.error(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
 
-            } else {
-              console.log("customer email updated " + customer);
-              return Parse.Promise.as(customer);
-            }
-          });
+              } else {
+                console.log("customer email updated " + customer);
+                return Parse.Promise.as(customer);
+              }
+            });
+          } else {
+            return Parse.Promise.as(customer);
+          }
+
         } else {
           return Parse.Promise.as(customer);
         }
