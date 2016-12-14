@@ -86,7 +86,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
       if (customer && customer.id) {
-        obj.save({ customerId : customer.id }, { useMasterKey : true});
+        obj.save({ customerId : customer.id }, { sessionToken : req.user.getSessionToken()});
       }
 
       return Parse.Promise.as(obj);
