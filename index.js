@@ -454,6 +454,11 @@ app.post('/smsReceived', function(req, res) {
                     case "payment":
                         if (resultData.paymentCommand == "" || !resultData.paymentCommand) {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
+
+                              if (err) {
+                                console.log(err);
+                                resultPromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE));
+                              } else {
                                 // asynchronously called
                                 if (!cards || !cards.data || cards.data.length == 0) {
                                     twilio.sendMessage({
@@ -487,7 +492,8 @@ app.post('/smsReceived', function(req, res) {
                                       resultPromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE))
                                     }
                                 }
-                            });
+                            }
+                          });
                         } else if (resultData.paymentCommand == "set") {
 
                             var verificationPromise = new Parse.Promise();
@@ -565,6 +571,7 @@ app.post('/smsReceived', function(req, res) {
                                     }, function(err, customer) {
                                       // asynchronously called
                                       if (err) {
+                                        console.log(err);
                                         customerUpdatePromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
                                       } else {
                                         customerUpdatePromise.resolve(customer);
@@ -572,6 +579,7 @@ app.post('/smsReceived', function(req, res) {
                                 });
 
                                 } else {
+                                  console.log(err);
                                   customerUpdatePromise.reject(AllMyPPL.STRIPE_ERROR_MESSAGE);
                                 }
 
@@ -596,6 +604,7 @@ app.post('/smsReceived', function(req, res) {
                                 resultPromise.resolve();
                               }, function (message) {
                                 console.log("Card verification failed.");
+                                console.log(message);
                                 resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,message));
                               });
 
