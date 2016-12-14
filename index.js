@@ -502,10 +502,10 @@ app.post('/smsReceived', function(req, res) {
                             } else {
                               verificationPromise.resolve({
                                 object: 'card',
-                                number: wordList[4], // while using test servers, card numbers must be the following: '4242424242424242' or '5555555555554444'
-                                exp_month: wordList[5],
-                                exp_year: wordList[6],
-                                cvc: wordList[7],
+                                number: "4242424242424242", // while using test servers, card numbers must be the following: '4242424242424242' or '5555555555554444'
+                                exp_month: "05",
+                                exp_year: "2019",
+                                cvc: "171",
                                 currency: 'usd'
                               });
                             }
