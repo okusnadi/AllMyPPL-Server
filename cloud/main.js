@@ -7,6 +7,7 @@
 
 // import stripe module
 var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
+var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
 
 /*
 switch (err.type) {
@@ -53,7 +54,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
       var customerCreationPromise = new Parse.Promise();
 
-      if (emailVerified && !req.obj.get('customerId')) {
+      if (emailVerified && !obj.get('customerId')) {
 
         stripe.customers.create({
             email : obj.get("email"),
@@ -88,7 +89,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
         obj.set("customerId",customer.id);
       }
 
-      return Parse.Promise.as();
+      return obj.save();
 
     }).then(function() {
 
@@ -97,6 +98,18 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
     },function(err){
 
       console.log(err);
+
+      twilio.sendMessage({
+          to: "+16505878510", // Any number Twilio can deliver to
+          from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+          body: "AllMyPPL had an error:\n\n" + err
+      }, function(err, responseData) { //this function is executed when a response is received from Twilio
+          if (!err) {
+              console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+          } else {
+              console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+          }
+      });
 
       res.error(err);
 
