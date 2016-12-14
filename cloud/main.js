@@ -71,7 +71,7 @@ Parse.Cloud.afterSave(Parse.User, (req) => {
 
         if (emailVerified) {
 
-         if (obj.get('customerId')) {
+         if (obj.get('customerId') && obj.get('customerId').length > 0) {
 
           console.log("emailVerified, customerId");
 
@@ -123,7 +123,7 @@ Parse.Cloud.afterSave(Parse.User, (req) => {
 
           obj.set("customerId", customer.id);
 
-          obj.save(null, { sessionToken : obj.getSessionToken() });
+          return obj.save(null, { useMasterKey : true });
 
           /*if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
             stripe.customers.update(customer.id, {
