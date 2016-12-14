@@ -8,6 +8,5 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
   const obj = req.object;
   console.log('[beforeSave] object: ', obj.toJSON());
   obj.set('nameLowercase', obj.get("name").toLowerCase());
-  if (!obj.get("label")) {obj.set('label','main');}
   res.success();
 })
