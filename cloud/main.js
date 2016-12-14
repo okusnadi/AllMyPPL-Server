@@ -115,15 +115,15 @@ Parse.Cloud.afterSave(Parse.User, (req) => {
 
     }).then(function(customer) {
 
+      console.log(JSON.stringify(customer));
       // now we have the stripe customer object passed on from the last block
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
 
       if (customer && customer.id) {
 
           obj.set("customerId", customer.id);
-          Parse.Cloud.useMasterKey();
 
-          obj.save(null, { useMasterKey: true });
+          obj.save(null, { sessionToken : obj.getSessionToken() });
 
           /*if (obj.get('email') != customer.email || obj.get('username') != customer.description) {
             stripe.customers.update(customer.id, {
