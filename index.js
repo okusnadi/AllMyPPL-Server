@@ -482,9 +482,11 @@ app.post('/smsReceived', function(req, res) {
                                         }
                                     });
                                       resultPromise.resolve();
-                                  } else {
-                                    resultPromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE))
-                                  }
+                                    } else {
+                                      console.log(JSON.stringify(cards));
+                                      console.log(cards);
+                                      resultPromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE))
+                                    }
                                 }
                             });
                         } else if (resultData.paymentCommand == "set") {
