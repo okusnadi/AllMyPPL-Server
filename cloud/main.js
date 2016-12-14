@@ -6,7 +6,7 @@
  */
 
 // import stripe module
-var Stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
+var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
 
 /*
 switch (err.type) {
