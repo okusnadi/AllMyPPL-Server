@@ -9,6 +9,22 @@
 var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
 var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
 
+// import AllMyPPL
+// setup AllMyPPL
+var AllMyPPL = new Object();
+AllMyPPL.PHONE_NUMBER = "+16502062610";
+AllMyPPL.WEBSITE = "www.allmyppl.com";
+AllMyPPL.CREATED_BY = "Patrick Blaine";
+AllMyPPL.NAME = "AllMyPPL";
+
+AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD = undefined;
+AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE = "SUBSCRIPTION_STATUS_ACTIVE";
+AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
+AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
+
+AllMyPPL.STRIPE_ERROR_MESSAGE = "AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time.";
+AllMyPPL.SUPPORT_SMS_RESPONSE = "Thank you for writing AllMyPPL Support, you'll be receiving an email from us addressing your concerns.  Starting off any text with 'support' or 'help' means that you're sending a message from the phone you text from directly to AllMyPPL Support, you can also send a support message with your account information by typing 'USERNAME PASSWORD support MESSAGE'.";
+
 /*
 switch (err.type) {
   case 'StripeCardError':
