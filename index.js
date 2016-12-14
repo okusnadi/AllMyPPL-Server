@@ -230,10 +230,10 @@ app.post('/smsReceived', function(req, res) {
                   );
                 } else {
 
-                /*  if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) { */
+                /*  if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {  */
                     // SUBSCRIPTION_STATUS_ACTIVE
                     var wordList = latestMessage.body.split(" ");
-                    var enteredCommand = wordList[2].toLowerCase() || "";
+                    var enteredCommand = wordList[2].toLowerCase();
                     console.log("user " + user.id + " logged in");
                     if (enteredCommand == "add") {
                         var nameString = "";
@@ -302,9 +302,7 @@ app.post('/smsReceived', function(req, res) {
                     } else if (enteredCommand == "signup") {
                         return Parse.Promise.as({
                             command: enteredCommand,
-                            username: wordList[0].toLowerCase(),
-                            password: wordList[1],
-                            email: wordList[3].toLowerCase(),
+                            email: user.email,
                             user: user
                         });
                     } else if (enteredCommand == "payment") {
@@ -332,7 +330,7 @@ app.post('/smsReceived', function(req, res) {
             .then(function(commandData) {
                 var commandPromise = new Parse.Promise();
                 var wordList = latestMessage.body.split(" ");
-                var enteredCommand = wordList[2].toLowerCase() || "";
+                var enteredCommand = commandData.command;
                 var resultData = {
                     results: [],
                     result: {},
@@ -518,7 +516,7 @@ app.post('/smsReceived', function(req, res) {
                     // resultData == {results:[], result:{}, command: commandData.command, user: commandData.user}
                     var resultPromise = new Parse.Promise();
                     var wordList = latestMessage.body.split(" ");
-                    var enteredCommand = wordList[2].toLowerCase() || "";
+                    var enteredCommand = wordList[2].toLowerCase() ;
                     switch (enteredCommand) {
                         case "payment":
                             if (resultData.paymentCommand == "" || !resultData.paymentCommand) {
@@ -530,7 +528,7 @@ app.post('/smsReceived', function(req, res) {
                                   if (!err) {
                                       console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                   } else {
-                                      console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
+                                      console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                                   }
                               });
                             } else if (resultData.paymentCommand == "status") {
@@ -550,8 +548,8 @@ app.post('/smsReceived', function(req, res) {
                                             if (!err) {
                                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                             } else {
-                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
-                                            }
+                                                console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
+                                              }
                                         });
                                         resultPromise.resolve();
                                     } else {
@@ -564,7 +562,7 @@ app.post('/smsReceived', function(req, res) {
                                             if (!err) {
                                                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                             } else {
-                                                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
+                                                console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                                             }
                                         });
                                           resultPromise.resolve();
@@ -637,7 +635,7 @@ app.post('/smsReceived', function(req, res) {
                                         if (!err) {
                                             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                         } else {
-                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
+                                            console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                                         }
                                     });
 
@@ -658,7 +656,7 @@ app.post('/smsReceived', function(req, res) {
                                 if (!err) {
                                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                                 } else {
-                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
+                                    console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                                 }
                             });
                             resultPromise.resolve();
