@@ -502,7 +502,7 @@ app.post('/smsReceived', function(req, res) {
                             } else {
                               verificationPromise.resolve({
                                 object: 'card',
-                                number: wordList[4],
+                                number: wordList[4], // while using test servers, card numbers must be the following: '4242424242424242' or '5555555555554444'
                                 exp_month: wordList[5],
                                 exp_year: wordList[6],
                                 cvc: wordList[7],
@@ -564,7 +564,7 @@ app.post('/smsReceived', function(req, res) {
                                     }, function(err, customer) {
                                       // asynchronously called
                                       if (err) {
-                                        customerUpdatePromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE + "  Tell support that you had an error of this type: " + err.type));
+                                        customerUpdatePromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE));
                                       } else {
                                         customerUpdatePromise.resolve(customer);
                                       }
@@ -595,11 +595,7 @@ app.post('/smsReceived', function(req, res) {
                                 resultPromise.resolve();
                               }, function (error) {
                                 console.log("Card verification failed.");
-                                if (error.type) {
-                                  resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,error.type));
-                                } else {
-                                  resultPromise.reject(error);
-                                }
+                                resultPromise.reject(error);
                               });
 
                         } else if (resultData.paymentCommand == "delete") {
