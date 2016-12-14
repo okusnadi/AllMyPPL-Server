@@ -40,9 +40,11 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
   console.log('[beforeSave] object: ', obj.toJSON());
 
-  Parse.Promise.as({
+  Parse.Promise.as().then(function() {
     // setup to chain through beforeSave(Parse.User)
     // create a customer in stripe if the id is blank
+    // if everything is good just skip through and save
+    // throw out a special warning if the email isn't verified
 
     if (obj.get('emailVerified')) { return Parse.Promise.as() }
     else { return Parse.Promise.error(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN, "AllMyPPL requires that you verify your email address before proceeding with the sign up process, please do so, then text back in \"USERNAME PASSWORD payment\" to access the payment method options and finish setting up the service."))}
