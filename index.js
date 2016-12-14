@@ -837,11 +837,11 @@ app.post('/smsReceived', function(req, res) {
 .then(function() {
     Parse.User.logOut();
 }, function(error) {
-    console.log("error code " + error.code + " message " + error.message);
+    console.log(error)
     twilio.sendMessage({
         to: latestMessage.from, // Any number Twilio can deliver to
         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-        body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
+        body: error + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
     }, function(err, responseData) { //this function is executed when a response is received from Twilio
         if (!err) {
             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
