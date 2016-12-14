@@ -455,7 +455,7 @@ app.post('/smsReceived', function(req, res) {
                         if (resultData.paymentCommand == "" || !resultData.paymentCommand) {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
                                 // asynchronously called
-                                if (!cards || cards.length == 0) {
+                                if (!cards || !cards.data || cards.data.length == 0) {
                                     twilio.sendMessage({
                                         to: latestMessage.from, // Any number Twilio can deliver to
                                         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
@@ -469,11 +469,11 @@ app.post('/smsReceived', function(req, res) {
                                     });
                                     resultPromise.resolve();
                                 } else {
-                                    if (cards[0] && cards[0].last4) {
+                                    if (cards.data[0] && cards.data[0].last4) {
                                     twilio.sendMessage({
                                         to: latestMessage.from, // Any number Twilio can deliver to
                                         from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                        body: "The last 4 digits of your active payment method are " + cards[0].last4 + ".\n\nTo set a new payment method, type USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
+                                        body: "The last 4 digits of your active payment method are " + cards.data[0].last4 + ".\n\nTo set a new payment method, type USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV."
                                     }, function(err, responseData) { //this function is executed when a response is received from Twilio
                                         if (!err) {
                                             console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -483,7 +483,6 @@ app.post('/smsReceived', function(req, res) {
                                     });
                                       resultPromise.resolve();
                                     } else {
-                                      console.log(JSON.stringify(cards));
                                       console.log(cards);
                                       resultPromise.reject(new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR,AllMyPPL.STRIPE_ERROR_MESSAGE))
                                     }
