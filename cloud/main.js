@@ -149,7 +149,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
 
       console.log(err);
 
-      res.error(err);
+      res.success(err);
 
     });
 });
