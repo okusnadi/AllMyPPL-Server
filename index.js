@@ -496,10 +496,17 @@ app.post('/smsReceived', function(req, res) {
                             } else if (!wordList[7] || wordList[7].length != 3) {
                               verificationPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,"CVC must be 3 digits.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."));
                             } else {
-                              verificationPromise.resolve();
+                              verificationPromise.resolve({
+                                object: 'card',
+                                number: wordList[4],
+                                exp_month: wordList[5],
+                                exp_year: wordList[6],
+                                cvc: wordList[7],
+                                currency: 'usd'
+                              });
                             }
 
-                            Parse.Promise.when(verificationPromise).then(function(){
+                            Parse.Promise.when(verificationPromise).then(function(sourceToken){
 
                               /*
                                                               var tokenCreationPromise = new Parse.Promise();
@@ -541,7 +548,7 @@ app.post('/smsReceived', function(req, res) {
 
                                                             }).then(function(source) {
                               */
-
+/*
                                 var customerUpdatePromise = new Parse.Promise();
 
                                 if (resultData.user.get('customerId')) {
@@ -549,14 +556,7 @@ app.post('/smsReceived', function(req, res) {
                                 console.log(resultData.user.get('customerId'));
 
                                 stripe.customers.update(resultData.user.get('customerId'), {
-                                      source: {
-                                        object: 'card',
-                                        number: wordList[4],
-                                        exp_month: wordList[5],
-                                        exp_year: wordList[6],
-                                        cvc: wordList[7],
-                                        currency: 'usd'
-                                      }
+                                      source: sourceToken
                                     }, function(err, customer) {
                                       // asynchronously called
                                       if (err) {
@@ -573,9 +573,9 @@ app.post('/smsReceived', function(req, res) {
                                 return customerUpdatePromise;
 
                               }).then(function(customer) {
-
+*/
                                 console.log("Card verified successfully.");
-                                console.log("updated customer " + customer);
+                                console.log("card number " + sourceToken.number);
 
                                 twilio.sendMessage({
                                     to: latestMessage.from, // Any number Twilio can deliver to
@@ -592,7 +592,7 @@ app.post('/smsReceived', function(req, res) {
                                 resultPromise.resolve();
                               }, function (error) {
                                 console.log("Card verification failed.");
-                                resultPromise.reject(error);
+                                resultPromise.reject(new Parse.Error(error.code,error.message));
                               });
 
                         } else if (resultData.paymentCommand == "delete") {
