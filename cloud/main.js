@@ -89,7 +89,7 @@ Parse.Cloud.afterSave(Parse.User, (req, res) => {
         obj.set("customerId",customer.id);
       }
 
-      return obj.save();
+      return obj.save(null, {sessionToken: req.user.getSessionToken()});
 
     }).then(function() {
 
