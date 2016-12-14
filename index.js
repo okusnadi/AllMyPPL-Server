@@ -164,9 +164,10 @@ app.post('/smsReceived', function(req, res) {
             .then(function(latestMsg) {
                 latestMessage = latestMsg;
                 var wordList = latestMessage.body.split(" ");
-                var enteredUsername = wordList[0].toLowerCase() || "";
-                var enteredPassword = wordList[1] || "";
-                var enteredCommand = wordList[2].toLowerCase() || "";
+                var enteredUsername = wordList[0].toLowerCase();
+                var enteredPassword = wordList[1];
+                var enteredCommand = wordList[2].toLowerCase();
+                var enteredEmail = wordList[3].toLowerCase();
                 if (!enteredUsername) {
                     return Parse.Promise.error(new Parse.Error(Parse.Error.USERNAME_MISSING, "All requests must begin with a username, then the password then a command. Structure your next SMS as 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')."));
                 } else if (!enteredPassword) {
@@ -200,18 +201,17 @@ app.post('/smsReceived', function(req, res) {
                     return Parse.Promise.as({
                         username: enteredUsername,
                         password: enteredPassword,
-                        command: enteredCommand
+                        command: enteredCommand,
+                        email: enteredEmail
                     });
                 }
             })
             .then(function(userData) {
-                var wordList = latestMessage.body.split(" ");
-                var enteredCommand = wordList[2].toLowerCase() || "";
-                if (enteredCommand == "signup") {
+                if (userData.command == "signup") {
                     var user = new Parse.User();
-                    user.set("username", wordList[0].toLowerCase());
-                    user.set("password", wordList[1]);
-                    user.set("email", wordList[3].toLowerCase());
+                    user.set("username", userData.username);
+                    user.set("password", userData.password);
+                    user.set("email", userData.email);
                     return user.signUp(null);
                 } else {
                     return Parse.User.logIn(userData.username, userData.password);
@@ -221,7 +221,7 @@ app.post('/smsReceived', function(req, res) {
 
                 console.log(JSON.stringify(user));
 
-                if (!user.get("emailVerified")) {
+                if (!user.get("emailVerified") && latestMessage.body.split(" ")[2].toLowerCase() != "signup" ) {
                   return Parse.Promise.error(
                     new Parse.Error(
                       Parse.Error.INVALID_EMAIL_ADDRESS,
@@ -230,7 +230,7 @@ app.post('/smsReceived', function(req, res) {
                   );
                 } else {
 
-                  if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
+                /*  if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) { */
                     // SUBSCRIPTION_STATUS_ACTIVE
                     var wordList = latestMessage.body.split(" ");
                     var enteredCommand = wordList[2].toLowerCase() || "";
@@ -318,7 +318,7 @@ app.post('/smsReceived', function(req, res) {
                             user: user
                         });
                     }
-                  } else {
+                  /*} else {
                     if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD) {
                         return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You've never subscribed to the SMS service, subscribing will allow you to manage and retrieve your contacts by text messaging."));
                     } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
@@ -326,7 +326,7 @@ app.post('/smsReceived', function(req, res) {
                     } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED) {
                         return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You are not currently subscribed to the SMS service, please activate your subscription to enable managing and retrieval of contacts by text messaging."));
                     }
-                  }
+                  }*/
                 }
             })
             .then(function(commandData) {
@@ -862,7 +862,7 @@ app.post('/smsReceived', function(req, res) {
         twilio.sendMessage({
           to: latestMessage.from, // Any number Twilio can deliver to
           from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-          body: stringifiedError + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
+          body: error + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. 'USERNAME PASSWORD signup EMAIL_ADDRESS')" // body of the SMS message
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
             if (!err) {
                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
