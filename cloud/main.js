@@ -56,7 +56,7 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
 
       stripe.customers.create({
           email : obj.get("email"),
-          description: obj.get("objectId"),
+          description: obj.id,
           plan: "basic-monthly"
         }, function(err, customer) {
           // asynchronously called
