@@ -3,6 +3,15 @@
 // all payment & subscription management does not require a subscription, neither does signup
 // TODO write a tutorial for the onboarding process, first all messages just tell you to signup or login to your existing account, after signup, you must verify the email, then it makes a customer in stripe, you must then attach a card, and activate the subscription and pay for the current month, once receipt of a successfully paid subscription registers with stripe, then all of the sms service opens up
 
+// while using test servers, card numbers must be the following: '4242424242424242' or '5555555555554444'
+
+// TODO only block certain features with subscription statuses, not the all feature block that it is now
+
+// if email is not verified, then make sure that happens before creating a stripe customer for the account
+// if email is verified, but no subscription active, and no payment methods, the only commands are the payment commands: status, set.
+// if email is verified, and a payment method set, but no subscription active, the only commands are the payment commands and subscription commands: status, activate, cancel
+// if email is verified, and a payment method set, and a subscription is active, then all commands are available: signup, payment, subscription, menu, add, all, search, delete
+
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
 const resolve = require('path')
@@ -175,13 +184,8 @@ app.post('/smsReceived', function(req, res) {
 
             if (!user.get("emailVerified")) { return Parse.Promise.error(Parse.Error.INVALID_EMAIL_ADDRESS,"Welcome to AllMyPPL, "+user.username+", before continuing, you'll need to verify the email address provided at sign up.  After you successfully verify, you'll be able to manage your account, subscriptions and payment methods.\n\nIf you want to use the SMS interface to retrieve and manage your contacts, you'll need an active subscription.  To activate your subscription, first attach a payment method to your account with 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVC'."); }
             else {
-              if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD) {
-                return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You've never subscribed to the SMS service, subscribing will allow you to manage and retrieve your contacts by text messaging."));
-              } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
-                  return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "Your account is not in good standing, please make sure all outstanding charges have been paid and that your subscription is reactivated."));
-              } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED) {
-                  return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You are not currently subscribed to the SMS service, please activate your subscription to enable managing and retrieval of contacts by text messaging."));
-              } else {
+
+              if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE) {
                 // SUBSCRIPTION_STATUS_ACTIVE
                 var wordList = latestMessage.body.split(" ");
                 var enteredCommand = wordList[2] || "";
@@ -269,6 +273,14 @@ app.post('/smsReceived', function(req, res) {
                         user: user
                     });
                 }
+              } else {
+                if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD) {
+                    return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You've never subscribed to the SMS service, subscribing will allow you to manage and retrieve your contacts by text messaging."));
+                } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_UNPAID) {
+                    return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "Your account is not in good standing, please make sure all outstanding charges have been paid and that your subscription is reactivated."));
+                } else if (user.get("subscriptionStatus") == AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED) {
+                    return Parse.Promise.error(new Parse.Error(Parse.Error.EXCEEDED_QUOTA, "You are not currently subscribed to the SMS service, please activate your subscription to enable managing and retrieval of contacts by text messaging."));
+                }
               }
             }
         })
@@ -285,11 +297,7 @@ app.post('/smsReceived', function(req, res) {
             };
             switch (enteredCommand.toLowerCase()) {
                 case "payment":
-                    if (wordList[3] == "set") {
-                        resultData.paymentCommand = wordList[3];
-                    } else if (wordList[3] == "delete") {
-                        resultData.paymentCommand = wordList[3];
-                    } else {}
+                    resultData.paymentCommand = wordList[3];
                     commandPromise.resolve(resultData);
                     break;
                 case "menu":
@@ -428,6 +436,9 @@ app.post('/smsReceived', function(req, res) {
                             .then(function(result) {
                                 console.log("name " + result.get("name") + "\nphone " + result.get("phone") + "\nuid " + result.id);
                                 var key = commandData.key;
+
+                                if (result.get(key)) {
+
                                 result.save({
                                         key: commandData.value
                                     }, {
@@ -444,6 +455,10 @@ app.post('/smsReceived', function(req, res) {
                                     }, function(error) {
                                         commandPromise.reject(error);
                                     });
+
+                                  } else {
+                                    commandPromise.reject(new Parse.Error(Parse.Error.INVALID_KEY_NAME,"Currently you can only set the existing keys, "+JSON.stringify(result)+".  To edit this contact, type 'USERNAME PASSWORD edit "+commandData.contactId+" KEY NEW-VALUE'"))
+                                  }
                             }, function(error) {
                                 commandPromise.reject(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND, error.message));
                             });
@@ -462,6 +477,18 @@ app.post('/smsReceived', function(req, res) {
                 switch (enteredCommand) {
                     case "payment":
                         if (resultData.paymentCommand == "" || !resultData.paymentCommand) {
+                          twilio.sendMessage({
+                              to: latestMessage.from, // Any number Twilio can deliver to
+                              from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
+                              body: "In the 'payment' menu, you can perform the following commands, 'status', which will show all the payment method registered to your account, and 'set CARD_NUMBER EXP_MONTH EXP_YEAR CVC', which will set your current payment method to the information you provide."
+                          }, function(err, responseData) { //this function is executed when a response is received from Twilio
+                              if (!err) {
+                                  console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+                              } else {
+                                  console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                              }
+                          });
+                        } else if (resultData.paymentCommand == "status") {
                             stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
 
                               if (err) {
@@ -518,56 +545,15 @@ app.post('/smsReceived', function(req, res) {
                             } else {
                               verificationPromise.resolve({
                                 object: 'card',
-                                number: "4242424242424242", // while using test servers, card numbers must be the following: '4242424242424242' or '5555555555554444'
-                                exp_month: "05",
-                                exp_year: "2019",
-                                cvc: "171",
+                                number: wordList[4],
+                                exp_month: wordList[5],
+                                exp_year: wordList[6],
+                                cvc: wordList[7],
                                 currency: 'usd'
                               });
                             }
 
                             Parse.Promise.when(verificationPromise).then(function(sourceToken){
-
-                              /*
-                                                              var tokenCreationPromise = new Parse.Promise();
-
-                                                              stripe.tokens.create({
-                                                                  card: {
-                                                                    "number": wordList[4],
-                                                                    "exp_month": wordList[5],
-                                                                    "exp_year": wordList[6],
-                                                                    "cvc": wordList[7]
-                                                                  }
-                                                                }, function(err, token) {
-                                                                  // asynchronously called
-                                                                  if (err) {
-                                                                    tokenCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
-                                                                  } else {
-                                                                    tokenCreationPromise.resolve(token);
-                                                                  }
-                                                                });
-
-                                                              return tokenCreationPromise;
-
-                                                            }).then(function(cardToken) {
-
-                                                              var sourceCreationPromise = new Parse.Promise();
-
-                                                              stripe.sources.create({
-                                                                    token:cardToken
-                                                                  }, function(err, source) {
-                                                                    // asynchronously called
-                                                                    if (err) {
-                                                                      sourceCreationPromise.reject(new Parse.Error(Parse.Error.SCRIPT_FAILED,AllMyPPL.STRIPE_ERROR_MESSAGE));
-                                                                    } else {
-                                                                      sourceCreationPromise.resolve(source);
-                                                                    }
-                                                                  });
-
-                                                              return sourceCreationPromise;
-
-                                                            }).then(function(source) {
-                              */
 
                                 var customerUpdatePromise = new Parse.Promise();
 
@@ -596,12 +582,12 @@ app.post('/smsReceived', function(req, res) {
 
                               }).then(function(customer) {
 
-                                console.log("Card verified successfully.");
+                                console.log("Card verified successfully.\n\n" + customer);
 
                                 twilio.sendMessage({
                                     to: latestMessage.from, // Any number Twilio can deliver to
                                     from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                    body: "Card verified successfully and added to the customer's account as the default payment method."
+                                    body: "Card verified successfully and added to the customer's account as the default payment method." // TODO mention the next step, 'subscription activate' when its written
                                 }, function(err, responseData) { //this function is executed when a response is received from Twilio
                                     if (!err) {
                                         console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
@@ -613,51 +599,9 @@ app.post('/smsReceived', function(req, res) {
                                 resultPromise.resolve();
                               }, function (message) {
                                 console.log("Card verification failed.");
-                                console.log(message);
                                 resultPromise.reject(new Parse.Error(Parse.Error.VALIDATION_ERROR,message));
                               });
 
-                        } else if (resultData.paymentCommand == "delete") {
-                            stripe.customers.listCards(resultData.user.get("customerId"), function(err, cards) {
-                                // asynchronously called
-                                if (cards.length == 0) {
-                                    twilio.sendMessage({
-                                        to: latestMessage.from, // Any number Twilio can deliver to
-                                        from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                        body: "You currently have no payment methods on file.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
-                                    }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                                        if (!err) {
-                                            console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                                        } else {
-                                            console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                                        }
-                                    });
-                                    resultPromise.resolve();
-                                } else if (cards.length == 1) {
-                                    stripe.customers.deleteCard(resultData.user.get("customerId"), cards[0].id, function(err, confirmation) {
-                                        // asynchronously called
-                                        if (err) {
-                                            console.log(err + " error deleting customer " + resultData.user.get("customerId") + " card " + cards[0].id);
-                                            resultPromise.reject(err);
-                                        } else {
-                                            twilio.sendMessage({
-                                                to: latestMessage.from, // Any number Twilio can deliver to
-                                                from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-                                                body: "Card deleted successfully, you will not have a payment method on file to pay for your subscription when it expires, if you would like to auto-renew your subscription, add another payment method.\n\nType 'USERNAME PASSWORD payment set CARD_NUMBER EXP_MONTH EXP_YEAR CVV'."
-                                            }, function(err, responseData) { //this function is executed when a response is received from Twilio
-                                                if (!err) {
-                                                    console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
-                                                } else {
-                                                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
-                                                }
-                                            });
-                                            resultPromise.resolve();
-                                        }
-                                    });
-                                } else {
-                                    resultPromise.reject(new Parse.Error(Parse.Error.OTHER_CAUSE, "You currently have too many payment methods on file.  Please contact support@allmyppl.com for further assistance."));
-                                }
-                            });
                         }
                         break;
                     case "menu":
