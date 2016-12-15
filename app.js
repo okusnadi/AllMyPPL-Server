@@ -1,4 +1,4 @@
-'use strict'
+"use strict";
 
 const keyPublishable = process.env.PUBLISHABLE_KEY;
 const keySecret = process.env.SECRET_KEY;

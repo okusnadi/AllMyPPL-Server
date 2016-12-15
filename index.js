@@ -64,7 +64,7 @@ var api = new ParseServer({
                     pathHtml: resolve(__dirname, 'public/email-templates/verification_email.html')
                 },
                 customEmailAlert: {
-                    subject: 'Your recent message to AllMyPPL Support',
+                    subject: 'Custom alert',
                     pathPlainText: resolve(__dirname, 'public/email-templates/custom_alert.txt'),
                     pathHtml: resolve(__dirname, 'public/email-templates/custom_alert.html')
                 },

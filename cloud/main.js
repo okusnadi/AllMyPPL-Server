@@ -5,9 +5,6 @@
  * as its too costly without a prepared field.  Calling res.success() is required.
  */
 
-// import stripe module
-var stripe = require('stripe')(process.env.STRIPE_API_KEY);
-var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 /*
 switch (err.type) {
@@ -36,68 +33,7 @@ switch (err.type) {
 }
 */
 
-Parse.Cloud.afterSave(Parse.User, function(req) {
-
-    Parse.Promise.as().then(function() {
-
-    var customerCreationPromise = new Parse.Promise();
-
-    if (req.object.get('customerId') === undefined || !req.object.get('customerId') || req.object.get('customerId') === null) {
-
-          stripe.customers.create({
-               description: req.object.id,
-               plan: "basic-monthly"
-          }, function(err, customer) {
-               // asynchronously called
-               if (err) {
-                 if (err.code  && err.message) {
-                   console.error("error " + err.code + " : " + err.message);
-                 }
-                 customerCreationPromise.reject(err);
-               } else {
-                 customerCreationPromise.resolve(customer);
-               }
-         });
-
-      }
-
-    return customerCreationPromise;
-
-    }).then(function(customer) {
-
-      // now we have the stripe customer object passed on from the last block
-      // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
-      if (!customer || customer == undefined || !customer.id) {
-      } else {
-          req.object.set('customerId',customer.id);
-          return req.object.save(null, { useMasterKey : true });
-      }
-
-    }).then(function(user) {
-
-      console.log(user.get('customerId'));
-
-    },function(err){
-
-      console.log(err);
-
-    });
-});
-
-
 Parse.Cloud.beforeSave("Contact", function(req, res) {
-
-  Parse.Promise.as({
-    // setup to chain through beforeSave('Contact')
-    // will need to make a lowercase copy of name for case insensitive searching
-  }).then(function(){
-
-    req.object.set('nameLowercase', req.object.get("name").toLowerCase());
-
-  }).then(function() {
-
-    res.success();
-
-  });
-
+  req.object.set('nameLowercase', req.object.get("name").toLowerCase());
+  res.success();
 });
