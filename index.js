@@ -80,7 +80,7 @@ app.use(mountPath, api);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send('<html style="display:table;width:100%;height:100%;text-align:center;"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style=" display:table-cell; vertical-align: middle; width:auto; height:100%; margin: auto; padding:auto; background: url(./public/assets/images/AppIcon.png) bottom left no-repeat; background-size:400px 100%;"><div style="width: 200px;height: 250px;text-align: top;padding: 1em;margin: auto;margin-right: 17.5%; border-width:5px; border-style:solid; border-radius: 300px;background: rgba(0, 0, 0, 0.15) border-box;"><p><a href="mailto:support@allmyppl.com?subject=I%27m%20have%20some%20questions,%20comments,%20concerns%20or%20feedback%20about%20AllMyPPL&amp;body=I%20have%20a%20question%20or%20am%20confused%20about...%0A%0A%0A%0AI%20take%20issue%20with...%0A%0A%0A%0AHave%20you%20thought%20about...%0A%0A%0A%0AI%20really%20like....%0A%0A">Contact<br>AllMyPPL Support<br>By Email</a></p><p style="">For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at the number below.</p><p><a id="allMyPPLPhoneNumber" href="">+1 (650) 206-2610</a></p></div><script type="text/javascript">if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {document.getElementById("allMyPPLPhoneNumber").href = "sms:+16502062610";} else {document.getElementById("allMyPPLPhoneNumber").href=""}</script></body></html>');
+  res.status(200).send('<html style="display:table;width:100%;height:100%;text-align:center;"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style=" display:table-cell; vertical-align: middle; width:auto; height:100%; margin: auto; padding:auto; background: url(./public/assets/images/AppIcon.png) bottom left no-repeat; background-size:400px 100%;"><div style="width: 200px;height: 250px;text-align: top;padding: 1em;margin: auto;margin-right: 17.5%; border-width:5px; border-style:solid; border-radius: 300px;background: rgba(0, 0, 0, 0.15) border-box;"><p><a href="mailto:support@allmyppl.com?subject=I%20have%20some%20questions,%20comments,%20concerns%20or%20feedback%20about%20AllMyPPL&amp;body=I%20have%20a%20question%20or%20am%20confused%20about...%0A%0A%0A%0AI%20take%20issue%20with...%0A%0A%0A%0AHave%20you%20thought%20about...%0A%0A%0A%0AI%20really%20like....%0A%0A">Contact<br>AllMyPPL Support<br>By Email</a></p><p style="">For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at the number below.</p><p><a id="allMyPPLPhoneNumber" href="">+1 (650) 206-2610</a></p></div><script type="text/javascript">if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {document.getElementById("allMyPPLPhoneNumber").href = "sms:+16502062610";} else {document.getElementById("allMyPPLPhoneNumber").href=""}</script></body></html>');
 });
 
 app.post('/smsReceived', function(req, res) {
@@ -95,10 +95,10 @@ app.post('/smsReceived', function(req, res) {
         to: allMyPPLPhoneNumber
     }, function(err, responseData) {
         if (!err) {
-            res.status(200).send();
+            res.status(200).send(responseData.sms_messages[0]);
         twilioListSmsPromise.resolve(responseData.sms_messages[0]);
       } else {
-        res.status(404).send();
+        res.status(404).send(err);
         twilioListSmsPromise.reject(err);
       }
     });
@@ -108,15 +108,15 @@ app.post('/smsReceived', function(req, res) {
     latestMessage = latestMsg;
 
     var wordList = latestMessage.body.split(" ");
-    var enteredUsername = wordList[0].toLowerCase() || "";
-    var enteredPassword = wordList[1] || "";
-    var enteredCommand = wordList[2].toLowerCase() || "";
 
-    if (!enteredUsername) {
-      return Parse.Promise.error(new Parse.Error(Parse.Error.USERNAME_MISSING,"All requests must begin with a username, then the password then a command. Structure your next SMS as 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL')."));
-    } else if (!enteredPassword) {
-      return Parse.Promise.error(new Parse.Error(Parse.Error.PASSWORD_MISSING,"A password is required, then a command. Structure your next SMS in the following syntax, 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL')."));
+    if (wordList.length < 2) {
+      return Parse.Promise.error(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,"Welcome to AllMyPPL, you can signup with us by texting back 'USERNAME PASSWORD signup EMAIL_ADDRESS' with the capitalized fields replaced with your own choice of username, etc.  You'll see strings that look like that often in our instructions, so remember to replace the capitalized fields with your information.  When texting in to AllMyPPL, nothing is case-sensitive except your password, and the unique ids used in contact editing and deletion.  The next steps are signing up with the service or logging in to your existing account, to sign up with AllMyPPL, text in your desired account information followed by 'signup' and then your email, so to signup text 'USERNAME PASSWORD signup EMAIL_ADDRESS'.  To log in to an existing account just text your 'USERNAME PASSWORD' followed by a command if you choose like 'menu', but you'll already be greeted by the main menu when you log in.");
     } else {
+
+      var enteredUsername = wordList[0].toLowerCase() : "";
+      var enteredPassword = wordList[1] || "";
+      var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
+
       return Parse.Promise.as({username:enteredUsername,password:enteredPassword,command:enteredCommand});
     }
 
@@ -128,7 +128,7 @@ app.post('/smsReceived', function(req, res) {
       var user = new Parse.User();
       user.set("username", wordList[0].toLowerCase());
       user.set("password", wordList[1]);
-      user.set("email", wordList[3]);
+      user.set("email", wordList[3] ? wordList[3].toLowerCase() : "");
       return user.signUp(null);
     } else {
       return Parse.User.logIn(userData.username,userData.password);
@@ -137,13 +137,13 @@ app.post('/smsReceived', function(req, res) {
   }).then(function(user) {
 
     var wordList = latestMessage.body.split(" ");
-    var enteredCommand = wordList[2].toLowerCase() || "";
+    var enteredCommand = wordList[2] ? wordList[2].toLowerCase() || "";
 
     console.log("user " + user.id + " logged in");
     if (enteredCommand == "add") {
       var nameString = "";
       for (var index in wordList) {
-        if (index >= 4) {
+        if (index >= 3) {
           nameString += wordList[index];
           if (index != wordList.length - 1) {
             nameString += " ";
@@ -175,13 +175,13 @@ app.post('/smsReceived', function(req, res) {
           }
         }
       }
-      return Parse.Promise.as({command: enteredCommand, contactId:wordList[3], key:wordList[4].toLowerCase(), value:valueString, user: user});
+      return Parse.Promise.as({command: enteredCommand, contactId:wordList[3], key:wordList[4] ? wordList[4].toLowerCase() : "", value:valueString, user: user});
     } else if (enteredCommand == "delete") {
       return Parse.Promise.as({command: enteredCommand, contactId:wordList[3], user: user});
     } else if (enteredCommand == "menu") {
       return Parse.Promise.as({command: enteredCommand, user: user});
     } else if (enteredCommand == "signup") {
-      return Parse.Promise.as({command: enteredCommand, username:wordList[0].toLowerCase(), password:wordList[1], email: wordList[3].toLowerCase(), user: user});
+      return Parse.Promise.as({command: enteredCommand, username:wordList[0].toLowerCase(), password:wordList[1], email: wordList[3] ? wordList[3].toLowerCase() : "", user: user});
     } else {
       return Parse.Promise.as({command: enteredCommand, user: user});
     }
@@ -290,9 +290,9 @@ app.post('/smsReceived', function(req, res) {
             return false;
           }
         if (!commandData.email || commandData.email.length < 1) {
-          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An email address is required following the 'signup' command. 'USERNAME PASSWORD signup EMAIL'"));
+          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An email address is required following the 'signup' command. 'USERNAME PASSWORD signup EMAIL_ADDRESS'"));
         } else if (!validateEmail(commandData.email)) {
-          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An invalid email address was entered, please make sure the email address has a valid format. 'USERNAME PASSWORD signup EMAIL'"));
+          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An invalid email address was entered, please make sure the email address has a valid format. 'USERNAME PASSWORD signup EMAIL_ADDRESS'"));
         } else {
           commandPromise.resolve(resultData);
         }
@@ -332,7 +332,7 @@ app.post('/smsReceived', function(req, res) {
       var resultPromise = new Parse.Promise();
       var wordList = latestMessage.body.split(" ");
 
-      var enteredCommand = wordList[2].toLowerCase() || "";
+      var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
       switch (enteredCommand) {
         case "":
@@ -341,7 +341,7 @@ app.post('/smsReceived', function(req, res) {
 
                   to: latestMessage.from, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: "Available Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
+                  body: "Available Menu Commands:\n\n'signup EMAIL_ADDRESS'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
 
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -358,7 +358,7 @@ app.post('/smsReceived', function(req, res) {
 
                       to: latestMessage.from, // Any number Twilio can deliver to
                       from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                      body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  The most utility of our service is found when you don\'t have your phone available, that means authenticating on another\'s device, which might give you pause, our authentication has a lifetime of a single texted command and reply, instead of sessions that have to be explicitly closed or else leaving you vulnerable until its expiration, authentication is required with every texted command, first, your username, second, your password, you will be logged in and the command following PASSWORD will run.  Make note that the sequence expected of text message commands is \'USERNAME PASSWORD command\', the latter being a command selected from the \"Available Commands\" shown when you text in the command \"menu\".  Please be aware that all commands and keys are case-sensitive (i.e. 'USERNAME PASSWORD menu')"
+                      body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  When texting all my people, remember that every command must be authorized with your credentials, all words must be space-seperated, and the command texted must be prefixed by valid user credentials.  Text back 'USERNAME PASSWORD' and a command chosen from the list below."
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -429,7 +429,7 @@ app.post('/smsReceived', function(req, res) {
               // perform a startsWith search
               var wasFound = true;
               for (var index in resultData.results) {
-                var nameLowercase = resultData.results[index].get("name").toLowerCase();
+                var nameLowercase = resultData.results[index].get("nameLowercase");
                 var searchStringLowercase = searchString.toLowerCase();
                 for (var i = 0; i < searchStringLowercase.length; i++) {
                       if (i >= searchStringLowercase.length || nameLowercase[i] != searchStringLowercase[i]) {
@@ -508,7 +508,7 @@ app.post('/smsReceived', function(req, res) {
 
               to: latestMessage.from, // Any number Twilio can deliver to
               from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-              body: "Log in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them, edit and search them through texting.\n\nAvailable Commands:\n\n'signup EMAIL'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
+              body: "Your login was successful, welcome to AllMyPPL.  When texting in your commands, remember that every one must be prefixed with valid credentials, all words must be space-seperated, not any other deliminator, that all stored and searched names and fields are not case-sensitive except the password field when you log in and a contact's unique id field when editing or delete it.\n\nTo continue, text in your USERNAME PASSWORD and a command chosen from the list below.\n\nAvailable Menu Commands:\n\n'signup EMAIL_ADDRESS'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)"
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -537,7 +537,7 @@ app.post('/smsReceived', function(req, res) {
 
                   to: latestMessage.from, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. USERNAME PASSWORD signup EMAIL)"  // body of the SMS message
+                  body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. USERNAME PASSWORD signup EMAIL_ADDRESS)"  // body of the SMS message
 
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
