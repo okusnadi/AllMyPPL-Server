@@ -1,3 +1,5 @@
+"use strict";
+
 // TODO add a subscription management menu section
 // TODO decide which text message replies send out on the free plan, and which require an active subscription for use of the feature
 // all payment & subscription management does not require a subscription, neither does signup
@@ -96,14 +98,14 @@ app.use('/public', express.static(path.join(__dirname, '/public')));
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 // Parse Server plays nicely with the rest of your web routes
-app.set("view engine", "pug");
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-const keyPublishable = process.env.STRIPE_PUB_KEY;
+const keyPublishable  = process.env.STRIPE_PUB_KEY;
 
+app.set("view engine", "pug");
 app.get("/", (req, res) =>
-  res.render("index.pug", { keyPublishable }, null));
+  res.render("/public/templates/index.pug", { keyPublishable } ));
 
 var port = process.env.PORT || 1337;
 var httpServer = require('http')

@@ -2,7 +2,7 @@
   "name": "AllMyPPL",
   "version": "1.0.0",
   "description": "A text message based contact storage service",
-  "main": "app.js",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/apatrickstar/AllMyPeople-Server"
@@ -16,10 +16,11 @@
     "parse-server-mailgun": "~2.1.16",
     "stripe": "~4.13.0",
     "twilio": "~2.9.3",
-    "body-parser": "~1.15.2"
+    "body-parser": "~1.15.2",
+    "pug": "~2.0.0"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=4.3"
