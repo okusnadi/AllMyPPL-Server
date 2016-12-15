@@ -143,6 +143,9 @@ app.get('/createPlans', function(req,res) {
 
 app.post('/smsReceived', function(req, res) {
 
+  console.log(req);
+  JSON.stringify(console.log(req));
+
   var messagesPromise = new Parse.Promise();
 
   twilio.listSms({
