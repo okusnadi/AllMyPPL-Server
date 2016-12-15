@@ -15,7 +15,8 @@
     "parse-server": "~2.2.12",
     "parse-server-mailgun": "~2.1.16",
     "stripe": "~4.13.0",
-    "twilio": "~2.9.3"
+    "twilio": "~2.9.3",
+    "body-parser": "~1.15.2"
   },
   "scripts": {
     "start": "node index.js"

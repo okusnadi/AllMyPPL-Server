@@ -17,6 +17,7 @@
 const resolve = require('path')
     .resolve;
 var express = require('express');
+var bodyParser = require('body-parser');
 var ParseServer = require('parse-server')
     .ParseServer;
 var Parse = require('parse/node');
@@ -113,10 +114,6 @@ app.use('/public', express.static(path.join(__dirname, '/public')));
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 // Parse Server plays nicely with the rest of your web routes
-app.get('/', function(req, res) {
-    res.status(200)
-        .send(''); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
-});
 
 app.get('/createPlans', function(req,res) {
   stripe.plans.create({
@@ -141,17 +138,31 @@ app.get('/createPlans', function(req,res) {
   });
 });
 
-app.post('/smsReceived', function(req, res) {
+app.use(bodyParser.json()); // for parsing application/json
+app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-  console.log(req.body);
+app.post('/smsReceived', null, function(req,res,next) {
 
-  Parse.Promise.as()
-  .then(function() {
+    console.log(req.body);
+    res.set('Content-Type', 'application/json');
+    // res.json(req.body);
+
+  Parse.Promise.as().then(function() {
+    var listString = "{";
+    for (var key in req) {
+      listString += key + ":'"+req[key]+"',";
+    }
+    listString[listString.length - 1] = '}';
+    res.status(200).send(listString);
+
+    return Parse.Promise.as(req);
+
+  }).then(function() {
 
       twilio.sendMessage({
           to: req.from, // Any number Twilio can deliver to
           from: req.to, // A number you bought from Twilio and can use for outbound communication
-          body: req.body
+          body: req.sid
       }, function(err, responseData) { //this function is executed when a response is received from Twilio
           if (!err) {
               console.log("Successfully sent sms to " + req.from + ". Response: " + responseData);
