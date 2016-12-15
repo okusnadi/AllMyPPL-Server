@@ -200,7 +200,7 @@ app.post('/smsReceivedBROKEN', function(req, res) {
                           console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + responseData + "\". Error: \"" + err);
                       }
                   });
-                  const { AppCache } = require('parse-server/lib/cache');
+                  const AppCache = require('parse-server/lib/cache');
                   // Get a reference to the MailgunAdapter
                   // NOTE: It's best to do this inside the Parse.Cloud.define(...) method body and not at the top of your file with your other imports. This gives Parse Server time to boot, setup cloud code and the email adapter.
                   const MailgunAdapter = AppCache.get(process.env.APP_ID)['userController']['adapter'];
