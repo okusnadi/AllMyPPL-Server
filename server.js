@@ -90,14 +90,13 @@ Parse.serverURL = process.env.SERVER_URL;
 // javascriptKey, restAPIKey, dotNetKey, clientKey
 
 var app = express();
-app.set("view engine", "pug");
-
 // Serve static assets from the /public folder
 app.use('/public', express.static(path.join(__dirname, '/public')));
 // Serve the Parse API on the /parse URL prefix
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 // Parse Server plays nicely with the rest of your web routes
+app.set("view engine", "pug");
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
