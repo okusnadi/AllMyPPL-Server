@@ -16,10 +16,9 @@
 // compatible API routes.
 const resolve = require('path')
     .resolve;
-var express = require('express')();
+var express = require('express');
 var bodyParser = require('body-parser');
-var ParseServer = require('parse-server')
-    .ParseServer;
+var ParseServer = require('parse-server').ParseServer;
 var Parse = require('parse/node');
 var path = require('path');
 var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
@@ -89,6 +88,7 @@ Parse.serverURL = process.env.SERVER_URL;
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
+
 var app = express();
 app.set("view engine", "pug");
 
