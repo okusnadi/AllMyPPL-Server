@@ -100,8 +100,10 @@ app.set("view engine", "pug");
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
+const keyPublishable = process.env.STRIPE_PUB_KEY;
+
 app.get("/", (req, res) =>
-  res.render("index.pug", { keyPublishable : process.env.STRIPE_PUB_KEY }, null));
+  res.render("index.pug", { keyPublishable }, null));
 
 var port = process.env.PORT || 1337;
 var httpServer = require('http')
