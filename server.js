@@ -105,7 +105,7 @@ const keyPublishable  = process.env.STRIPE_PUB_KEY;
 
 app.set("view engine", "pug");
 app.get("/", (req, res) =>
-  res.render("/public/templates/index.pug", { keyPublishable } ));
+  res.render("/public/templates/index.pug", { keyPublishable }));
 
 var port = process.env.PORT || 1337;
 var httpServer = require('http')
