@@ -16,7 +16,7 @@
 // compatible API routes.
 const resolve = require('path')
     .resolve;
-var express = require('express');
+var express = require('express')();
 var bodyParser = require('body-parser');
 var ParseServer = require('parse-server')
     .ParseServer;
