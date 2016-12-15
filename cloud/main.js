@@ -6,24 +6,8 @@
  */
 
 // import stripe module
-var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
-var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
-
-// import AllMyPPL
-// setup AllMyPPL
-var AllMyPPL = new Object();
-AllMyPPL.PHONE_NUMBER = "+16502062610";
-AllMyPPL.WEBSITE = "www.allmyppl.com";
-AllMyPPL.CREATED_BY = "Patrick Blaine";
-AllMyPPL.NAME = "AllMyPPL";
-
-AllMyPPL.SUBSCRIPTION_STATUS_NEVER_HAD = undefined;
-AllMyPPL.SUBSCRIPTION_STATUS_ACTIVE = "SUBSCRIPTION_STATUS_ACTIVE";
-AllMyPPL.SUBSCRIPTION_STATUS_EXPIRED = "SUBSCRIPTION_STATUS_EXPIRED";
-AllMyPPL.SUBSCRIPTION_STATUS_UNPAID = "SUBSCRIPTION_STATUS_UNPAID";
-
-AllMyPPL.STRIPE_ERROR_MESSAGE = "AllMyPPL had an internal error when interacting with Stripe, please contact support@allmyppl.com and tell us what you were trying to do and at what time.";
-AllMyPPL.SUPPORT_SMS_RESPONSE = "Thank you for writing AllMyPPL Support, you'll be receiving an email from us addressing your concerns.  Starting off any text with 'support' or 'help' means that you're sending a message from the phone you text from directly to AllMyPPL Support, you can also send a support message with your account information by typing 'USERNAME PASSWORD support MESSAGE'.";
+var stripe = require('stripe')(process.env.STRIPE_API_KEY);
+var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 /*
 switch (err.type) {
@@ -58,64 +42,40 @@ Parse.Cloud.afterSave(Parse.User, function(req) {
 
     var customerCreationPromise = new Parse.Promise();
 
-            if (req.object.get('emailVerified')) {
+    if (req.object.get('customerId') === undefined || !req.object.get('customerId') || req.object.get('customerId') === null) {
 
-                if (!req.object.get('customerId')) {
+          stripe.customers.create({
+               description: req.object.id,
+               plan: "basic-monthly"
+          }, function(err, customer) {
+               // asynchronously called
+               if (err) {
+                 if (err.code  && err.message) {
+                   console.error("error " + err.code + " : " + err.message);
+                 }
+                 customerCreationPromise.reject(err);
+               } else {
+                 customerCreationPromise.resolve(customer);
+               }
+         });
 
-                 console.log("emailVerified, !customerId");
+      }
 
-                 stripe.customers.create({
-                     email : req.object.get("email"),
-                     description: req.object.get("username"),
-                     plan: "basic-monthly"
-                   }, function(err, customer) {
-                     // asynchronously called
-                     if (err) {
-                       if (err.code  && err.message) {
-                       console.log("error " + err.code + " : " + err.message);
-                       }
-                       customerCreationPromise.reject(err);
-                     } else {
-                       customerCreationPromise.resolve(customer);
-                     }
-                   });
-
-                 } else {
-
-                    console.log("emailVerified, customerId");
-
-                    stripe.customers.retrieve(req.object.get('customerId'),
-                    function(err, customer) {
-                    // asynchronously called
-                      if (err) {
-                        customerCreationPromise.reject(err);
-                      } else {
-                        customerCreationPromise.resolve(customer);
-                      }
-                    });
-                  }
-              } else {
-                customerCreationPromise.resolve(null);
-              }
-
-          return customerCreationPromise;
+    return customerCreationPromise;
 
     }).then(function(customer) {
 
-      console.log(JSON.stringify(customer));
       // now we have the stripe customer object passed on from the last block
       // store customer.id as 'customerId' on the Parse.user so as to not lose the stripe customer object
-      if (!customer || !customer.id) {
-          return req.object;
+      if (!customer || customer == undefined || !customer.id) {
       } else {
-
-          return req.object.save({ customerId : customer.id }, { useMasterKey : true });
-
+          req.object.set('customerId',customer.id);
+          return req.object.save(null, { useMasterKey : true });
       }
 
     }).then(function(user) {
 
-      console.log(user);
+      console.log(user.get('customerId'));
 
     },function(err){
 
@@ -129,21 +89,14 @@ Parse.Cloud.beforeSave("Contact", function(req, res) {
 
   Parse.Promise.as({
     // setup to chain through beforeSave('Contact')
-    // will need to make a lowercase copy of name
-    // and create a customer in stripe if the id is blank
+    // will need to make a lowercase copy of name for case insensitive searching
   }).then(function(){
-    // copy name field to
+
     req.object.set('nameLowercase', req.object.get("name").toLowerCase());
 
   }).then(function() {
 
     res.success();
-
-  },function(err){
-
-    console.log("error " + err);
-
-    res.error(err);
 
   });
 

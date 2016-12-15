@@ -22,35 +22,35 @@ var ParseServer = require('parse-server')
     .ParseServer;
 var Parse = require('parse/node');
 var path = require('path');
-var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
+var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 var http = require('http');
 var querystring = require('querystring');
-var stripe = require('stripe')(process.env.STRIPE_API_KEY || "stripeApiKey");
+var stripe = require('stripe')(process.env.STRIPE_API_KEY);
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 if (!databaseUri) {
     console.log('DATABASE_URI not specified, falling back to localhost.');
 }
 var api = new ParseServer({
-    databaseURI: databaseUri || 'mongodb://localhost:27017/dev',
-    cloud: process.env.CLOUD_CODE_MAIN || __dirname + '/cloud/main.js',
-    appId: process.env.APP_ID || 'appId',
-    masterKey: process.env.MASTER_KEY || 'masterKey', //Add your master key here. Keep it secret!
-    serverURL: process.env.SERVER_URL || 'https://localhost:1337/parse', // Don't forget to change to https if needed
+    databaseURI: databaseUri,
+    cloud: process.env.CLOUD_CODE_MAIN,
+    appId: process.env.APP_ID,
+    masterKey: process.env.MASTER_KEY, //Add your master key here. Keep it secret!
+    serverURL: process.env.SERVER_URL, // Don't forget to change to https if needed
     liveQuery: {
         classNames: ["Contact"] // List of classes to support for query subscriptions
     },
-    publicServerURL: process.env.SERVER_URL || 'https://localhost:1337/parse',
-    appName: process.env.APP_NAME || 'appName',
+    publicServerURL: process.env.SERVER_URL,
+    appName: process.env.APP_NAME,
     verifyUserEmails: true,
     emailAdapter: {
         module: 'parse-server-mailgun',
         options: {
             // The address that your emails come from
-            fromAddress: process.env.MAILGUN_FROM_ADDRESS || "user@domain.tld",
+            fromAddress: process.env.MAILGUN_FROM_ADDRESS,
             // Your domain from mailgun.com
-            domain: process.env.MAILGUN_DOMAIN || "domain.tld",
+            domain: process.env.MAILGUN_DOMAIN,
             // Your API key from mailgun.com
-            apiKey: process.env.MAILGUN_API_KEY || 'key-',
+            apiKey: process.env.MAILGUN_API_KEY,
             // The template section
             templates: {
                 passwordResetEmail: {
@@ -83,9 +83,8 @@ var api = new ParseServer({
     }
 });
 // initialize Parse
-Parse.initialize(process.env.APP_ID || "appId");
-Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
-Parse.masterKey = process.env.MASTER_KEY || "masterKey";
+Parse.initialize(process.env.APP_ID);
+Parse.serverURL = process.env.SERVER_URL;
 
 // setup AllMyPPL
 var AllMyPPL = new Object();
