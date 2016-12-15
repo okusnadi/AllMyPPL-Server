@@ -143,8 +143,6 @@ app.get('/createPlans', function(req,res) {
 
 app.post('/smsReceived', function(req, res) {
 
-  console.log(JSON.stringify(req));
-
   Parse.Promise.as()
   .then(function() {
 
@@ -154,16 +152,16 @@ app.post('/smsReceived', function(req, res) {
           body: req.body
       }, function(err, responseData) { //this function is executed when a response is received from Twilio
           if (!err) {
-              console.log("Successfully sent sms to " + message.from + ". Response: " + responseData);
+              console.log("Successfully sent sms to " + req.from + ". Response: " + responseData);
           } else {
-              console.error("Could not send sms to " + message.from + ". Error: \"" + err);
+              console.error("Could not send sms to " + req.from + ". Error: \"" + err);
           }
       });
 
       return Parse.Promise.as();
 
   }).then(function() {
-    
+
   }, function(err) {
         console.error(err);
   });
