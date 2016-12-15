@@ -80,7 +80,7 @@ app.use(mountPath, api);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send('<html><head><title>AllMyPPL Cloud Contact Management & Retrieval</title></head><body>For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at <a href="sms:+16505878510?body=So, what is all this about?">+16505878510</body></html>'); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
+  res.status(200).send('<html><head><title>AllMyPPL Cloud Contact Management & Retrieval</title></head><body>For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at <a href="sms:+16502062610?body=Tell me more!">+16502062610</a></body></html>'); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
 });
 
 app.post('/smsReceived', function(req, res) {
