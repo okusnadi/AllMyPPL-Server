@@ -143,34 +143,15 @@ app.get('/createPlans', function(req,res) {
 
 app.post('/smsReceived', function(req, res) {
 
-  console.log(req);
-  JSON.stringify(console.log(req));
+  console.log(JSON.stringify(req));
 
-  var messagesPromise = new Parse.Promise();
-
-  twilio.listSms({
-      to: AllMyPPL.PHONE_NUMBER
-  }, function(err, responseData) {
-      if (!err) {
-          res.status(200)
-              .send(responseData.sms_messages[0].body);
-          messagesPromise.resolve(responseData.sms_messages[0]);
-      } else {
-          res.status(404)
-              .send('Cannot access latestMessage.');
-          messagesPromise.reject(err);
-      }
-  });
-
-  Parse.Promise.when(messagesPromise)
-  .then(function(message) {
-
-      console.log(message);
+  Parse.Promise.as()
+  .then(function() {
 
       twilio.sendMessage({
-          to: message.from, // Any number Twilio can deliver to
-          from: AllMyPPL.PHONE_NUMBER, // A number you bought from Twilio and can use for outbound communication
-          body: message.body
+          to: req.from, // Any number Twilio can deliver to
+          from: req.to, // A number you bought from Twilio and can use for outbound communication
+          body: req.body
       }, function(err, responseData) { //this function is executed when a response is received from Twilio
           if (!err) {
               console.log("Successfully sent sms to " + message.from + ". Response: " + responseData);
@@ -179,10 +160,10 @@ app.post('/smsReceived', function(req, res) {
           }
       });
 
-      return Parse.Promise.as(message);
+      return Parse.Promise.as();
 
-  }).then(function(message) {
-        console.log(message);
+  }).then(function() {
+    
   }, function(err) {
         console.error(err);
   });
