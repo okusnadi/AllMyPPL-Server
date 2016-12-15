@@ -102,8 +102,7 @@ app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
 app.get("/", (req, res) =>
-  res.render("index.pug", { keyPublishable : process.env.STRIPE_PUB_KEY });
-);
+  res.render("index.pug", { keyPublishable : process.env.STRIPE_PUB_KEY }, null));
 
 var port = process.env.PORT || 1337;
 var httpServer = require('http')
