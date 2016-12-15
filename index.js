@@ -115,33 +115,10 @@ var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 // Parse Server plays nicely with the rest of your web routes
 
-app.get('/createPlans', function(req,res) {
-  stripe.plans.create({
-    name: "Basic Plan",
-    id: "basic-monthly",
-    interval: "month",
-    currency: "usd",
-    amount: 0,
-  }, function(err, plan) {
-  // asynchronously called
-    console.log(err);
-  });
-  stripe.plans.create({
-  name: "Text Messaging Plan",
-  id: "text-messaging",
-  interval: "month",
-  currency: "usd",
-  amount: 99,
-  }, function(err, plan) {
-  // asynchronously called
-    console.log(err);
-  });
-});
-
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 
-app.post('/smsReceived', null, function(req,res,next) {
+app.post('/smsReceived', function(req,res,next) {
 
     console.log(req.body);
     res.set('Content-Type', 'application/json');
@@ -153,21 +130,21 @@ app.post('/smsReceived', null, function(req,res,next) {
       listString += key + ":'"+req[key]+"',";
     }
     listString[listString.length - 1] = '}';
-    res.status(200).send(listString);
+    res.status(200).json(JSON.parse(listString));
 
-    return Parse.Promise.as(req);
+    return Parse.Promise.as();
 
   }).then(function() {
 
       twilio.sendMessage({
-          to: req.from, // Any number Twilio can deliver to
-          from: req.to, // A number you bought from Twilio and can use for outbound communication
-          body: req.sid
+          to: req.body.from, // Any number Twilio can deliver to
+          from: req.body.to, // A number you bought from Twilio and can use for outbound communication
+          body: req.body.sid
       }, function(err, responseData) { //this function is executed when a response is received from Twilio
           if (!err) {
-              console.log("Successfully sent sms to " + req.from + ". Response: " + responseData);
+              console.log("Successfully sent sms to " + req.body.from + ". Response: " + responseData);
           } else {
-              console.error("Could not send sms to " + req.from + ". Error: \"" + err);
+              console.error("Could not send sms to " + req.body.from + ". Error: \"" + err);
           }
       });
 
