@@ -143,7 +143,7 @@ app.get('/createPlans', function(req,res) {
 
 app.post('/smsReceived', function(req, res) {
 
-  console.log(JSON.stringify(req));
+  console.log(req.body);
 
   Parse.Promise.as()
   .then(function() {
