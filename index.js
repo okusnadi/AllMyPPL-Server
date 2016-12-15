@@ -137,7 +137,7 @@ app.post('/smsReceived', function(req, res) {
   }).then(function(user) {
 
     var wordList = latestMessage.body.split(" ");
-    var enteredCommand = wordList[2] ? wordList[2].toLowerCase() || "";
+    var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
     console.log("user " + user.id + " logged in");
     if (enteredCommand == "add") {
