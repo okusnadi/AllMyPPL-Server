@@ -65,18 +65,6 @@ Parse.initialize(process.env.APP_ID || "appId");
 Parse.serverURL = process.env.SERVER_URL || "https://localhost:1337/parse";
 Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
-var AllMyPPL = new Object();
-AllMyPPL.Error = {SUBSCRIPTION_UNPAID:1000,SUBSCRIPTION_EXPIRED:1001};
-AllMyPPL.PHONE_NUMBER = "+16502062610";
-AllMyPPL.WEBSITE = "www.allmyppl.com";
-AllMyPPL.CREATED_BY = "Patrick Blaine";
-AllMyPPL.NAME = "AllMyPPL";
-
-console.log("AllMyPPL.PHONE_NUMBER = " + AllMyPPL.PHONE_NUMBER);
-console.log("AllMyPPL.WEBSITE = " + AllMyPPL.WEBSITE);
-console.log("AllMyPPL.CREATED_BY = " + AllMyPPL.CREATED_BY);
-console.log("AllMyPPL.Error.SUBSCRIPTION_UNPAID == 1000? " + AllMyPPL.Error.SUBSCRIPTION_UNPAID);
-
 // Client-keys like the javascript key or the .NET key are not necessary with parse-server
 // If you wish you require them, you can set them as options in the initialization above:
 // javascriptKey, restAPIKey, dotNetKey, clientKey
@@ -92,7 +80,7 @@ app.use(mountPath, api);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send(''); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
+  res.status(200).send('<html><head><title>AllMyPPL Cloud Contact Management & Retrieval</title></head><body>For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at <a href="sms:+16505878510?body=So, what is all this about?">+16505878510</body></html>'); // PLACE HTML OR TEXT FOR INDEX OF DOMAIN.COM/ BETWEEN '' in send()
 });
 
 app.post('/smsReceived', function(req, res) {
@@ -120,9 +108,9 @@ app.post('/smsReceived', function(req, res) {
     latestMessage = latestMsg;
 
     var wordList = latestMessage.body.split(" ");
-    var enteredUsername = wordList[0] || "";
+    var enteredUsername = wordList[0].toLowerCase() || "";
     var enteredPassword = wordList[1] || "";
-    var enteredCommand = wordList[2] || "";
+    var enteredCommand = wordList[2].toLowerCase() || "";
 
     if (!enteredUsername) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.USERNAME_MISSING,"All requests must begin with a username, then the password then a command. Structure your next SMS as 'USERNAME PASSWORD command ...' (i.e. 'USERNAME PASSWORD signup EMAIL')."));
@@ -134,11 +122,11 @@ app.post('/smsReceived', function(req, res) {
 
   }).then(function(userData) {
     var wordList = latestMessage.body.split(" ");
-    var enteredCommand = wordList[2] || "";
+    var enteredCommand = wordList[2].toLowerCase() || "";
 
     if (enteredCommand == "signup") {
       var user = new Parse.User();
-      user.set("username", wordList[0]);
+      user.set("username", wordList[0].toLowerCase());
       user.set("password", wordList[1]);
       user.set("email", wordList[3]);
       return user.signUp(null);
@@ -149,7 +137,7 @@ app.post('/smsReceived', function(req, res) {
   }).then(function(user) {
 
     var wordList = latestMessage.body.split(" ");
-    var enteredCommand = wordList[2] || "";
+    var enteredCommand = wordList[2].toLowerCase() || "";
 
     console.log("user " + user.id + " logged in");
     if (enteredCommand == "add") {
@@ -187,13 +175,13 @@ app.post('/smsReceived', function(req, res) {
           }
         }
       }
-      return Parse.Promise.as({command: enteredCommand, contactId:wordList[3], key:wordList[4], value:valueString, user: user});
+      return Parse.Promise.as({command: enteredCommand, contactId:wordList[3], key:wordList[4].toLowerCase(), value:valueString, user: user});
     } else if (enteredCommand == "delete") {
       return Parse.Promise.as({command: enteredCommand, contactId:wordList[3], user: user});
     } else if (enteredCommand == "menu") {
       return Parse.Promise.as({command: enteredCommand, user: user});
     } else if (enteredCommand == "signup") {
-      return Parse.Promise.as({command: enteredCommand, username:wordList[0], password:wordList[1], email: wordList[3], user: user});
+      return Parse.Promise.as({command: enteredCommand, username:wordList[0].toLowerCase(), password:wordList[1], email: wordList[3].toLowerCase(), user: user});
     } else {
       return Parse.Promise.as({command: enteredCommand, user: user});
     }
@@ -202,10 +190,11 @@ app.post('/smsReceived', function(req, res) {
     var commandPromise = new Parse.Promise();
     var wordList = latestMessage.body.split(" ");
 
-    var enteredCommand = wordList[2] || "";
+    var enteredCommand = wordList[2].toLowerCase() || "";
     var resultData = {results:[], result:{}, command: commandData.command, user: commandData.user};
 
     switch (enteredCommand) {
+      case "":
       case "menu":
             commandPromise.resolve(resultData);
             break;
@@ -343,9 +332,10 @@ app.post('/smsReceived', function(req, res) {
       var resultPromise = new Parse.Promise();
       var wordList = latestMessage.body.split(" ");
 
-      var enteredCommand = wordList[2] || "";
+      var enteredCommand = wordList[2].toLowerCase() || "";
 
       switch (enteredCommand) {
+        case "":
         case "menu":
         twilio.sendMessage({
 
@@ -358,7 +348,7 @@ app.post('/smsReceived', function(req, res) {
                   if (!err) {
                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                   } else {
-                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                    console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                   }
         });
            resultPromise.resolve(resultData);
@@ -375,7 +365,7 @@ app.post('/smsReceived', function(req, res) {
                       if (!err) {
                         console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                       } else {
-                        console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                        console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                       }
             });
             resultPromise.resolve(resultData);
@@ -392,7 +382,7 @@ app.post('/smsReceived', function(req, res) {
                       if (!err) {
                         console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                       } else {
-                        console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                        console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                       }
             });
             resultPromise.resolve(resultData);
@@ -412,7 +402,7 @@ app.post('/smsReceived', function(req, res) {
                         if (!err) {
                           console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                         } else {
-                          console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                          console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                         }
               }       );
             }
@@ -461,7 +451,7 @@ app.post('/smsReceived', function(req, res) {
                             if (!err) {
                               console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                             } else {
-                              console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                              console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                             }
                   });
                 }
@@ -487,7 +477,7 @@ app.post('/smsReceived', function(req, res) {
                   if (!err) {
                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                   } else {
-                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                    console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                   }
                 });
 
@@ -500,14 +490,14 @@ app.post('/smsReceived', function(req, res) {
 
             to: latestMessage.from, // Any number Twilio can deliver to
             from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : \"" + resultData.result.get(latestMessage.body.split(" ")[4]) + "\"."
+            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : '" + resultData.result.get(latestMessage.body.split(" ")[4]) + "'."
 
           }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
             if (!err) {
               console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
             } else {
-              console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+              console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
             }
           });
 
@@ -525,13 +515,19 @@ app.post('/smsReceived', function(req, res) {
               if (!err) {
                 console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
               } else {
-                console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
               }
             });
           resultPromise.resolve(resultData);
         }
         return resultPromise;
       }).then(function(resultData) {
+
+        let savedObjectPriomise = new Parse.Promise();
+
+        Parse.Session.current().save({from:latestMessage.from},{sessionToken:Parse.User.current().getSessionToken()}).then(function(savedObject){savedObjectPriomise.resolve(savedObject);},function(err){savedObjectPriomise.reject(err)});
+
+        console.log(Parse.Promise.as(savedObjectPriomise));
 
         Parse.User.logOut();
 
@@ -548,17 +544,11 @@ app.post('/smsReceived', function(req, res) {
                   if (!err) {
                     console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
                   } else {
-                    console.error("Could not send sms to " + latestMessage.from + ". Body: \"" + error + "\". Error: \"" + err);
+                    console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
                   }
         });
       });
 
-});
-
-// There will be a test page available on the /test path of your server url
-// Remove this before launching your app
-app.get('/test', function(req, res) {
-  res.sendFile(path.join(__dirname, '/public/test.html'));
 });
 
 var port = process.env.PORT || 1337;
