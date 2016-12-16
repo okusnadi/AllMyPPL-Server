@@ -80,7 +80,7 @@ app.use(mountPath, api);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send('<html style="display:table;width:100%;height:100%;text-align:center;"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style=" display:table-cell; vertical-align: middle; width:auto; height:100%; margin: auto; padding:auto; background: url(./public/assets/images/AppIcon.png) bottom left no-repeat; background-size:400px 100%;"><div style="width: 200px;height: 250px;text-align: top;padding: 1em;margin: auto;margin-right: 17.5%; border-width:5px; border-style:solid; border-radius: 300px;background: rgba(0, 0, 0, 0.15) border-box;"><p><a href="mailto:support@allmyppl.com?subject=I%20have%20some%20questions,%20comments,%20concerns%20or%20feedback%20about%20AllMyPPL&amp;body=I%20have%20a%20question%20or%20am%20confused%20about...%0A%0A%0A%0AI%20take%20issue%20with...%0A%0A%0A%0AHave%20you%20thought%20about...%0A%0A%0A%0AI%20really%20like....%0A%0A">Contact<br>AllMyPPL Support<br>By Email</a></p><p style="">For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at the number below.</p><p><a id="allMyPPLPhoneNumber" href="">+1 (650) 206-2610</a></p></div><script type="text/javascript">if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {document.getElementById("allMyPPLPhoneNumber").href = "sms:+16502062610";} else {document.getElementById("allMyPPLPhoneNumber").href=""}</script></body></html>');
+  res.status(200).send('<html style="display:table;width:100%;height:100%;text-align:center;"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style=" display:table-cell; vertical-align: middle; width:auto; height:100%; margin: auto; padding:auto; background: url(./public/assets/images/AppIcon.png) bottom left no-repeat; background-size:50% 100%;"><div style="width: 200px;height: 250px;text-align: top;padding: 1em;margin: auto;margin-right: 5%; border-width:5px; border-style:solid; border-radius: 300px;background: rgba(0, 0, 0, 0.15) border-box;"><p><a href="mailto:support@allmyppl.com?subject=I%20have%20some%20questions,%20comments,%20concerns%20or%20feedback%20about%20AllMyPPL&amp;body=I%20have%20a%20question%20or%20am%20confused%20about...%0A%0A%0A%0AI%20take%20issue%20with...%0A%0A%0A%0AHave%20you%20thought%20about...%0A%0A%0A%0AI%20really%20like....%0A%0A">Contact<br>AllMyPPL Support<br>By Email</a></p><p style="">For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at the number below.</p><p><a id="allMyPPLPhoneNumber" href="">+1 (650) 206-2610</a></p></div><script type="text/javascript">if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {document.getElementById("allMyPPLPhoneNumber").href = "sms:+16502062610";} else {document.getElementById("allMyPPLPhoneNumber").href=""}</script></body></html>');
 });
 
 app.post('/smsReceived', function(req, res) {
@@ -122,7 +122,7 @@ app.post('/smsReceived', function(req, res) {
 
   }).then(function(userData) {
     var wordList = latestMessage.body.split(" ");
-    var enteredCommand = wordList[2].toLowerCase() || "";
+    var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
     if (enteredCommand == "signup") {
       var user = new Parse.User();
