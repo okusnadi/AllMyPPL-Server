@@ -9,4 +9,11 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
   console.log('[beforeSave] object: ', obj.toJSON());
   obj.set('nameLowercase', obj.get("name").toLowerCase());
   res.success();
-})
+});
+
+Parse.Cloud.beforeSave(Parse.User, (req, res) => {
+  const obj = req.object;
+  console.log('[beforeSave] object: ', obj.toJSON());
+  if (obj.get('username').toLowerCase() != obj.get('username')) {res.error("Usernames must consist of all lowercase letters.");}
+  res.success();
+});
