@@ -16,6 +16,6 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const user = req.user;
   console.log('[beforeSave] object: ', obj.toJSON());
   if (user.username != user.username.toLowerCase()) {res.error('A username must consist only of lower case letters.')}
-  if (obj.get('email') == user.get('email')) {res.error('Attempting to update a user\'s email field with the value it already has is not permitted.');}
-  res.success();
+  else if (obj.get('email') == user.get('email')) {res.error('Attempting to update a user\'s email field with the value it already has is not permitted.');}
+  else { res.success();}
 });
