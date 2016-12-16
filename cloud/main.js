@@ -23,6 +23,7 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   console.log('[beforeSave] object: ', obj.toJSON());
   console.log('user object; ',user.toJSON());
   console.log('obj dirtyKeys:', obj.dirtyKeys());
+  console.log(!obj.dirtyKeys());
 
   var emailDirty;
   var usernameDirty;
@@ -31,7 +32,7 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   if (usernameDirty && !obj.get('username') || obj.get('username') == '') {res.error('A username must be provided.');}
   else if (usernameDirty && obj.get('username') != obj.get('username').toLowerCase()) {res.error('A username must consist only of lower case letters.');}
   else if (emailDirty && !user.get('email') || user.get('email') == '' || !validateEmail(user.get('email'))) {res.error('A valid email address must be provided.');}
-  else if (!obj.dirty() && obj.dirtyKeys().length() == 0) {res.error('No changes to save.');}
+  else if (!obj.dirtyKeys()) {res.error('No changes to save.');}
   else if (obj.get('username' == user.get('username') && obj.get('email') == user.get('username'))) {res.error('No changes were saved.');}
   else { res.success();}
 });
