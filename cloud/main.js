@@ -26,12 +26,12 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
 
   var emailDirty;
   var usernameDirty;
-  for (let key in user.dirtyKeys()) {if (key == 'email') {emailDirty = true; break;} if (key == 'username') {usernameDirty = true; break;}}
+  for (let key in obj.dirtyKeys()) {if (key == 'email') {emailDirty = true; break;} if (key == 'username') {usernameDirty = true; break;}}
 
   if (usernameDirty && !user.get('username') || user.get('username') == '') {res.error('A username must be provided.');}
   else if (usernameDirty && user.get('username') != user.get('username').toLowerCase()) {res.error('A username must consist only of lower case letters.');}
   else if (emailDirty && !user.get('email') || user.get('email') == '' || !validateEmail(user.get('email'))) {res.error('A valid email address must be provided.');}
   else if (emailDirty && user.get('email') == obj.get('email')) {res.error('Attempting to update a user\'s email address with the value it already has is not permitted.');}
-  else if (!user.dirty()) {res.error('No changes to save.');}
+  else if (!obj.dirty()) {res.error('No changes to save.');}
   else { res.success();}
 });
