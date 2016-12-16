@@ -190,7 +190,7 @@ app.post('/smsReceived', function(req, res) {
     var commandPromise = new Parse.Promise();
     var wordList = latestMessage.body.split(" ");
 
-    var enteredCommand = wordList[2].toLowerCase() || "";
+    var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
     var resultData = {results:[], result:{}, command: commandData.command, user: commandData.user};
 
     switch (enteredCommand) {
