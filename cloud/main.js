@@ -21,15 +21,6 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const user = req.user;
 
   console.log(obj.username);
-    console.log(obj.username.toLowerCase());
-      console.log((obj.username != obj.username.toLowerCase()));
 
-  var emailDirty;
-  var usernameDirty;
-  for (let key in obj.dirtyKeys()) {if (key == 'email') {emailDirty = true; break;} if (key == 'username') {usernameDirty = true; break;}}
-
-  if (usernameDirty && !obj.get('username') || obj.get('username') == '') {res.error('A username must be provided.');}
-  else if (obj.get('username') != obj.get('username').toLowerCase()) {res.error('A username must consist only of lower case letters.');}
-  else if (emailDirty && !user.get('email') || user.get('email') == '' || !validateEmail(user.get('email'))) {res.error('A valid email address must be provided.');}
-  else { res.success();}
+  res.success();
 });
