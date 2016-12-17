@@ -20,9 +20,10 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
   const user = req.user;
 
-  var username = obj.get('username');
+  var noErrors = true;
 
-  if (!validateEmail(obj.get('email'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
-  else if (username.toLowerCase() != username) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must be only lower case letters."));}
-  else {res.success();}
+  if (!validateEmail(obj.get('email'))) {noErrors = false; res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
+  if (obj.get('username').toLowerCase() != obj.get('username')) {noErrors = false; res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must be only lower case letters."));}
+
+  if (noErrors) {res.success();}
 });
