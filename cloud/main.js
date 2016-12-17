@@ -20,10 +20,6 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
   const user = req.user;
 
-
-  console.log(obj.username);
-  console.log(obj.email);
-
-  if (!validateEmail(obj.email)) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
+  if (!validateEmail(obj.get('email')) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
   else {res.success();}
 });
