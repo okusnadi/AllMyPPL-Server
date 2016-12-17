@@ -20,6 +20,10 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
   const user = req.user;
 
+  console.log(obj.username);
+    console.log(obj.username.toLowerCase());
+      console.log((obj.username != obj.username.toLowerCase()));
+
   var emailDirty;
   var usernameDirty;
   for (let key in obj.dirtyKeys()) {if (key == 'email') {emailDirty = true; break;} if (key == 'username') {usernameDirty = true; break;}}
