@@ -88,7 +88,8 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     response.type('text/xml');
     response.send(twiml.toString());
   } else if (input.length == 4) {
-    Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = logInObj; twiml.redirect('/voice/afterLogin'); response.type('text/xml');
+    Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = logInObj;
+       twiml.redirect('/voice/afterLogin'); response.type('text/xml');
     response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/promptForPinNumber'); response.type('text/xml');
     response.send(twiml.toString());});
   }
@@ -102,10 +103,42 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   twiml.say("Welcome, "+user.get('username')+".",{voice: 'alice'});
 
-  twiml.redirect('/voice/hangup');
+  var Contact = Parse.Object.extend("Contact");
 
-      response.type('text/xml');
-      response.send(twiml.toString());
+  var emergencyContactPromise = new Parse.Promise();
+
+  var emergencyContactQuery = new Parse.Query(Contact);
+  emergencyContactQuery.equalTo('isEmergencyContact');
+  emergencyContactQuery.first({sessionToken:user.get('sessionToken')})
+  .then(function(emergencyContact){
+
+    if (!emergencyContact) {
+      return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
+    } else {
+      twiml.say("Dialing your emergency contact, "+emergencyContact.get('phone')+", now. Press star to hang up.");
+
+      twiml.dial(emergencyContact.get('phone'),{action:"/voice/emergencyContactCall",hangupOnStar:true});
+
+            response.type('text/xml');
+            response.send(twiml.toString());
+
+            return Parse.Promise.as();
+          }
+
+  }).then(function(){},function(error) {
+    console.error(error.code+" : "+error.message);
+
+    twiml.say("Could not find an emergency contact for you, please make sure you've set up your emergency contact prior to calling.");
+
+    twiml.redirect('/voice/hangup');
+
+        response.type('text/xml');
+        response.send(twiml.toString());
+  });
+});
+
+router.post('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
+  console.log(JSON.stringify(request.body));
 });
 
 router.post('/hangup', twilio.webhook({validate:false}), function(request, response){
