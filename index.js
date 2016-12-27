@@ -1,3 +1,5 @@
+'use strict';
+
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
 
@@ -10,6 +12,7 @@ var path = require('path');
 var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
 var http = require('http');
 var querystring = require('querystring');
+var bodyParser = require('body-parser');
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
@@ -71,6 +74,8 @@ Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
 var app = express();
 
+app.use(bodyParser.urlencoded({ extended: true }));
+
 // Serve static assets from the /public folder
 app.use('/public', express.static(path.join(__dirname, '/public')));
 
@@ -85,6 +90,9 @@ app.get('/', function(req, res) {
 
 app.post('/smsReceived', function(req, res) {
 
+  res.status(200).send(JSON.stringify(req.body));
+  console.log(JSON.stringify(req.body));
+
   var allMyPPLPhoneNumber = '+16502062610';
   var latestMessage = {}; // needed in multiple steps
 
@@ -95,10 +103,8 @@ app.post('/smsReceived', function(req, res) {
         to: allMyPPLPhoneNumber
     }, function(err, responseData) {
         if (!err) {
-            res.status(200).send(responseData.sms_messages[0]);
-        twilioListSmsPromise.resolve(responseData.sms_messages[0]);
+            twilioListSmsPromise.resolve(responseData.sms_messages[0]);
       } else {
-        res.status(404).send(err);
         twilioListSmsPromise.reject(err);
       }
     });
