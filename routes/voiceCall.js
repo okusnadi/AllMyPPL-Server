@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var twilio = require('twilio');
-var Parse = require('parse');
+var Parse = require('parse/node');
 
     Parse.initialize(process.env.APP_ID);
     Parse.serverURL = process.env.SERVER_URL;
@@ -9,31 +9,83 @@ var Parse = require('parse');
 router.post('/', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   twiml.redirect('/voice/welcome');
-  response.type('text/xml');
-  response.send(twiml.toString());
+      response.type('text/xml');
+      response.send(twiml.toString());
 });
 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
-
-    console.log(JSON.stringify(request.body));
-
-    var input = request.body.Digits;
     var twiml = new twilio.TwimlResponse();
 
-    // helper to append a new "Say" verb with alice voice
-    function say(text) {
-        twiml.say(text, { voice: 'alice'});
-    }
+    twiml.say("Welcome To AllMyPPL.", { voice: 'alice'});;
 
-    // respond with the current TwiML content
-    function respond() {
+    twiml.redirect('/voice/promptForPhoneNumber');
+
         response.type('text/xml');
         response.send(twiml.toString());
-    }
+});
 
-    say("Welcome To AllMyPPL.");
+router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(request, response){
 
-    respond();
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.say("Please enter the ten digit phone number associated with your account.", { voice: 'alice'});
+
+  twiml.gather({
+    action: "/voice/parsePhoneNumberInput",
+    numDigits: 10,
+    method: "POST"
+  });
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function(request, response){
+
+  var input = request.body.Digits;
+
+  var twiml = new twilio.TwimlResponse();
+
+  if (!input || input.length != 10) {
+    twiml.redirect('/voice/promptForPhoneNumber');
+  } else if (input.length == 10) {
+    twiml.redirect('/voice/promptForPinNumber');
+  }
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(request, response){
+
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.say("Please enter the four digit pin number associated with your account.", { voice: 'alice'});
+
+  twiml.gather({
+    action: "/voice/parsePinNumberInput",
+    numDigits: 4,
+    method: "POST"
+  });
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function(request, response){
+
+  var input = request.body.Digits;
+
+  var twiml = new twilio.TwimlResponse();
+
+  if (!input || input.length != 4) {
+    twiml.redirect('/voice/promptForPinNumber');
+  } else if (input.length == 4) {
+    twiml.hangup();
+  }
+
+      response.type('text/xml');
+      response.send(twiml.toString());
 });
 
 module.exports = router;
