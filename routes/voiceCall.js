@@ -88,7 +88,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     response.type('text/xml');
     response.send(twiml.toString());
   } else if (input.length == 4) {
-    Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = Parse.User.current(); twiml.redirect('/voice/afterLogin'); response.type('text/xml');
+    Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = logInObj; twiml.redirect('/voice/afterLogin'); response.type('text/xml');
     response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/promptForPinNumber'); response.type('text/xml');
     response.send(twiml.toString());});
   }
