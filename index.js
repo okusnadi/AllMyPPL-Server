@@ -14,7 +14,6 @@ var http = require('http');
 var querystring = require('querystring');
 var bodyParser = require('body-parser');
 var voice = require('./routes/voiceCall');
-var message = require('./routes/message');
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
