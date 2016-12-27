@@ -87,7 +87,6 @@ app.use(mountPath, api);
 
 // Twilio Webhook routes
 app.post('/voice', voice.introduction);
-app.post('/message', message);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
