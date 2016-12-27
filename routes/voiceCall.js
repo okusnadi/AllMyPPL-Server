@@ -107,6 +107,10 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   twiml.say("Welcome, "+user.get(username),{voice: 'alice'});
 
+  twiml.pause({length:3});
+
+  twiml.say("Goodbye.");
+
   twiml.hangup();
 
       response.type('text/xml');
