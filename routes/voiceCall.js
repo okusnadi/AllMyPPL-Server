@@ -119,7 +119,7 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
   response.type('text/xml');
   response.send(twiml.toString());
 
-  user = null;
+  user = undefined;
 });
 
 module.exports = router;
