@@ -13,6 +13,8 @@ var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountS
 var http = require('http');
 var querystring = require('querystring');
 var bodyParser = require('body-parser');
+var voice = require('./routes/voiceCall');
+var message = require('./routes/message');
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
@@ -82,6 +84,10 @@ app.use('/public', express.static(path.join(__dirname, '/public')));
 // Serve the Parse API on the /parse URL prefix
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
+
+// Twilio Webhook routes
+app.post('/voice', voice.introduction);
+app.post('/message', message);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
