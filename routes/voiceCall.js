@@ -114,11 +114,11 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     } else {
       twiml.say("Dialing your emergency contact,"+emergencyContact.get('phone')+" now.",{voice: 'alice'});
 
-      var number = emergencyContact.get('phone') || '650-587-8510';
+      var number = emergencyContact.get('phone');
 
-      console.log(emergencyContact.toJSON());
+      console.log(JSON.stringify(request.body));
 
-      twiml.dial(number,{ callerId : "+16502062610", action: "/voice/hangup", timeout: 30 });
+      twiml.dial(number,{ callerId : request.body.To, action: "/voice/hangup", timeout: 30, hangupOnStar:true });
 
       return Parse.Promise.as(emergencyContact);
     }
