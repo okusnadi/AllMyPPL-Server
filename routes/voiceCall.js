@@ -137,6 +137,14 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
 router.use('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
+
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.say("Thank you for using all my people.",{voice:'alice'});
+
+  response.type('text/xml');
+  response.send(twiml.toString());
+
 });
 
 router.post('/hangup', twilio.webhook({validate:false}), function(request, response){
