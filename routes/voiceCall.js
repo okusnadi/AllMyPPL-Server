@@ -49,10 +49,10 @@ router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function
   var UserInfo = Parse.Object.extend("UserInfo");
   var userInfo = new UserInfo();
   userInfo.set("phone",input);
-  userInfo.set("parent",Parse.User.currentUser());
+  userInfo.set("parent",Parse.User.current());
   userInfo.save();
 
-  var user = Parse.User.currentUser();
+  var user = Parse.User.current();
   user.set('username',input);
 
   if (!input || input.length != 10) {
@@ -90,7 +90,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   if (!input || input.length != 4) {
     twiml.redirect('/voice/promptForPinNumber');
   } else if (input.length == 4) {
-    Parse.User.logIn(Parse.User.currentUser().get('username'),input).then(function(user){console.log(user.toJSON())},function(user, error){console.error(error);});
+    Parse.User.logIn(Parse.User.current().get('username'),input).then(function(user){console.log(user.toJSON())},function(user, error){console.error(error);});
     twiml.hangup();
   }
 
