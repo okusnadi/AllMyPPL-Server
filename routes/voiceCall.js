@@ -115,7 +115,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     } else {
       twiml.say("Dialing your emergency contact now.");
 
-      twiml.dial(emergencyContact.get('phone'),{ timeout : 10, action : '/voice/emergencyContactCall' });
+      twiml.dial("650-961-1902",{ callerId : "+16502062610", timeout : 10 });
 
       return Parse.Promise.as(emergencyContact);
     }
@@ -137,7 +137,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
   });
 });
 
-router.use('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
+router.post('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
 
   var twiml = new twilio.TwimlResponse();
