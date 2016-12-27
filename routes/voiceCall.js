@@ -126,12 +126,12 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
       console.log(JSON.stringify(request.body));
 
-      twiml.dial(number,{ callerId : request.body.To, action: "/voice/emergencyContactCalled", method:"POST", timeout: 30, hangupOnStar:true }, (err, respData) => {
+      twiml.dial(number,{ callerId : request.body.To, action: "/voice/goodbye", method:"POST", timeout: 30, hangupOnStar:true }, (err, respData) => {
                   console.log(err);
                   console.log(respData);
 
                     var twiml = new twilio.TwimlResponse();
-                      twiml.redirect('/voice/hangup');
+                      twiml.redirect('/voice/goodbye');
                           response.type('text/xml');
                           response.send(twiml.toString());
                 });
@@ -149,17 +149,20 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
     twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People prior to calling.");
 
-    twiml.redirect('/voice/hangup');
+    twiml.redirect('/voice/goodbye');
 
         response.type('text/xml');
         response.send(twiml.toString());
   });
 });
 
-router.post('/voice/emergencyContactCalled', twilio.webhook({validate:false}), function(request, response){
+router.post('/voice/goodbye', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
 
   var twiml = new twilio.TwimlResponse();
+
+
+  twiml.say("Thank you for using all my people. Goodbye.",{voice:'alice'});
 
   twiml.redirect('/voice/hangup');
 
@@ -171,8 +174,6 @@ router.post('/voice/emergencyContactCalled', twilio.webhook({validate:false}), f
 router.post('/hangup', twilio.webhook({validate:false}), function(request, response){
 
   var twiml = new twilio.TwimlResponse();
-
-  twiml.say("Thank you for using all my people. Goodbye.",{voice:'alice'});
 
   twiml.hangup();
 
