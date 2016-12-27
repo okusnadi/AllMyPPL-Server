@@ -107,9 +107,17 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   twiml.say("Welcome, "+user.get(username),{voice: 'alice'});
 
-  twiml.pause({length:3});
+  twiml.say("Goodbye.",{voice: 'alice'});
 
-  twiml.say("Goodbye.");
+  twiml.redirect('/voice/hangup');
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/hangup', twilio.webhook({validate:false}), function(request, response){
+
+  var twiml = new twilio.TwimlResponse();
 
   twiml.hangup();
 
