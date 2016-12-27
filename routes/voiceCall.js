@@ -113,17 +113,19 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-      twiml.say("Dialing your emergency contact, "+emergencyContact.get('phone')+", now. Press star to hang up.");
+      twiml.say("Dialing your emergency contact now.");
 
-      twiml.dial(emergencyContact.get('phone'),{action:"/voice/emergencyContactCall",hangupOnStar:true});
+      twiml.dial(emergencyContact.get('phone'),{ timeout : 10, action : '/voice/emergencyContactCall' });
 
-            response.type('text/xml');
-            response.send(twiml.toString());
+      return Parse.Promise.as(emergencyContact);
+    }
 
-            return Parse.Promise.as();
-          }
+  }).then(function(emergencyContact){
 
-  }).then(function(){},function(error) {
+      response.type('text/xml');
+      response.send(twiml.toString());
+
+    },function(error) {
     console.error(error.code+" : "+error.message);
 
     twiml.say("Could not find an emergency contact for you, please make sure you've set up your emergency contact prior to calling.");
@@ -141,6 +143,8 @@ router.use('/voice/emergencyContactCall', twilio.webhook({validate:false}), func
   var twiml = new twilio.TwimlResponse();
 
   twiml.say("Thank you for using all my people.",{voice:'alice'});
+
+  twiml.redirect('/voice/hangup');
 
   response.type('text/xml');
   response.send(twiml.toString());
