@@ -105,8 +105,6 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   var Contact = Parse.Object.extend("Contact");
 
-  var emergencyContactPromise = new Parse.Promise();
-
   var emergencyContactQuery = new Parse.Query(Contact);
   emergencyContactQuery.equalTo('isEmergencyContact');
   emergencyContactQuery.first({sessionToken:user.get('sessionToken')})
@@ -137,7 +135,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
   });
 });
 
-router.post('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
+router.use('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
 });
 
