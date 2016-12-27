@@ -89,11 +89,19 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   } else if (input.length == 4) {
     Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = logInObj;
        twiml.redirect('/voice/afterLogin'); response.type('text/xml');
-    response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/promptForPhoneNumber'); response.type('text/xml');
+    response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/loginError'); response.type('text/xml');
     response.send(twiml.toString());});
   }
 
 
+});
+
+router.post('/loginError', twilio.webhook({validate: false}), function(request, response) {
+  var twiml = new twilio.TwimlResponse();
+  twiml.say("That username and password combination didn't work, you'll need to re-enter your credentials.",{voice:'alice'})
+  twiml.redirect('/voice/promptForPhoneNumber');
+      response.type('text/xml');
+      response.send(twiml.toString());
 });
 
 router.post('/afterLogin', twilio.webhook({validate:false}), function(request, response){
@@ -118,7 +126,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
       console.log(JSON.stringify(request.body));
 
-      twiml.dial(number,{ callerId : request.body.To, action: "/voice/hangup", timeout: 30, hangupOnStar:true });
+      twiml.dial(number,{ callerId : request.body.To, action: "/voice/emergencyContactCalled", method:"POST", timeout: 30, hangupOnStar:true });
 
       return Parse.Promise.as(emergencyContact);
     }
@@ -131,7 +139,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("Could not find an emergency contact for you, please make sure you've set up your emergency contact prior to calling.");
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People prior to calling.");
 
     twiml.redirect('/voice/hangup');
 
@@ -140,12 +148,10 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
   });
 });
 
-router.post('/voice/emergencyContactCall', twilio.webhook({validate:false}), function(request, response){
+router.post('/voice/emergencyContactCalled', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
 
   var twiml = new twilio.TwimlResponse();
-
-  twiml.say("Thank you for using all my people.",{voice:'alice'});
 
   twiml.redirect('/voice/hangup');
 
@@ -158,7 +164,7 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Goodbye.",{voice:'alice'});
+  twiml.say("Thank you for using all my people. Goodbye.",{voice:'alice'});
 
   twiml.hangup();
 
