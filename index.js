@@ -85,7 +85,7 @@ var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 
 // Twilio Webhook routes
-app.post('/voice', voice.introduction);
+app.use('/voice', voice);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
