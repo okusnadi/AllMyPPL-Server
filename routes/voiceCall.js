@@ -116,11 +116,10 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
   twiml.hangup();
 
-      response.type('text/xml');
-      response.send(twiml.toString());
+  response.type('text/xml');
+  response.send(twiml.toString());
 
-  Parse.User.logOut();
-
+  user = null;
 });
 
 module.exports = router;
