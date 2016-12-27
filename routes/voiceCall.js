@@ -56,6 +56,8 @@ router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function
 
   user.set('username',input);
 
+  console.log(user.get('username'));
+
   if (!input || input.length != 10) {
     twiml.redirect('/voice/promptForPhoneNumber');
   } else if (input.length == 10) {
@@ -91,9 +93,21 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   if (!input || input.length != 4) {
     twiml.redirect('/voice/promptForPinNumber');
   } else if (input.length == 4) {
-    Parse.User.logIn(user.get('username'),input).then(function(user){console.log(user.toJSON())},function(user, error){console.error(error);});
-    twiml.hangup();
+    console.log(user.get('username'));
+    Parse.User.logIn(user.get('username'),input).then(function(logInObj){console.log(logInObj.toJSON()); user = logInObj; twiml.redirect('/voice/afterLogin');},function(user, error){console.error(error); twiml.redirect('/voice/promptForPinNumber');});
   }
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/afterLogin', twilio.webhook({validate:false}), function(request, response){
+
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.say("Welcome, "+user.get(username),{voice: 'alice'});
+
+  twiml.hangup();
 
       response.type('text/xml');
       response.send(twiml.toString());
