@@ -93,8 +93,26 @@ app.post('/smsReceived', function(req, res) {
   res.status(200).send(JSON.stringify(req.body));
   console.log(JSON.stringify(req.body));
 
-  var allMyPPLPhoneNumber = '+16502062610';
-  var latestMessage = {}; // needed in multiple steps
+  var allMyPPLPhoneNumber = req.body.To;
+  var latestMessage = { to:req.body.To, from:req.body.From, body: req.body.Body }; // needed in multiple steps
+
+  twilio.sendMessage({
+
+            to: latestMessage.from, // Any number Twilio can deliver to
+            from: latestMessage.to, // A number you bought from Twilio and can use for outbound communication
+            body: latestMessage.body // body of the SMS message
+
+  }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+            if (!err) {
+              console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+            } else {
+              console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
+            }
+  
+  });
+
+  /*
 
   Parse.Promise.as().then(function(){
     var twilioListSmsPromise = new Parse.Promise();
@@ -554,7 +572,7 @@ app.post('/smsReceived', function(req, res) {
                   }
         });
       });
-
+      */
 });
 
 var port = process.env.PORT || 1337;
