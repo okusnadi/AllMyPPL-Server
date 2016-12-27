@@ -4,8 +4,11 @@ var Parse = require('parse');
     Parse.initialize(process.env.APP_ID);
     Parse.serverURL = process.env.SERVER_URL;
 
+    Parse.User.currentUser().set('state',0);
+
 exports.introduction = function(request, response) {
 
+    console.log(JSON.stringify(Parse.User.currentUser()));
     console.log(JSON.stringify(request.body));
 
     var phone = request.body.From;
@@ -27,12 +30,38 @@ exports.introduction = function(request, response) {
 
     var logInPromise = new Parse.Promise();
     // Find an in-progess survey if one exists, otherwise create one
-    if (!input) { say('Welcome to All My People. Please enter the ten digit phone number for your account.'); twiml.gather({ timeout: 20, numDigits: 10 }); }
-    else if (input.length == 10) { say("Entered account phone number, "+input+"."); user.set('username',input); say("Please enter the four digit pin number for your account."); twiml.gather({ timeout: 15, numDigits: 10 });}
-    else if (input.length == 4) { say("Entered account pin number, "+input+"."); Parse.User.logIn(user.get('username'),input).then(function(user){say("Welcome, "+user.get('username')+"."); logInPromise.resolve(user);},function(user, error){logInPromise.reject(error)}); }
 
+    switch (user.get('state')) {
+        case 0:
+          say("Welcome to All My People.");
+          user.set('state',1);
+        case 1:
+          if (!input || input.length != 10) {
+            say("Please enter the ten digit phone number for your account.");
+            twiml.gather({timeout:20, numDigits:10});
+          }
+          else if (input.length == 10) {
+            user.set('state',2);
+            user.set('username',input);
+          }
+          break;
+        case 2:
+          if (!input || input.length != 4) {
+            say("Please enter the four digit pin number for your account.");
+            twiml.gather({timeout:10, numDigits:4});
+          }
+          else if (input.length == 4) {
+            user.set('state',3);
+            Parse.User.logIn(user.get('username'),input);
+          }
+          break;
+        case 3:
+          say("Welcome, "+user.get('username')+".");
+          break;
+        default:
+          say("An error has occurred.  Please call again.");
+          user.set('state',0);
+    }
 
-
-        // render TwiML response
-        Parse.Promise.when(logInPromise).then(function(user){respond();},function(error){console.error(error.code + " : " + error.message); say("An error has occurred, please call again."); respond();});
+    respond();
 };
