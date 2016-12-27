@@ -72,7 +72,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
       response.send(twiml.toString());
 });
 
-router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function(request, response){
+router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(request, response){
 
   var input = request.body.Digits;
 
