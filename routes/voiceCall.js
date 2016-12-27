@@ -6,6 +6,8 @@ var Parse = require('parse/node');
     Parse.initialize(process.env.APP_ID);
     Parse.serverURL = process.env.SERVER_URL;
 
+    var user = new Parse.User();
+
 router.post('/', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   twiml.redirect('/voice/welcome');
@@ -46,13 +48,12 @@ router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function
 
   var twiml = new twilio.TwimlResponse();
 
-  var UserInfo = Parse.Object.extend("UserInfo");
+  /*var UserInfo = Parse.Object.extend("UserInfo");
   var userInfo = new UserInfo();
   userInfo.set("phone",input);
-  userInfo.set("parent",Parse.User.current());
-  userInfo.save();
+  userInfo.set("parent",user);
+  userInfo.save();*/
 
-  var user = Parse.User.current();
   user.set('username',input);
 
   if (!input || input.length != 10) {
@@ -90,7 +91,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   if (!input || input.length != 4) {
     twiml.redirect('/voice/promptForPinNumber');
   } else if (input.length == 4) {
-    Parse.User.logIn(Parse.User.current().get('username'),input).then(function(user){console.log(user.toJSON())},function(user, error){console.error(error);});
+    Parse.User.logIn(user.get('username'),input).then(function(user){console.log(user.toJSON())},function(user, error){console.error(error);});
     twiml.hangup();
   }
 
