@@ -93,23 +93,21 @@ app.post('/smsReceived', function(req, res) {
   res.status(200).send(JSON.stringify(req.body));
   console.log(JSON.stringify(req.body));
 
-  var allMyPPLPhoneNumber = req.body.To;
-  var latestMessage = { to:req.body.To, from:req.body.From, body: req.body.Body }; // needed in multiple steps
-
+  // take the info from req.body and reply with the first word from a parsed list
   twilio.sendMessage({
 
-            to: latestMessage.from, // Any number Twilio can deliver to
-            from: latestMessage.to, // A number you bought from Twilio and can use for outbound communication
-            body: latestMessage.body // body of the SMS message
+            to: req.body.From, // Any number Twilio can deliver to
+            from: req.body.To, // A number you bought from Twilio and can use for outbound communication
+            body: req.body.Body.split(" ")[0] // body of the SMS message
 
   }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
             if (!err) {
-              console.log("Successfully sent sms to " + latestMessage.from + ". Body: " + responseData);
+              console.log("Successfully sent sms to " + req.body.From + ". responseData: " + responseData);
             } else {
-              console.error("Could not send sms to " + latestMessage.from + ". Error: \"" + err);
+              console.error("Could not send sms to " + req.body.From + ". 1st Word: '"+req.body.Body.split(" ")[0]+"'. Error: \"" + err);
             }
-  
+
   });
 
   /*
