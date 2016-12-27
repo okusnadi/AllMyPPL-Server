@@ -108,7 +108,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Welcome, "+user.get(username),{voice: 'alice'});
+  twiml.say("Welcome, "+user.get('username')+".",{voice: 'alice'});
 
   twiml.redirect('/voice/hangup');
 
@@ -120,7 +120,7 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Goodbye",{voice:'alice'});
+  twiml.say("Goodbye.",{voice:'alice'});
 
   twiml.hangup();
 
