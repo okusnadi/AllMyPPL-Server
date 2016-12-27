@@ -6,10 +6,9 @@ var Parse = require('parse/node');
     Parse.initialize(process.env.APP_ID);
     Parse.serverURL = process.env.SERVER_URL;
 
-    var user;
+    var user = new Parse.User();
 
 router.post('/', twilio.webhook({validate: false}), function(request, response) {
-  user = new Parse.User();
   var twiml = new twilio.TwimlResponse();
   twiml.redirect('/voice/welcome');
       response.type('text/xml');
@@ -84,13 +83,13 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   var twiml = new twilio.TwimlResponse();
 
   if (!input || input.length != 4) {
-    twiml.redirect('/voice/promptForPinNumber');
+    twiml.redirect('/voice/promptForPhoneNumber');
     response.type('text/xml');
     response.send(twiml.toString());
   } else if (input.length == 4) {
     Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = logInObj;
        twiml.redirect('/voice/afterLogin'); response.type('text/xml');
-    response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/promptForPinNumber'); response.type('text/xml');
+    response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/promptForPhoneNumber'); response.type('text/xml');
     response.send(twiml.toString());});
   }
 
@@ -106,7 +105,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
   var Contact = Parse.Object.extend("Contact");
 
   var emergencyContactQuery = new Parse.Query(Contact);
-  emergencyContactQuery.equalTo('isEmergencyContact');
+  emergencyContactQuery.equalTo('isEmergencyContact',true);
   emergencyContactQuery.first({sessionToken:user.get('sessionToken')})
   .then(function(emergencyContact){
 
@@ -115,11 +114,11 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     } else {
       twiml.say("Dialing your emergency contact,"+emergencyContact.get('phone')+" now.",{voice: 'alice'});
 
-      var number = emergencyContact.get('phone') || '650-961-1902';
+      var number = emergencyContact.get('phone') || '650-587-8510';
 
       console.log(emergencyContact.toJSON());
 
-      twiml.dial(number,{ callerId : "+16502062610" });
+      twiml.dial(number,{ callerId : "+16502062610", action: "/voice/hangup", timeout: 30 });
 
       return Parse.Promise.as(emergencyContact);
     }
