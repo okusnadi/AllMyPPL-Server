@@ -113,9 +113,13 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-      twiml.say("Dialing your emergency contact now.");
+      twiml.say("Dialing your emergency contact,"+emergencyContact.get('phone')+" now.",{voice: 'alice'});
 
-      twiml.dial(emergencyContact.get('phone'),{ callerId : "+16502062610" });
+      var number = emergencyContact.get('phone') || '650-961-1902';
+
+      console.log(emergencyContact.toJSON());
+
+      twiml.dial(number,{ callerId : "+16502062610" });
 
       return Parse.Promise.as(emergencyContact);
     }
