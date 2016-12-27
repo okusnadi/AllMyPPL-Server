@@ -115,7 +115,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     } else {
       twiml.say("Dialing your emergency contact now.");
 
-      twiml.dial("650-961-1902",{ callerId : "+16502062610", timeout : 10 });
+      twiml.dial(emergencyContact.get('phone'),{ callerId : "+16502062610" });
 
       return Parse.Promise.as(emergencyContact);
     }
