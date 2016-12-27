@@ -6,9 +6,10 @@ var Parse = require('parse/node');
     Parse.initialize(process.env.APP_ID);
     Parse.serverURL = process.env.SERVER_URL;
 
-    var user = new Parse.User();
+    var user;
 
 router.post('/', twilio.webhook({validate: false}), function(request, response) {
+  user = new Parse.User();
   var twiml = new twilio.TwimlResponse();
   twiml.redirect('/voice/welcome');
       response.type('text/xml');
@@ -99,7 +100,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Welcome, "+user.get('username')+".",{voice: 'alice'});
+  twiml.say("Welcome, "+Parse.User.current().get('username')+".",{voice: 'alice'});
 
   twiml.redirect('/voice/hangup');
 
@@ -117,6 +118,9 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
       response.type('text/xml');
       response.send(twiml.toString());
+
+  Parse.User.logOut();
+
 });
 
 module.exports = router;
