@@ -16,6 +16,7 @@
  }
 
 Parse.Cloud.beforeSave("Contact", (req, res) => {
+  console.log("beforeSave triggered on Contact ",req.object.toJSON(),"user",req.user.toJSON());
   const obj = req.object;
   obj.set('nameLowercase', obj.get("name").toLowerCase());
   res.success();
