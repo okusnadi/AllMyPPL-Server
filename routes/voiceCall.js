@@ -47,6 +47,8 @@ router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function
 
   var input = request.body.Digits;
 
+  console.log('Digits entered: '+request.body.Digits);
+
   var twiml = new twilio.TwimlResponse();
 
   user.set('username',input);
@@ -80,6 +82,8 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
 router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(request, response){
 
   var input = request.body.Digits;
+  
+  console.log('Digits entered: '+request.body.Digits);
 
   var twiml = new twilio.TwimlResponse();
 
