@@ -221,13 +221,17 @@ app.post('/smsReceived', function(req, res) {
                     console.log("emergencyContact detected");
                     console.log(JSON.stringify(emergencyContact));
                     emergencyContact.set("isEmergencyContact",false);
-                    emergencyContact.save({sessionToken:commandData.user.getSessionToken()}).then(function(saved){
+                    emergencyContact.save(null, {sessionToken:commandData.user.getSessionToken()}).then(function(saved){
                       console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
                       resultData.result = saved;
                       commandPromise.resolve(resultData);
+                    },function (error) {
+                      console.log("save of object failed, "+error.code+" : "+error.message+" "+commandData.contactId);
+                      commandPromise.reject(new Parse.Error(error.code,error.message));
                     });
                   }
                 }, function(error) {
+                  console.log("error occurred when checking for emergencyContactQuery "+error.code+" "+error.message);
                   commandPromise.reject(new Parse.Error(error.code,error.message));
                 });
             } else {
