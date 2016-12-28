@@ -1,9 +1,27 @@
-/*
- * this beforeSave handler duplicates the name field in a duplicate but lowercase field
- * called nameLowercase, this gives something that can be case-insensitive searched against
- * as Parse doesn't provide a way to query case-insensitive,
- * as its too costly without a prepared field.  Calling res.success() is required.
- */
+/* Parse.Object class extension example
+// A complex subclass of Parse.Object
+var Monster = Parse.Object.extend("Monster", {
+  // Instance methods
+  hasSuperHumanStrength: function () {
+    return this.get("strength") > 18;
+  },
+  // Instance properties go in an initialize method
+  initialize: function (attrs, options) {
+    this.sound = "Rawr"
+  }
+}, {
+  // Class methods
+  spawn: function(strength) {
+    var monster = new Monster();
+    monster.set("strength", strength);
+    return monster;
+  }
+});
+
+var monster = Monster.spawn(200);
+alert(monster.get('strength'));  // Displays 200.
+alert(monster.sound); // Displays Rawr.
+*/
 
 
  function validateEmail(email) {
@@ -16,20 +34,26 @@
      return re.test(username);
  }
 
+
+ /*
+  * text({Body:"",To:"",From:""})
+  * sends a message via twilio
+  */
+
+
 Parse.Cloud.define('text', (req,res) => {
+
+   const Body = req.params.Body;
+   const To = req.params.To;
+   const From = req.params.From;
+   const accountSid = process.env.TWILIO_ACCOUNT_SID; // Your Account SID from www.twilio.com/console
+   const authToken = process.env.TWILIO_AUTH_TOKEN;   // Your Auth Token from www.twilio.com/console
+
+   var twilio = require('twilio');
+   var client = new twilio.RestClient(accountSid, authToken);
 
    if (!req.params.Body || !req.params.To || !req.params.From) { res.error(new Parse.Error(Parse.Error.SCRIPT_ERROR,'When calling, req.params must be {Body:"",To:"",From:""}.')); }
    else {
-     const Body = req.params.Body;
-     const To = req.params.To;
-     const From = req.params.From;
-
-     const accountSid = process.env.TWILIO_ACCOUNT_SID; // Your Account SID from www.twilio.com/console
-     const authToken = process.env.TWILIO_AUTH_TOKEN;   // Your Auth Token from www.twilio.com/console
-
-     var twilio = require('twilio');
-     var client = new twilio.RestClient(accountSid, authToken);
-
      client.messages.create({
          body: Body,
          to: To,
@@ -41,6 +65,14 @@ Parse.Cloud.define('text', (req,res) => {
    }
 
 });
+
+
+/*
+ * this beforeSave handler duplicates the name field in a duplicate but lowercase field
+ * called nameLowercase, this gives something that can be case-insensitive searched against
+ * as Parse doesn't provide a way to query case-insensitive,
+ * as its too costly without a prepared field.  Calling res.success() is required.
+ */
 
 Parse.Cloud.beforeSave("Contact", (req, res) => {
 
@@ -54,6 +86,11 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
   else {console.log("beforeSave triggered on Contact ",obj.toJSON()); obj.set('nameLowercase', obj.get("name").toLowerCase()); res.success();}
 
 });
+
+/*
+ * this beforeSave handler performs field validation on the email and username fields.
+ */
+
 
 Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
