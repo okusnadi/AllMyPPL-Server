@@ -211,7 +211,7 @@ app.post('/smsReceived', function(req, res) {
                     contactIdQuery.get(commandData.contactId,{sessionToken:commandData.user.getSessionToken()}).then(function(contact){
                       console.log("contactIdQuery.get happened");
                       if (!contact) {console.log(commandData.contactId+" did not return a contact."); commandPromise.reject(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,commandData.contactId+" did not return a contact."));}
-                      else {console.log(contact.id); contact.set("isEmergencyContact",true); contact.save({sessionToken:commandData.user.getSessionToken();}).then(function(saved){resultData.result = saved; commandPromise.resolve(resultData);},function(error){console.log("saving object failed."); commandPromise.reject(new Parse.Error(error.code,error.message));});}
+                      else {console.log(contact.id); contact.set("isEmergencyContact",true); contact.save({sessionToken:commandData.user.getSessionToken()}).then(function(saved){console.log("saved object ",saved.toJSON()); resultData.result = saved; commandPromise.resolve(resultData);},function(error){console.log("saving object failed."); commandPromise.reject(new Parse.Error(error.code,error.message));});}
                     },function(error) {
                       console.log("contactIdQuery.get failed, "+error.code+" : "+error.message+" "+commandData.contactId);
                       commandPromise.reject(new Parse.Error(error.code,error.message));
