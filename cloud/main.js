@@ -16,10 +16,16 @@
  }
 
 Parse.Cloud.beforeSave("Contact", (req, res) => {
-  console.log("beforeSave triggered on Contact ",req.object.toJSON(),"user",req.user.toJSON());
+
   const obj = req.object;
-  obj.set('nameLowercase', obj.get("name").toLowerCase());
-  res.success();
+  const user = req.user
+
+  if (user) {console.log("user",user.toJSON());}
+  else {console.log("no req.user");}
+
+  if (!req.object) {console.log("no object passed in, aborting..."); res.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"No req.object found."));}
+  else {console.log("beforeSave triggered on Contact ",req.object.toJSON()); obj.set('nameLowercase', obj.get("name").toLowerCase()); res.success();}
+
 });
 
 Parse.Cloud.beforeSave(Parse.User, (req, res) => {
