@@ -131,14 +131,6 @@ app.post('/smsReceived', function(req, res) {
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
-    var testUsername = function(username) {
-      return (testStringIsDigits(username) && username.length == 10);
-    }
-
-    var testPassword = function(password) {
-      return (testStringIsDigits(password) && password.length == 4);
-    }
-
     var testStringIsDigits = function(string) {
         var re = /^\d+$/;
         return re.test(string);
@@ -146,9 +138,9 @@ app.post('/smsReceived', function(req, res) {
 
     if (enteredCommand == "signup") {
       var user = new Parse.User();
-      if (!testUsername(wordList[0])) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must be your verified phone number and must consist of only numbers and must be 10 digits in length."));}
+      if (!testStringIsDigits(wordList[0]) || username.length != 10) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Your username should be your phone number, it must be a verifiable phone number consisting of only numbers and be 10 digits in length."));}
       user.set("username", wordList[0].toLowerCase());
-      if (!testPassword(wordList[1])) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
+      if (!testStringIsDigits(wordList[1]) || password.length != 4) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
       user.set("password", wordList[1]);
       user.set("email", wordList[3] ? wordList[3].toLowerCase() : "");
       return user.signUp(null);
