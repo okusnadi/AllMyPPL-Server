@@ -80,6 +80,8 @@ app.use('/public', express.static(path.join(__dirname, '/public')));
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 
+app.use(bodyParser.urlencoded({extended:true}));
+
 // Twilio Webhook routes
 app.use('/voice', voice);
 
@@ -90,8 +92,9 @@ app.get('/', function(req, res) {
 
 app.post('/smsReceived', function(req, res) {
 
-res.status(200).send(JSON.stringify(req.body));
+  res.status(200).send(JSON.stringify(req.body));
   console.log(JSON.stringify(req.body));
+
   var allMyPPLPhoneNumber = '+16502062610';
   var latestMessage = {};
 
