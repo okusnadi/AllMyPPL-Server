@@ -209,9 +209,10 @@ app.post('/smsReceived', function(req, res) {
 
                     var contactIdQuery = new Parse.Query(Contact);
                     contactIdQuery.get(commandData.contactId).then(function(contact){
-                      if (!contact) {console.error(commandData.contactId+" did not return a contact."); commandPromise.reject(new Parse.Error(error.code,error.message));}
-                      else {console.log(contact.toJSON()); resultData.result = contact; commandPromise.resolve(resultData);}
-                    })
+                      console.log("contactIdQuery.get happened");
+                      if (!contact) {console.log(commandData.contactId+" did not return a contact."); commandPromise.reject(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,commandData.contactId+" did not return a contact."));}
+                      else {console.log(contact.id); resultData.result = contact; commandPromise.resolve(resultData);}
+                    });
 
                   } else {
                     console.log("emergencyContact detected");
