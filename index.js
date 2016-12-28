@@ -202,47 +202,31 @@ app.post('/smsReceived', function(req, res) {
             if (commandData.contactCommand == "set") {
               console.log("contact set detected.");
               emergencyContactQuery.equalTo("isEmergencyContact",true);
-              emergencyContactQuery.first().then(
-                function(emergencyContact) {
+              emergencyContactQuery.first().then(function(emergencyContact) {
                   if (!emergencyContact) {
                     console.log("no contact to unset");
                     console.log("contactId "+commandData.contactId);
                   } else {
-                  console.log("emergencyContact detected");
-                  console.log(JSON.stringify(emergencyContact));
-                  emergencyContact.set("isEmergencyContact",false);
-                  emergencyContact.save().then(function(saved){
-                    console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
-                    resultData.result = saved;
-                    commandPromise.resolve(resultData);
-                  };
-                }
-                  /*
-                  var contactUIDQuery = new Parse.Query(Contact);
-                  return contactUIDQuery.get(commandData.contactId);
-                }).then(function (contact) {
-                  console.log(JSON.stringify(contact));
-                  contact.set("isEmergencyContact",true);
-                  return contact.save();
-                }).then(function(saved) {
-                  console.log("isEmergencyContact set on object "+JSON.stringify(saved));
-                  resultData.result = saved;
-                  commandPromise.resolve(resultData);*/
+                    console.log("emergencyContact detected");
+                    console.log(JSON.stringify(emergencyContact));
+                    emergencyContact.set("isEmergencyContact",false);
+                    emergencyContact.save().then(function(saved){
+                      console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
+                      resultData.result = saved;
+                      commandPromise.resolve(resultData);
+                    });
+                  }
                 }, function(error) {
                   commandPromise.reject(new Parse.Error(error.code,error.message));
                 });
             } else {
-              emergencyContactQuery.equalTo("isEmergencyContact",true);
-              emergencyContactQuery.first().then(
-                function(emergencyContact) {
-                  console.log(JSON.stringify(emergencyContact));
+                emergencyContactQuery.equalTo("isEmergencyContact",true);
+                emergencyContactQuery.first().then(function(emergencyContact) {
+                  if (!emergencyContact) { console.error("No emergencyContact found.")}
+                  else { console.log(JSON.stringify(emergencyContact)); }
                   resultData.result = emergencyContact;
                   commandPromise.resolve(resultData);
-                },
-                function(error) {
-                  commandPromise.reject(new Parse.Error(error.code,error.message));
-                }
-              );
+                });
             }
             break;
       case "add":
