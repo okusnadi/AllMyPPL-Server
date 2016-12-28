@@ -60,7 +60,7 @@ Parse.Cloud.define('text', (req,res) => {
          from: From
      }, function(err, message) {
          if(err) { res.error(new Parse.Error(err.code, err.message)); }
-         else { res.success("Sent message with Body: '",Body,"', To:'",To,"', From:",From); }
+         else { res.success("Sent message with Body: '"+Body+"', To:'"+To+"', From:"+From); }
      });
    }
 

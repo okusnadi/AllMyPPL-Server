@@ -92,7 +92,7 @@ app.get('/', function(req, res) {
 
 app.post('/smsReceived', function(req, res) {
 
-  res.status(200).send(JSON.stringify(req.body));
+  res.status(200).send();
   console.log(JSON.stringify(req.body));
 
   var allMyPPLPhoneNumber = '+16502062610';
