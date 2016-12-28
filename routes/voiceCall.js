@@ -142,7 +142,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People prior to calling.");
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People prior to calling.",{voice: 'alice'});
 
     twiml.redirect('/voice/goodbye');
 
