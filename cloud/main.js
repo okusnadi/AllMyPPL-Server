@@ -10,6 +10,15 @@
      return re.test(email);
  }
 
+ function validateUsername(username) {
+   return (validateUsernameIsDigits(username) && username.length == 10);
+ }
+
+ function validateUsernameIsDigits(username) {
+     var re = /^\d+$/;
+     return re.test(username);
+ }
+
 Parse.Cloud.beforeSave("Contact", (req, res) => {
   const obj = req.object;
   obj.set('nameLowercase', obj.get("name").toLowerCase());
@@ -21,6 +30,6 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const user = req.user;
 
   if (obj.get('email') && !validateEmail(obj.get('email'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
-  else if (obj.get('username').toLowerCase() != obj.get('username')) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must be only lower case letters."));}
+  else if (!validateUsername(obj.get('username'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must consist of only numbers and be 10 digits in length."));}
   else {res.success();}
 });

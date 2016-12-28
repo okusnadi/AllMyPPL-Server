@@ -121,7 +121,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-      twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".",{voice: 'alice'});
+      twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".  Connecting you now.",{voice: 'alice'});
 
       var number = emergencyContact.get('phone');
 
@@ -137,8 +137,6 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
       response.type('text/xml');
       response.send(twiml.toString());
 
-      user = undefined;
-
     },function(error) {
     console.error(error.code+" : "+error.message);
 
@@ -153,9 +151,6 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
 router.post('/goodbye', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
-
-
-  user = undefined;
 
   var twiml = new twilio.TwimlResponse();
 
@@ -176,6 +171,9 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
   response.type('text/xml');
   response.send(twiml.toString());
+
+  user = undefined;
+
 });
 
 module.exports = router;
