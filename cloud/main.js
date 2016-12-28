@@ -5,6 +5,7 @@
  * as its too costly without a prepared field.  Calling res.success() is required.
  */
 
+
  function validateEmail(email) {
      var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
      return re.test(email);
@@ -14,6 +15,32 @@
      var re = /^\d+$/;
      return re.test(username);
  }
+
+Parse.Cloud.define('text', (req,res) => {
+
+   if (!req.params.Body && ! ) { res.error(new Parse.Error(Parse.Error(Parse.Error.SCRIPT_ERROR,'When calling, req.params must be {Body:"",To:"",From:""}.')); }
+   else {
+     const Body = req.params.Body;
+     const To = req.params.To;
+     const From = req.params.From;
+
+     const accountSid = process.env.TWILIO_ACCOUNT_SID; // Your Account SID from www.twilio.com/console
+     const authToken = process.env.TWILIO_AUTH_TOKEN;   // Your Auth Token from www.twilio.com/console
+
+     var twilio = require('twilio');
+     var client = new twilio.RestClient(accountSid, authToken);
+
+     client.messages.create({
+         body: Body,
+         to: To,
+         from: From
+     }, function(err, message) {
+         if(err) { res.error(new Parse.Error(err.code, err.message)); }
+         else { res.success("Sent message with Body: '",Body,"', To:'",To,"', From:",From); }
+     });
+   }
+
+});
 
 Parse.Cloud.beforeSave("Contact", (req, res) => {
 
