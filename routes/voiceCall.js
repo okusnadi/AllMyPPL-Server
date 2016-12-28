@@ -127,7 +127,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
       console.log(JSON.stringify(request.body));
 
-      twiml.dial(number, { callerId : user.get('username'), timeout: 30 });
+      twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
 
       return Parse.Promise.as(emergencyContact);
     }
@@ -136,7 +136,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
       response.type('text/xml');
       response.send(twiml.toString());
-      
+
       user = undefined;
 
     },function(error) {
@@ -151,11 +151,13 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
   });
 });
 
-router.post('/voice/goodbye', twilio.webhook({validate:false}), function(request, response){
+router.post('/goodbye', twilio.webhook({validate:false}), function(request, response){
   console.log(JSON.stringify(request.body));
 
-  var twiml = new twilio.TwimlResponse();
 
+  user = undefined;
+
+  var twiml = new twilio.TwimlResponse();
 
   twiml.say("Thank you for using all my people. Goodbye.",{voice:'alice'});
 
@@ -174,8 +176,6 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
   response.type('text/xml');
   response.send(twiml.toString());
-
-  user = undefined;
 });
 
 module.exports = router;
