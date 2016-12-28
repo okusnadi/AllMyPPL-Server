@@ -220,7 +220,7 @@ app.post('/smsReceived', function(req, res) {
                   } else {
                     console.log("emergencyContact detected");
                     console.log(JSON.stringify(emergencyContact));
-                    emergencyContact.set("isEmergencyContact",false);
+                    emergencyContact.unset("isEmergencyContact");
                     emergencyContact.save(null, {sessionToken:commandData.user.getSessionToken()}).then(function(saved){
                       console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
                       resultData.result = saved;
