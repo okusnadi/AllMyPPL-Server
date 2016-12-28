@@ -18,7 +18,7 @@
 
 Parse.Cloud.define('text', (req,res) => {
 
-   if (!req.params.Body && ! ) { res.error(new Parse.Error(Parse.Error(Parse.Error.SCRIPT_ERROR,'When calling, req.params must be {Body:"",To:"",From:""}.')); }
+   if (!req.params.Body || !req.params.To || !req.params.From) { res.error(new Parse.Error(Parse.Error(Parse.Error.SCRIPT_ERROR,'When calling, req.params must be {Body:"",To:"",From:""}.')); }
    else {
      const Body = req.params.Body;
      const To = req.params.To;
