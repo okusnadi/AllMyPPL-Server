@@ -93,7 +93,7 @@ app.post('/smsReceived', function(req, res) {
 res.status(200).send(JSON.stringify(req.body));
   console.log(JSON.stringify(req.body));
   var allMyPPLPhoneNumber = '+16502062610';
-  var latestMessage = {}; 
+  var latestMessage = {};
 
   Parse.Promise.as().then(function(){
     var twilioListSmsPromise = new Parse.Promise();
@@ -102,10 +102,8 @@ res.status(200).send(JSON.stringify(req.body));
         to: allMyPPLPhoneNumber
     }, function(err, responseData) {
         if (!err) {
-            res.status(200).send(responseData.sms_messages[0]);
         twilioListSmsPromise.resolve(responseData.sms_messages[0]);
       } else {
-        res.status(404).send(err);
         twilioListSmsPromise.reject(err);
       }
     });
