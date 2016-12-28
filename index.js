@@ -97,25 +97,6 @@ app.post('/smsReceived', function(req, res) {
   res.status(200).send(JSON.stringify(req.body));
   console.log(JSON.stringify(req.body));
 
-  // take the info from req.body and reply with the first word from a parsed list
-  twilio.sendMessage({
-
-            to: req.body.From, // Any number Twilio can deliver to
-            from: req.body.To, // A number you bought from Twilio and can use for outbound communication
-            body: req.body.Body.split(" ")[0] // body of the SMS message
-
-  }, function(err, responseData) { //this function is executed when a response is received from Twilio
-
-            if (!err) {
-              console.log("Successfully sent sms to " + req.body.From + ". responseData: " + responseData);
-            } else {
-              console.error("Could not send sms to " + req.body.From + ". 1st Word: '"+req.body.Body.split(" ")[0]+"'. Error: \"" + err);
-            }
-
-  });
-
-  /*
-
   Parse.Promise.as().then(function(){
     var twilioListSmsPromise = new Parse.Promise();
 
@@ -150,9 +131,24 @@ app.post('/smsReceived', function(req, res) {
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
+    var testUsername = function(username) {
+      return (testStringIsDigits(username) && username.length == 10);
+    }
+
+    var testPassword = function(password) {
+      return (testStringIsDigits(password) && password.length == 4);
+    }
+
+    var testStringIsDigits = function(string) {
+        var re = /^\d+$/;
+        return re.test(string);
+    }
+
     if (enteredCommand == "signup") {
       var user = new Parse.User();
+      if (!testUsername(wordList[0])) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must be your verified phone number and must consist of only numbers and must be 10 digits in length."));}
       user.set("username", wordList[0].toLowerCase());
+      if (!testPassword(wordList[1])) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
       user.set("password", wordList[1]);
       user.set("email", wordList[3] ? wordList[3].toLowerCase() : "");
       return user.signUp(null);
@@ -574,7 +570,7 @@ app.post('/smsReceived', function(req, res) {
                   }
         });
       });
-      */
+
 });
 
 var port = process.env.PORT || 1337;
