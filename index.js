@@ -10,6 +10,8 @@ var path = require('path');
 var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountSid", process.env.TWILIO_AUTH_TOKEN || "twilioAuthToken");
 var http = require('http');
 var querystring = require('querystring');
+var bodyParser = require('body-parser');
+var voice = require('./routes/voiceCall');
 
 var databaseUri = process.env.DATABASE_URI || process.env.MONGODB_URI;
 
@@ -78,6 +80,9 @@ app.use('/public', express.static(path.join(__dirname, '/public')));
 var mountPath = process.env.PARSE_MOUNT || '/parse';
 app.use(mountPath, api);
 
+// Twilio Webhook routes
+app.use('/voice', voice);
+
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
   res.status(200).send('<html style="display:table;width:100%;height:100%;text-align:center;"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style=" display:table-cell; vertical-align: middle; width:auto; height:100%; margin: auto; padding:auto; background: url(./public/assets/images/AppIcon.png) bottom left no-repeat; background-size:50% 100%;"><div style="width: 200px;height: 250px;text-align: top;padding: 1em;margin: auto;margin-right: 5%; border-width:5px; border-style:solid; border-radius: 300px;background: rgba(0, 0, 0, 0.15) border-box;"><p><a href="mailto:support@allmyppl.com?subject=I%20have%20some%20questions,%20comments,%20concerns%20or%20feedback%20about%20AllMyPPL&amp;body=I%20have%20a%20question%20or%20am%20confused%20about...%0A%0A%0A%0AI%20take%20issue%20with...%0A%0A%0A%0AHave%20you%20thought%20about...%0A%0A%0A%0AI%20really%20like....%0A%0A">Contact<br>AllMyPPL Support<br>By Email</a></p><p style="">For contact retrieval and management through text messaging, send a friendly greeting to our automated attendant at the number below.</p><p><a id="allMyPPLPhoneNumber" href="">+1 (650) 206-2610</a></p></div><script type="text/javascript">if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {document.getElementById("allMyPPLPhoneNumber").href = "sms:+16502062610";} else {document.getElementById("allMyPPLPhoneNumber").href=""}</script></body></html>');
@@ -85,8 +90,10 @@ app.get('/', function(req, res) {
 
 app.post('/smsReceived', function(req, res) {
 
+res.status(200).send(JSON.stringify(req.body));
+  console.log(JSON.stringify(req.body));
   var allMyPPLPhoneNumber = '+16502062610';
-  var latestMessage = {}; // needed in multiple steps
+  var latestMessage = {}; 
 
   Parse.Promise.as().then(function(){
     var twilioListSmsPromise = new Parse.Promise();
@@ -124,9 +131,16 @@ app.post('/smsReceived', function(req, res) {
     var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
+    var testStringIsDigits = function(string) {
+        var re = /^\d+$/;
+        return re.test(string);
+    }
+
     if (enteredCommand == "signup") {
       var user = new Parse.User();
+      if (!testStringIsDigits(wordList[0]) || username.length != 10) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Your username should be your phone number, it must be a verifiable phone number consisting of only numbers and be 10 digits in length."));}
       user.set("username", wordList[0].toLowerCase());
+      if (!testStringIsDigits(wordList[1]) || password.length != 4) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
       user.set("password", wordList[1]);
       user.set("email", wordList[3] ? wordList[3].toLowerCase() : "");
       return user.signUp(null);
