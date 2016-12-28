@@ -1,5 +1,3 @@
-'use strict';
-
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
 
@@ -75,8 +73,6 @@ Parse.masterKey = process.env.MASTER_KEY || "masterKey";
 
 var app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-
 // Serve static assets from the /public folder
 app.use('/public', express.static(path.join(__dirname, '/public')));
 
@@ -94,8 +90,10 @@ app.get('/', function(req, res) {
 
 app.post('/smsReceived', function(req, res) {
 
-  res.status(200).send(JSON.stringify(req.body));
+res.status(200).send(JSON.stringify(req.body));
   console.log(JSON.stringify(req.body));
+  var allMyPPLPhoneNumber = '+16502062610';
+  var latestMessage = {}; 
 
   Parse.Promise.as().then(function(){
     var twilioListSmsPromise = new Parse.Promise();
@@ -104,8 +102,10 @@ app.post('/smsReceived', function(req, res) {
         to: allMyPPLPhoneNumber
     }, function(err, responseData) {
         if (!err) {
-            twilioListSmsPromise.resolve(responseData.sms_messages[0]);
+            res.status(200).send(responseData.sms_messages[0]);
+        twilioListSmsPromise.resolve(responseData.sms_messages[0]);
       } else {
+        res.status(404).send(err);
         twilioListSmsPromise.reject(err);
       }
     });
