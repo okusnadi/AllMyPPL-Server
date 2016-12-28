@@ -96,27 +96,9 @@ app.post('/smsReceived', function(req, res) {
   console.log(JSON.stringify(req.body));
 
   var allMyPPLPhoneNumber = '+16502062610';
-  var latestMessage = {};
+  var wordList = req.body.Body.split(" ");
 
   Parse.Promise.as().then(function(){
-    var twilioListSmsPromise = new Parse.Promise();
-
-    twilio.listSms({
-        to: allMyPPLPhoneNumber
-    }, function(err, responseData) {
-        if (!err) {
-        twilioListSmsPromise.resolve(responseData.sms_messages[0]);
-      } else {
-        twilioListSmsPromise.reject(err);
-      }
-    });
-
-    return twilioListSmsPromise;
-  }).then( function(latestMsg){
-    latestMessage = latestMsg;
-
-    var wordList = latestMessage.body.split(" ");
-
     if (wordList.length < 2) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,"Welcome to AllMyPPL, you can signup with us by texting back 'USERNAME PASSWORD signup EMAIL_ADDRESS' with the capitalized fields replaced with your own choice of username, etc.  You'll see strings that look like that often in our instructions, so remember to replace the capitalized fields with your information.  When texting in to AllMyPPL, nothing is case-sensitive except your password, and the unique ids used in contact editing and deletion.  The next steps are signing up with the service or logging in to your existing account, to sign up with AllMyPPL, text in your desired account information followed by 'signup' and then your email, so to signup text 'USERNAME PASSWORD signup EMAIL_ADDRESS'.  To log in to an existing account just text your 'USERNAME PASSWORD' followed by a command if you choose like 'menu', but you'll already be greeted by the main menu when you log in."));
     } else {
@@ -129,7 +111,6 @@ app.post('/smsReceived', function(req, res) {
     }
 
   }).then(function(userData) {
-    var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
     var testStringIsDigits = function(string) {
@@ -151,7 +132,6 @@ app.post('/smsReceived', function(req, res) {
 
   }).then(function(user) {
 
-    var wordList = latestMessage.body.split(" ");
     var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
     console.log("user " + user.id + " logged in");
@@ -207,7 +187,6 @@ app.post('/smsReceived', function(req, res) {
 
   }).then(function(commandData) {
     var commandPromise = new Parse.Promise();
-    var wordList = latestMessage.body.split(" ");
 
     var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
     var resultData = {results:[], result:{}, command: commandData.command, user: commandData.user};
@@ -325,7 +304,6 @@ app.post('/smsReceived', function(req, res) {
       // {command: enteredCommand, contactId:wordList[3], user: user}
         var Contact = Parse.Object.extend("Contact");
         var query = new Parse.Query(Contact);
-        var wordList = latestMessage.body.split(" ");
 
         console.log(wordList[3] + " " + commandData.contactId);
         if (wordList[3] == "CssnYynVKw") {
@@ -398,7 +376,6 @@ app.post('/smsReceived', function(req, res) {
   }).then(function(resultData) {
       // resultData == {results:[], result:{}, command: commandData.command, user: commandData.user}
       var resultPromise = new Parse.Promise();
-      var wordList = latestMessage.body.split(" ");
 
       var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
@@ -590,7 +567,7 @@ app.post('/smsReceived', function(req, res) {
 
             to: req.body.From, // Any number Twilio can deliver to
             from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + latestMessage.body.split(" ")[4] + "\" : '" + resultData.result.get(latestMessage.body.split(" ")[4]) + "'."
+            body: "Contact " + resultData.result.get("phone") + " \"" + resultData.result.get("name") + "\" updated with \"" + req.body.Body.split(" ")[4] + "\" : '" + resultData.result.get(req.body.Body.split(" ")[4]) + "'."
 
           }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
