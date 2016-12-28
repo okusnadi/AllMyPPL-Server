@@ -206,6 +206,13 @@ app.post('/smsReceived', function(req, res) {
                   if (!emergencyContact) {
                     console.log("no contact to unset");
                     console.log("contactId "+commandData.contactId);
+
+                    var contactIdQuery = new Parse.Query(Contact);
+                    contactIdQuery.get(commandData.contactId).then(function(contact){
+                      if (!contact) {console.error(commandData.contactId+" did not return a contact."); commandPromise.reject(new Parse.Error(error.code,error.message));}
+                      else {console.log(contact.toJSON()); resultData.result = contact; commandPromise.resolve(resultData);}
+                    })
+
                   } else {
                     console.log("emergencyContact detected");
                     console.log(JSON.stringify(emergencyContact));
