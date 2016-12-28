@@ -26,6 +26,6 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const user = req.user;
 
   if (obj.get('email') && !validateEmail(obj.get('email'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
-  else if (obj.get('username').length != 10 && !validateUsernameIsDigits(obj.get('username'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must consist of only numbers and be 10 digits in length."));}
+  else if (obj.get('username').length != 10 || !validateUsernameIsDigits(obj.get('username'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Usernames must consist of only numbers and be 10 digits in length."));}
   else {res.success();}
 });
