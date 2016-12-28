@@ -220,7 +220,8 @@ app.post('/smsReceived', function(req, res) {
       case "contact":
             var Contact = Parse.Object.extend("Contact");
             var emergencyContactQuery = new Parse.Query(Contact);
-            if (commandData.enteredContactCommand == "set") {
+            if (commandData.contactCommand == "set") {
+              console.log("contact set detected.");
               emergencyContactQuery.equalTo("isEmergencyContact",true);
               emergencyContactQuery.first().then(
                 function(emergencyContact) {
@@ -322,7 +323,7 @@ app.post('/smsReceived', function(req, res) {
 
         console.log(wordList[3] + " " + commandData.contactId);
         if (wordList[3] == "CssnYynVKw") {
-          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"That contact cannot be edited or deleted."))
+          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"The AllMyPPL contact is intended to demonstrate, it cannot be edited or deleted."))
         } else {
             query.get(wordList[3], {sessionToken:commandData.user.getSessionToken()}).then(function (result) {
 
@@ -435,7 +436,7 @@ app.post('/smsReceived', function(req, res) {
 
                   to: req.body.From, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: "Could not find resultData.result."
+                  body: "You do not currently have an Emergency Contact set, to set one, text back 'USERNAME PASSWORD contact set CONTACT-UID.'"
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                   if (!err) {
