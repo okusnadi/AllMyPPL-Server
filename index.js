@@ -225,14 +225,20 @@ app.post('/smsReceived', function(req, res) {
               emergencyContactQuery.equalTo("isEmergencyContact",true);
               emergencyContactQuery.first().then(
                 function(emergencyContact) {
+                  if (!emergencyContact) {
+                    console.log("no contact to unset");
+                    console.log("contactId "+commandData.contactId);
+                  } else {
+                  console.log("emergencyContact detected");
                   console.log(JSON.stringify(emergencyContact));
                   emergencyContact.unset("isEmergencyContact");
                   emergencyContact.save().then(function(saved){
                     console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
                     resultData.result = saved;
                     commandPromise.resolve(resultData);
-                  });
-/*
+                  };
+                }
+                  /*
                   var contactUIDQuery = new Parse.Query(Contact);
                   return contactUIDQuery.get(commandData.contactId);
                 }).then(function (contact) {
@@ -244,7 +250,7 @@ app.post('/smsReceived', function(req, res) {
                   resultData.result = saved;
                   commandPromise.resolve(resultData);*/
                 }, function(error) {
-                  commandPromise.reject(error);
+                  commandPromise.reject(new Parse.Error(error.code,error.message));
                 });
             } else {
               emergencyContactQuery.equalTo("isEmergencyContact",true);
@@ -255,7 +261,7 @@ app.post('/smsReceived', function(req, res) {
                   commandPromise.resolve(resultData);
                 },
                 function(error) {
-                  commandPromise.reject(error);
+                  commandPromise.reject(new Parse.Error(error.code,error.message));
                 }
               );
             }
