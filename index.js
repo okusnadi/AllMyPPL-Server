@@ -224,21 +224,24 @@ app.post('/smsReceived', function(req, res) {
               emergencyContactQuery.equalTo("isEmergencyContact",true);
               emergencyContactQuery.first().then(
                 function(emergencyContact) {
-                  resultData.result = emergencyContact;
+                  console.log(JSON.stringify(emergencyContact));
                   emergencyContact.unset("isEmergencyContact");
                   emergencyContact.save().then(function(saved){
                     console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
+                    resultData.result = saved;
+                    commandPromise.resolve(resultData);
                   });
-
+/*
                   var contactUIDQuery = new Parse.Query(Contact);
                   return contactUIDQuery.get(commandData.contactId);
                 }).then(function (contact) {
+                  console.log(JSON.stringify(contact));
                   contact.set("isEmergencyContact",true);
                   return contact.save();
                 }).then(function(saved) {
                   console.log("isEmergencyContact set on object "+JSON.stringify(saved));
                   resultData.result = saved;
-                  commandPromise.resolve(resultData);
+                  commandPromise.resolve(resultData);*/
                 }, function(error) {
                   commandPromise.reject(error);
                 });
@@ -246,6 +249,7 @@ app.post('/smsReceived', function(req, res) {
               emergencyContactQuery.equalTo("isEmergencyContact",true);
               emergencyContactQuery.first().then(
                 function(emergencyContact) {
+                  console.log(JSON.stringify(emergencyContact));
                   resultData.result = emergencyContact;
                   commandPromise.resolve(resultData);
                 },
@@ -411,6 +415,7 @@ app.post('/smsReceived', function(req, res) {
            resultPromise.resolve(resultData);
            break;
         case "contact":
+          if (resultData.result){
           twilio.sendMessage({
 
                     to: req.body.From, // Any number Twilio can deliver to
@@ -425,6 +430,21 @@ app.post('/smsReceived', function(req, res) {
                       console.error("Could not send sms to " + req.body.From + ". Error: \"" + err);
                     }
           });
+        } else {
+        twilio.sendMessage({
+
+                  to: req.body.From, // Any number Twilio can deliver to
+                  from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                  body: "Could not find resultData.result."
+        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+                  if (!err) {
+                    console.log("Successfully sent sms to " + req.body.From + ". Body: " + responseData);
+                  } else {
+                    console.error("Could not send sms to " + req.body.From + ". Error: \"" + err);
+                  }
+        });
+        }
           break;
         case "signup":
             twilio.sendMessage({
