@@ -231,7 +231,7 @@ app.post('/smsReceived', function(req, res) {
                   } else {
                   console.log("emergencyContact detected");
                   console.log(JSON.stringify(emergencyContact));
-                  emergencyContact.unset("isEmergencyContact");
+                  emergencyContact.set("isEmergencyContact",false);
                   emergencyContact.save().then(function(saved){
                     console.log("isEmergencyContact unset on object "+JSON.stringify(saved));
                     resultData.result = saved;
