@@ -1,11 +1,11 @@
 {
   "name": "AllMyPPL",
-  "version": "1.0.0",
-  "description": "A text message based contact storage service",
+  "version": "0.0.1",
+  "description": "The server of www.allmyppl.com",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/apatrickstar/AllMyPeople-Server"
+    "url": "https://github.com/apatrickstar/AllMyPPL-Server"
   },
   "license": "MIT",
   "dependencies": {
