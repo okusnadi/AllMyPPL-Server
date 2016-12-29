@@ -403,7 +403,7 @@ app.post('/smsReceived', function(req, res) {
 
                     to: req.body.From, // Any number Twilio can deliver to
                     from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                    body: "Your Emergency Contact is currently...\n\nName: "+resultData.result.get("name")+"\nPhone: "+resultData.result.get("phone")+"\n\nTo change your current Emergency Contact, text back 'USERNAME PASSWORD contact set CONTACT-UID'."
+                    body: "Your Emergency Contact is currently...\n\nName: "+resultData.result.get("name")+"\nPhone: "+resultData.result.get("phone")+"\nUID: "+resultData.result.id+"\n\nTo change your current Emergency Contact, text back 'USERNAME PASSWORD contact set CONTACT-UID'."
 
           }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
