@@ -449,7 +449,7 @@ app.post('/smsReceived', function(req, res) {
 
                   to: req.body.From, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: "You do not currently have an Emergency Contact set, to set one, text back 'YOUR_PHONE YOUR_PIN contact set CONTACT-UID.' to set one."
+                  body: "You do not currently have an Emergency Contact set, to set one, text back 'YOUR_PHONE YOUR_PIN contact set CONTACT-UID.'."
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                   if (!err) {
