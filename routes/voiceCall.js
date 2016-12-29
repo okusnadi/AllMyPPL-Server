@@ -3,7 +3,7 @@ var router = express.Router();
 var twilio = require('twilio');
 var Parse = require('parse/node');
 
-    Parse.initialize(process.env.APP_ID);
+    Parse.initialize(process.env.App_ID);
     Parse.serverURL = process.env.SERVER_URL;
 
     var user;
@@ -19,7 +19,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To All My People.", { voice: 'alice'});;
+    twiml.say("Welcome To All My People Emergency Caller.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -82,7 +82,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
 router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(request, response){
 
   var input = request.body.Digits;
-  
+
   console.log('Digits entered: '+request.body.Digits);
 
   var twiml = new twilio.TwimlResponse();
@@ -103,7 +103,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
 router.post('/loginError', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-  twiml.say("That username and password combination didn't work, you'll need to re-enter your credentials.",{voice:'alice'})
+  twiml.say("Invalid phone number and pin combination, you'll need to re-enter your credentials.",{voice:'alice'})
   twiml.redirect('/voice/promptForPhoneNumber');
       response.type('text/xml');
       response.send(twiml.toString());
@@ -144,7 +144,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
     },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People prior to calling.",{voice: 'alice'});
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
 
     twiml.redirect('/voice/goodbye');
 
@@ -158,7 +158,7 @@ router.post('/goodbye', twilio.webhook({validate:false}), function(request, resp
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Thank you for using all my people. Goodbye.",{voice:'alice'});
+  twiml.say("Thank you for using all my people emergency caller. Goodbye.",{voice:'alice'});
 
   twiml.redirect('/voice/hangup');
 

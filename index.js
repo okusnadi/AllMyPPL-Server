@@ -100,7 +100,7 @@ app.post('/smsReceived', function(req, res) {
 
   Parse.Promise.as().then(function(){
     if (wordList.length < 2) {
-      return Parse.Promise.error(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,"Welcome to AllMyPPL, you can signup with us by texting back 'USERNAME PASSWORD signup EMAIL_ADDRESS' with the capitalized fields replaced with your own choice of username, etc.  You'll see strings that look like that often in our instructions, so remember to replace the capitalized fields with your information.  When texting in to AllMyPPL, nothing is case-sensitive except your password, and the unique ids used in contact editing and deletion.  The next steps are signing up with the service or logging in to your existing account, to sign up with AllMyPPL, text in your desired account information followed by 'signup' and then your email, so to signup text 'USERNAME PASSWORD signup EMAIL_ADDRESS'.  To log in to an existing account just text your 'USERNAME PASSWORD' followed by a command if you choose like 'menu', but you'll already be greeted by the main menu when you log in."));
+      return Parse.Promise.error(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,"Welcome to AllMyPPL SMS, you can signup with us by texting back 'YOUR_PHONE YOUR_PIN signup YOUR_EMAIL_ADDRESS'.\n\nYOUR_PHONE must be your verifiable 10 digit phone number. YOUR_PIN must be numbers only and 4 digits in length.\n\nIf you have an existing account with AllMyPPL SMS, text back 'YOUR_PHONE YOUR_PIN menu' to get a list of Available Menu Commands."));
     } else {
 
       var enteredUsername = wordList[0].toLowerCase() || "";
@@ -118,12 +118,18 @@ app.post('/smsReceived', function(req, res) {
         return re.test(string);
     }
 
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
     if (enteredCommand == "signup") {
       var user = new Parse.User();
-      if (!testStringIsDigits(wordList[0]) || username.length != 10) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Your username should be your phone number, it must be a verifiable phone number consisting of only numbers and be 10 digits in length."));}
+      if (!testStringIsDigits(wordList[0]) || wordList[0].length != 10) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Your username should be your phone number, it must be a verifiable phone number consisting of only numbers and be 10 digits in length."));}
       user.set("username", wordList[0].toLowerCase());
-      if (!testStringIsDigits(wordList[1]) || password.length != 4) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
+      if (!testStringIsDigits(wordList[1]) || wordList[1].length != 4) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
       user.set("password", wordList[1]);
+      if (!validateEmail(wordList[3])) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"A valid email address must be provided."));}
       user.set("email", wordList[3] ? wordList[3].toLowerCase() : "");
       return user.signUp(null);
     } else {
@@ -272,9 +278,9 @@ app.post('/smsReceived', function(req, res) {
             });
 
           } else if (commandData.phone && commandData.phone.length < 10) {
-            commandPromise.reject(new Parse.Error(Parse.Error.INCORRECT_TYPE,"Phone numbers must be at least 10 digits.  An 'add' command has the following syntax, 'USERNAME PASSWORD add CONTACT-PHONE CONTACT-NAME'."));
+            commandPromise.reject(new Parse.Error(Parse.Error.INCORRECT_TYPE,"Phone numbers must be at least 10 digits.  An 'add' command has the following syntax, 'YOUR_PHONE YOUR_PIN add CONTACT-PHONE CONTACT-NAME'."));
           } else {
-            commandPromise.reject(new Parse.Error(Parse.Error.INCORRECT_TYPE,"Missing or invalid value for CONTACT-PHONE or CONTACT-NAME.  An 'add' command has the following syntax, 'USERNAME PASSWORD add CONTACT-PHONE CONTACT-NAME'."));
+            commandPromise.reject(new Parse.Error(Parse.Error.INCORRECT_TYPE,"Missing or invalid value for CONTACT-PHONE or CONTACT-NAME.  An 'add' command has the following syntax, 'YOUR_PHONE YOUR_PIN add CONTACT-PHONE CONTACT-NAME'."));
           }
         break;
       case "all":
@@ -316,7 +322,7 @@ app.post('/smsReceived', function(req, res) {
 
         console.log(wordList[3] + " " + commandData.contactId);
         if (wordList[3] == "CssnYynVKw") {
-          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"The AllMyPPL contact is intended to demonstrate, it cannot be edited or deleted."))
+          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"The AllMyPPL contact is included for demonstration purposes only, it cannot be edited or deleted."))
         } else {
             query.get(wordList[3], {sessionToken:commandData.user.getSessionToken()}).then(function (result) {
 
@@ -345,9 +351,9 @@ app.post('/smsReceived', function(req, res) {
             return false;
           }
         if (!commandData.email || commandData.email.length < 1) {
-          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An email address is required following the 'signup' command. 'USERNAME PASSWORD signup EMAIL_ADDRESS'"));
+          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An email address is required following the 'signup' command. Text back 'YOUR_PHONE YOUR_PIN signup YOUR_EMAIL_ADDRESS' to try again."));
         } else if (!validateEmail(commandData.email)) {
-          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An invalid email address was entered, please make sure the email address has a valid format. 'USERNAME PASSWORD signup EMAIL_ADDRESS'"));
+          commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"An invalid email address was entered, please make sure the email address has a valid format. Text back 'YOUR_PHONE YOUR_PIN signup YOUR_EMAIL_ADDRESS' to try again."));
         } else {
           commandPromise.resolve(resultData);
         }
@@ -359,7 +365,7 @@ app.post('/smsReceived', function(req, res) {
 
       console.log(commandData.contactId);
       if (wordList[3] == "CssnYynVKw") {
-        commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"The AllMyPPL contact cannot be edited or deleted."))
+        commandPromise.reject(new Parse.Error(Parse.Error.OPERATION_FORBIDDEN,"The AllMyPPL contact is included for demonstration purposes only, it cannot be edited or deleted."))
       } else {
       query.get(commandData.contactId, {sessionToken:commandData.user.getSessionToken()}).then(function (result) {
 
@@ -389,13 +395,12 @@ app.post('/smsReceived', function(req, res) {
       var enteredCommand = wordList[2] ? wordList[2].toLowerCase() : "";
 
       switch (enteredCommand) {
-        case "":
         case "menu":
         twilio.sendMessage({
 
                   to: req.body.From, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: "Available Menu Commands:\n\n'signup EMAIL_ADDRESS'\n(Sign up a new user)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)\n\n'contact'\n(Show current Emergency Contact)\n\n'contact set CONTACT-UID'\n(Set a new Emergency Contact by its UID, this is the contact you'll be connected to when you call and log into the AllMyPPL number, +16502062610.)"
+                  body: "Available Menu Commands:\n\n'signup YOUR_EMAIL_ADDRESS'\n(Sign up as a new user)\n\n'about'\n(A service overview of AllMyPPL)\n\n'add CONTACT-PHONE CONTACT-NAME'\n(Add a contact)\n\n'search NAME'\n(Search for contacts containing a NAME string)\n\n'all'\n(List all contacts)\n\n'edit CONTACT-UID KEY NEW-VALUE'\n(Edit existing contact)\n\n'delete CONTACT-UID'\n(Delete a contact by its UID)\n\n'contact'\n(Show current Emergency Contact)\n\n'contact set CONTACT-UID'\n(Set a new Emergency Contact by its UID).)"
 
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -407,13 +412,29 @@ app.post('/smsReceived', function(req, res) {
         });
            resultPromise.resolve(resultData);
            break;
+        case "about":
+        twilio.sendMessage({
+
+                  to: req.body.From, // Any number Twilio can deliver to
+                  from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
+                  body: "AllMyPPL is a text message based contact storage service to allow you access to your contacts when you are unable to access your own phone.\n\nAllMyPPL SMS & Emergency Caller\n6502062610\n\nThe AllMyPPL iOS App allows you to manage your Contacts, import the contacts from your iPhone and select an Emergency Contact to use with AllMyPPL Emergency Caller.\n\nAllMyPPL iOS App:\nSign Up\nLogin\nHome\nAdd Contact\nEdit Contact\nDelete Contact\nSet Emergency Contact\nAccount\nAbout\n\nAllMyPPL SMS, activates when you text message in to AllMyPPL, with it, you can manage your Contacts from any phone or select a new Emergency Contact.\n\nAllMyPPL SMS:\nSign Up\nMenu\nAbout\nAdd Contact\nEdit Contact\nSearch Contact\nList All Contacts\nDelete Contact\nSet Emergency Contact\nShow Emergency Contact\n\nCalling into AllMyPPL, activates AllMyPPL Emergency Caller, which, after you've selected an Emergency Contact using AllMyPPL SMS or the AllMyPPL iOS App, forwards the call to Emergency Contact. It calls using your account's phone number for the caller ID instead of the phone you call in with, letting your Emergency Contact know who's really calling.\n\nYou can change your Emergency Contact at any time using AllMyPPL SMS or the iOS app, your current Emergency Contact is the only Contact who you are forwarded to.\n\nAllMyPPL Emergency Caller:\nPIN Verify\nCall Emergency Contact\n\nWe take your security seriously, and require your credentials with every interaction, please take your own security seriously and delete your text messages with AllMyPPL SMS if you are using a borrowed device as your PIN could be compromised.\n\nVisit us online at:\nwww.allmyppl.com\n\nAllMyPPL was created in 2016\nby Patrick Blaine"
+                  
+        }, function(err, responseData) { //this function is executed when a response is received from Twilio
+
+                  if (!err) {
+                    console.log("Successfully sent sms to " + req.body.From + ". Body: " + responseData);
+                  } else {
+                    console.error("Could not send sms to " + req.body.From + ". Error: \"" + err);
+                  }
+        });
+          break;
         case "contact":
           if (resultData.result){
           twilio.sendMessage({
 
                     to: req.body.From, // Any number Twilio can deliver to
                     from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                    body: "Your Emergency Contact is currently...\n\nName: "+resultData.result.get("name")+"\nPhone: "+resultData.result.get("phone")+"\nUID: "+resultData.result.id+"\n\nTo change your current Emergency Contact, text back 'USERNAME PASSWORD contact set CONTACT-UID'."
+                    body: "Your Emergency Contact is currently...\n\nName: "+resultData.result.get("name")+"\nPhone: "+resultData.result.get("phone")+"\nUID: "+resultData.result.id+"\n\nTo change your current Emergency Contact, text back 'YOUR_PHONE YOUR_PIN contact set CONTACT-UID'."
 
           }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -428,7 +449,7 @@ app.post('/smsReceived', function(req, res) {
 
                   to: req.body.From, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: "You do not currently have an Emergency Contact set, to set one, text back 'USERNAME PASSWORD contact set CONTACT-UID.'"
+                  body: "You do not currently have an Emergency Contact set, to set one, text back 'YOUR_PHONE YOUR_PIN contact set CONTACT-UID.'."
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                   if (!err) {
@@ -444,8 +465,7 @@ app.post('/smsReceived', function(req, res) {
 
                       to: req.body.From, // Any number Twilio can deliver to
                       from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                      body: "Sign in successful, welcome to AllMyPPL, the textable contact storage service, we store your contacts in the cloud, allowing you to access them by texting, managing and searching them from any phone capable of text messaging.  So when your battery dies, instead of being stranded without a way to contact who matters until you charge, you can access all of your contacts, and search by name for who you need to call, with a single text from anyone\'s phone.  When texting all my people, remember that every command must be authorized with your credentials, all words must be space-seperated, and the command texted must be prefixed by valid user credentials.  Text back 'USERNAME PASSWORD' and a command chosen from the list below."
-
+                      body: "Signup successful, welcome to AllMyPPL SMS. To continue, text back 'YOUR_PHONE YOUR_PIN menu' for a list of Available Menu Commands or 'YOUR_PHONE YOUR_PIN about' for a service overview."
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                       if (!err) {
@@ -461,7 +481,7 @@ app.post('/smsReceived', function(req, res) {
 
                       to: req.body.From, // Any number Twilio can deliver to
                       from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                      body: "Contact created for\n" + resultData.result.get("phone") + "\n\"" + resultData.result.get("name") + "\"."  // body of the SMS message
+                      body: "Contact created.\n\nName: " + resultData.result.get("name") + "\nPhone: " + resultData.result.get("phone") + "\nUID: " + resultData.result.id  // body of the SMS message
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -481,7 +501,7 @@ app.post('/smsReceived', function(req, res) {
 
                         to: req.body.From, // Any number Twilio can deliver to
                         from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                        body: "name: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: "+resultData.results[index].id   // body of the SMS message
+                        body: "Name: " + resultData.results[index].get("Name") + "\nphone: " + resultData.results[index].get("phone") + "\nUID: "+resultData.results[index].id   // body of the SMS message
 
               }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -530,7 +550,7 @@ app.post('/smsReceived', function(req, res) {
 
                             to: req.body.From, // Any number Twilio can deliver to
                             from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                            body: "name: " + resultData.results[index].get("name") + "\nphone: " + resultData.results[index].get("phone") + "\nuid: "+resultData.results[index].id   // body of the SMS message
+                            body: "Name: " + resultData.results[index].get("name") + "\nPhone: " + resultData.results[index].get("phone") + "\nUID: "+resultData.results[index].id   // body of the SMS message
 
                   }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -594,7 +614,7 @@ app.post('/smsReceived', function(req, res) {
 
               to: req.body.From, // Any number Twilio can deliver to
               from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-              body: "Your login was successful, welcome to AllMyPPL.  When texting in your commands, remember that every one must be prefixed with valid credentials, all words must be space-seperated, not any other deliminator, that all stored and searched names and fields are not case-sensitive except the password field when you log in and a contact's unique id field when editing or delete it.\n\nTo continue, text in your USERNAME PASSWORD and a command chosen from the menu.\n\nText back 'USERNAME PASSWORD' or 'USERNAME PASSWORD menu' to view the list of Available Menu Commands."
+              body: "Looks like you're a little lost, but you logged in successfully, welcome to AllMyPPL SMS.\n\nTo continue, text back 'YOUR_PHONE YOUR_PIN menu' to view the list of Available Menu Commands or 'YOUR_PHONE YOUR_PIN about' for a service overview."
 
             }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
@@ -623,7 +643,7 @@ app.post('/smsReceived', function(req, res) {
 
                   to: req.body.From, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
-                  body: error.message + "\n\nSMS Command Syntax:\n\n'USERNAME PASSWORD command'\n\n(i.e. USERNAME PASSWORD signup EMAIL_ADDRESS)"  // body of the SMS message
+                  body: error.message  // body of the SMS message
 
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
