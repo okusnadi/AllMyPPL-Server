@@ -100,7 +100,7 @@ app.post('/smsReceived', function(req, res) {
 
   Parse.Promise.as().then(function(){
     if (wordList.length < 2) {
-      return Parse.Promise.error(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,"Welcome to AllMyPPL, you can signup with us by texting back 'USERNAME PASSWORD signup EMAIL_ADDRESS' with the capitalized fields replaced with your own choice of username, etc.  You'll see strings that look like that often in our instructions, so remember to replace the capitalized fields with your information.  When texting in to AllMyPPL, nothing is case-sensitive except your password, and the unique ids used in contact editing and deletion.  The next steps are signing up with the service or logging in to your existing account, to sign up with AllMyPPL, text in your desired account information followed by 'signup' and then your email, so to signup text 'USERNAME PASSWORD signup EMAIL_ADDRESS'.  To log in to an existing account just text your 'USERNAME PASSWORD' followed by a command if you choose like 'menu', but you'll already be greeted by the main menu when you log in."));
+      return Parse.Promise.error(new Parse.Error(Parse.Error.COMMAND_UNAVAILABLE,"Welcome to AllMyPPL, you can signup with us by texting back 'USERNAME PASSWORD signup EMAIL_ADDRESS' with the capitalized fields replaced with your own choice of username, etc.  Usernames must be your phone number with area code and 10 digits in length, passwords, or PIN numbers, must be numbers only and 4 digits in length.  You'll see strings that look like that often in our instructions, so remember to replace the capitalized fields with your information.  When texting in to AllMyPPL, nothing is case-sensitive except your password, and the unique ids used in contact editing and deletion.  The next steps are signing up with the service or logging in to your existing account, to sign up with AllMyPPL, text in your desired account information followed by 'signup' and then your email, so to signup text 'USERNAME PASSWORD signup EMAIL_ADDRESS'.  To log in to an existing account just text your 'USERNAME PASSWORD' followed by a command if you choose like 'menu', but you'll already be greeted by the main menu when you log in."));
     } else {
 
       var enteredUsername = wordList[0].toLowerCase() || "";
@@ -118,12 +118,18 @@ app.post('/smsReceived', function(req, res) {
         return re.test(string);
     }
 
+    function validateEmail(email) {
+        var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(email);
+    }
+
     if (enteredCommand == "signup") {
       var user = new Parse.User();
-      if (!testStringIsDigits(wordList[0]) || username.length != 10) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Your username should be your phone number, it must be a verifiable phone number consisting of only numbers and be 10 digits in length."));}
+      if (!testStringIsDigits(wordList[0]) || wordList[0].length != 10) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Your username should be your phone number, it must be a verifiable phone number consisting of only numbers and be 10 digits in length."));}
       user.set("username", wordList[0].toLowerCase());
-      if (!testStringIsDigits(wordList[1]) || password.length != 4) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
+      if (!testStringIsDigits(wordList[1]) || wordList[1].length != 4) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Passwords, or PIN numbers, must consist of only numbers and must be 4 digits in length."));}
       user.set("password", wordList[1]);
+      if (!validateEmail(wordList[3])) {return Parse.Promise.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"A valid email address must be provided."));}
       user.set("email", wordList[3] ? wordList[3].toLowerCase() : "");
       return user.signUp(null);
     } else {
