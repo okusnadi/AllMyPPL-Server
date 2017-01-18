@@ -164,7 +164,7 @@ twiml.redirect('/voice/menu');
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Please enter the 10 digit phone number you would like to dial, area code first. ",{voice: 'alice'});
+  twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign. ",{voice: 'alice'});
 
   twiml.gather({
    action: "/voice/afterDialOut",
@@ -188,10 +188,9 @@ twiml.redirect('/voice/menu');
 
   if (!input || input.length != 10) {
     twiml.redirect('/voice/menu');
-
   } else {
-  twiml.say("Calling "+input+". ",{voice: 'alice'});
-  twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+    twiml.say("Calling "+input+". ",{voice: 'alice'});
+    twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
   }
 
       response.type('text/xml');
