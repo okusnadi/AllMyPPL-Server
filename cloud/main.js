@@ -1,5 +1,3 @@
-require("app.js");
-
 var twilioAccountSid = 'Your-Twilio-Account-Sid';
 var twilioAuthToken = 'Your-Twilio-Auth-Token';
 var twilioPhoneNumber = '+16502062610';
@@ -86,8 +84,8 @@ function sendCodeSms(phoneNumber, code, language) {
 
 	var promise = new Parse.Promise();
 	twilio.sendSms({
-		to: prefix + phoneNumber.replace(/\D/g, ''),
-		from: twilioPhoneNumber.replace(/\D/g, ''),
+		to: prefix + phoneNumber,
+		from: twilioPhoneNumber,
 		body: 'Your login code for AnyPhone is ' + code
 	}, function(err, responseData) {
 		if (err) {
@@ -194,11 +192,11 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
  */
 
 
-Parse.Cloud.beforeSave(Parse.User, (req, res) => {
+/*Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
   const user = req.user;
 
   if (obj.get('email') && !validateEmail(obj.get('email'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"You must use a valid email address."));}
   else if (obj.get('username').length != 10 || !validateUsernameIsDigits(obj.get('username'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Username must be a ten digit phone number."));}
   else {res.success();}
-});
+});*/
