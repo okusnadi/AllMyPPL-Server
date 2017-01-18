@@ -19,7 +19,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To All My People Emergency Caller.", { voice: 'alice'});;
+    twiml.say("Welcome To All My People Emergency Caller; call your contacts from any phone, keeping your own caller id, not the phone you're using.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -210,7 +210,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-        twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".  If you would like to make this call press 1 to be connected, otherwise press any key to return to the main menu.",{voice: 'alice'});
+        twiml.say("Your emergency contact is named "+emergencyContact.get('name')+", and their phone number is "+emergencyContact.get('phone')+".  If you would like to be connected, press 1. Otherwise press any key to cancel return to the main menu.",{voice: 'alice'});
 
       var number = emergencyContact.get('phone');
 
