@@ -209,13 +209,62 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-      twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".  Connecting you now.",{voice: 'alice'});
+      twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".  If you would like to be call out press 1 to be connected, otherwise press any key to return to the main menu.",{voice: 'alice'});
 
       var number = emergencyContact.get('phone');
 
       console.log(JSON.stringify(request.body));
 
-      twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+
+        twiml.gather({
+         action: "/voice/afterCallEmergencyContact",
+         numDigits: 1,
+         method: "POST"
+        });
+
+      return Parse.Promise.as(emergencyContact);
+    }
+
+  }).then(function(emergencyContact){
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+
+    },function(error) {
+    console.error(error.code+" : "+error.message);
+
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
+
+    twiml.redirect('/voice/goodbye');
+
+        response.type('text/xml');
+        response.send(twiml.toString());
+  });
+});
+
+router.post('/afterCallEmergencyContact', twilio.webhook({validate:false}), function(request, response){
+
+  var Contact = Parse.Object.extend("Contact");
+
+  var emergencyContactQuery = new Parse.Query(Contact);
+  emergencyContactQuery.equalTo('isEmergencyContact',true);
+  emergencyContactQuery.first({sessionToken:user.get('sessionToken')})
+  .then(function(emergencyContact){
+
+    if (!emergencyContact) {
+      return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
+    } else {
+      var number = emergencyContact.get('phone');
+
+      console.log(JSON.stringify(request.body));
+
+      var input = request.body.Digits;
+
+      if (input == "1") {
+        twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+      } else {
+          twiml.redirect('/voice/menu');
+      }
 
       return Parse.Promise.as(emergencyContact);
     }
