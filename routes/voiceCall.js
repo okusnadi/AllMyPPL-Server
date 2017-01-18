@@ -19,7 +19,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To All My People Emergency Caller; call your contacts from any phone, keeping your own caller id, not the phone you're using.", { voice: 'alice'});;
+    twiml.say("Welcome To All My People Emergency Caller; call from your own number not the phone you're using.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -31,7 +31,7 @@ router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Please enter the ten digit phone number associated with your account.", { voice: 'alice'});
+  twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
 
   twiml.gather({
     action: "/voice/parsePhoneNumberInput",
@@ -67,7 +67,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Please enter the four digit pin number associated with your account.", { voice: 'alice'});
+  twiml.say("Please enter the four digit pin number associated with your account followed by the pound sign.", { voice: 'alice'});
 
   twiml.gather({
     action: "/voice/parsePinNumberInput",
@@ -112,7 +112,7 @@ router.post('/loginError', twilio.webhook({validate: false}), function(request, 
 
 router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-  twiml.say("To call your emergency contact, press 1.  To dial out to a number you provide, press 2.",{voice:'alice'})
+  twiml.say("To call your emergency contact, press 1 followed by the pound sign.  To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'})
 
    twiml.gather({
     action: "/voice/afterMenu",
@@ -134,11 +134,12 @@ router.post('/afterMenu', twilio.webhook({validate: false}), function(request, r
 
   if (!input || input.length != 1) {
     twiml.redirect('/voice/menu');
-
   } else if (input == "1") {
     twiml.redirect('/voice/callEmergencyContact');
   } else if (input == "2") {
     twiml.redirect('/voice/dialOut');
+  } else {
+    twiml.redirect('/voice/menu');
   }
 
       response.type('text/xml');
