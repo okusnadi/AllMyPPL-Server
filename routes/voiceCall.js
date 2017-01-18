@@ -236,7 +236,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
 
     twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
 
-    twiml.redirect('/voice/goodbye');
+    twiml.redirect('/voice/menu');
 
         response.type('text/xml');
         response.send(twiml.toString());
