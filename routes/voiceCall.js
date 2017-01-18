@@ -210,7 +210,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-        twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".  If you would like to be call out press 1 to be connected, otherwise press any key to return to the main menu.",{voice: 'alice'});
+        twiml.say("Dialing your emergency contact named "+emergencyContact.get('name')+", the phone number is "+emergencyContact.get('phone')+", once again, the phone number is "+emergencyContact.get('phone')+".  If you would like to make this call press 1 to be connected, otherwise press any key to return to the main menu.",{voice: 'alice'});
 
       var number = emergencyContact.get('phone');
 
