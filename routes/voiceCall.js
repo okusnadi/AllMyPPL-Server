@@ -116,12 +116,12 @@ router.post('/loginError', twilio.webhook({validate: false}), function(request, 
 
 router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-  twiml.say("To call your emergency contact, press 1 followed by the pound sign.");
-   twiml.gather({
+  twiml.gather({
     action: "/voice/afterMenu",
     numDigits: 4,
     method: "POST"
-  },function () {twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
+  },function () {twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
+   twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
 });
   twiml.redirect('/voice/menu');
 
@@ -189,8 +189,8 @@ router.post('/afterDialOut', twilio.webhook({validate: false}), function(request
     twiml.say("Calling "+input+". ",{voice: 'alice'});
     twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
   } else {
-    twiml.say("You must dial a ten digit phone number, area code first.  Please try again.");
-    twiml.redirect('/voice/dialOut');
+    twiml.say("Invalid input, you must dial a ten digit phone number, area code first.  Returning to the main menu.",{voice:'alice'});
+    twiml.redirect('/voice/menu');
   }
 
       response.type('text/xml');
@@ -210,7 +210,15 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-      twiml.say("Your emergency contact is named "+emergencyContact.get('name')+", and has a phone number of "+emergencyContact.get('phone')+".  Connecting you now.",{voice: 'alice'});
+      twiml.say("Your emergency contact is named "+emergencyContact.get('name')+", and has a phone number of "+emergencyContact.get('phone')+".",{voice: 'alice'});
+
+      twiml.gather({
+       action: "/voice/menu",
+       numDigits: 1,
+       method: "POST"
+     },function() {
+       twiml.say("Press any key to return to the main menu, or stay on the line to be connected to your emergency Contact.",{voice: 'alice'});
+     });
 
       var number = emergencyContact.get('phone');
 
