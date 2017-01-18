@@ -39,7 +39,7 @@ router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(
     twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
   });
 
-  twiml.redirect('/promptForPhoneNumber');
+  twiml.redirect('/voice/promptForPhoneNumber');
 
       response.type('text/xml');
       response.send(twiml.toString());
