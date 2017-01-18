@@ -130,8 +130,6 @@ router.post('/afterMenu', twilio.webhook({validate: false}), function(request, r
 
   console.log('Digits entered: '+request.body.Digits);
 
-  var twiml = new twilio.TwimlResponse();
-
   if (!input || input.length != 1) {
     twiml.redirect('/voice/menu');
   } else if (input == "1") {
@@ -160,7 +158,7 @@ twiml.redirect('/voice/menu');
 
       });
 
-      router.post('/dialOut', twilio.webhook({validate:false}), function(request, response){
+router.post('/dialOut', twilio.webhook({validate:false}), function(request, response){
 
   var twiml = new twilio.TwimlResponse();
 
@@ -178,13 +176,11 @@ twiml.redirect('/voice/menu');
 
       });
 
-      router.post('/afterDialOut', twilio.webhook({validate: false}), function(request, response) {
+router.post('/afterDialOut', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   var input = request.body.Digits;
 
   console.log('Digits entered: '+request.body.Digits);
-
-  var twiml = new twilio.TwimlResponse();
 
   if (!input || input.length != 10) {
     twiml.redirect('/voice/menu');
@@ -245,6 +241,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
 
 router.post('/afterCallEmergencyContact', twilio.webhook({validate:false}), function(request, response){
 
+    var twiml = new twilio.TwimlResponse();
   var Contact = Parse.Object.extend("Contact");
 
   var emergencyContactQuery = new Parse.Query(Contact);

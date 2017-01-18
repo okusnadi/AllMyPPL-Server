@@ -91,7 +91,7 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
  * this beforeSave handler performs field validation on the email and username fields.
  */
 
-
+/*
 Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   const obj = req.object;
   const user = req.user;
@@ -100,3 +100,4 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
   else if (obj.get('username').length != 10 || !validateUsernameIsDigits(obj.get('username'))) {res.error(new Parse.Error(Parse.Error.VALIDATION_ERROR,"Username must be a ten digit phone number."));}
   else {res.success();}
 });
+*/
