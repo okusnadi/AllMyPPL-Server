@@ -210,7 +210,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
     if (!emergencyContact) {
       return Parse.Promise.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"Couldn't load emergency contact."))
     } else {
-        twiml.say("Your emergency contact is named "+emergencyContact.get('name')+", and their phone number is "+emergencyContact.get('phone')+".  If you would like to be connected, press 1. Otherwise press any key to cancel return to the main menu.",{voice: 'alice'});
+      twiml.say("Your emergency contact is named "+emergencyContact.get('name')+", and their phone number is "+emergencyContact.get('phone')+".  If you would like to be connected, press 1 followed by the pound sign.",{voice: 'alice'});
 
       var number = emergencyContact.get('phone');
 
@@ -261,8 +261,10 @@ router.post('/afterCallEmergencyContact', twilio.webhook({validate:false}), func
 
       var input = request.body.Digits;
 
-      if (input == "1") {
-        twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+      if (!input || input.length != 1) {
+          twiml.redirect('/voice/menu');
+      } else if (input == "1") {
+          twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
       } else {
           twiml.redirect('/voice/menu');
       }
