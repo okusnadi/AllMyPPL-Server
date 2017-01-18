@@ -112,7 +112,7 @@ router.post('/loginError', twilio.webhook({validate: false}), function(request, 
 
 router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-  twiml.say("To call your emergency contact, press 1.  To dial out with your own number as your caller id, press 2.",{voice:'alice'})
+  twiml.say("To call your emergency contact, press 1.  To dial out to a number you provide, press 2.",{voice:'alice'})
 
    twiml.gather({
     action: "/voice/afterMenu",
