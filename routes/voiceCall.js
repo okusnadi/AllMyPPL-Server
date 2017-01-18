@@ -198,7 +198,7 @@ twiml.redirect('/voice/menu');
 });
 
 router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(request, response){
-  var twiml = new twiml.TwimlResponse();
+  var twiml = new twilio.TwimlResponse();
 
   var Contact = Parse.Object.extend("Contact");
 
