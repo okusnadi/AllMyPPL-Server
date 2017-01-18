@@ -113,13 +113,13 @@ router.post('/loginError', twilio.webhook({validate: false}), function(request, 
 router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   twiml.say("To call your emergency contact, press 1.  To dial out with your own number as your caller id, press 2.",{voice:'alice'})
-  
+
    twiml.gather({
     action: "/voice/afterMenu",
     numDigits: 4,
     method: "POST"
   });
-  
+
       response.type('text/xml');
       response.send(twiml.toString());
 });
@@ -134,13 +134,13 @@ router.post('/afterMenu', twilio.webhook({validate: false}), function(request, r
 
   if (!input || input.length != 1) {
     twiml.redirect('/voice/menu');
-   
+
   } else if (input == "1") {
     twiml.redirect('/voice/callEmergencyContact');
   } else if (input == "2") {
     twiml.redirect('/voice/dialOut');
   }
-  
+
       response.type('text/xml');
       response.send(twiml.toString());
 });
@@ -152,27 +152,31 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
   twiml.say("Welcome, "+user.get('username')+".",{voice: 'alice'});
 
 twiml.redirect('/voice/menu');
-  
-  
+
+
       response.type('text/xml');
       response.send(twiml.toString());
-      
+
       });
-      
+
       router.post('/dialOut', twilio.webhook({validate:false}), function(request, response){
 
   var twiml = new twilio.TwimlResponse();
 
   twiml.say("Please enter the 10 digit phone number you would like to dial, area code first. ",{voice: 'alice'});
 
-twiml.redirect('/voice/afterDialOut');
-  
-  
+  twiml.gather({
+   action: "/voice/afterDialOut",
+   numDigits: 10,
+   method: "POST"
+  });
+
+
       response.type('text/xml');
       response.send(twiml.toString());
-      
+
       });
-      
+
       router.post('/afterDialOut', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   var input = request.body.Digits;
@@ -183,16 +187,16 @@ twiml.redirect('/voice/afterDialOut');
 
   if (!input || input.length != 10) {
     twiml.redirect('/voice/menu');
-   
-  } else { 
+
+  } else {
   twiml.say("Calling "+input+". ",{voice: 'alice'});
   twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
   }
-  
+
       response.type('text/xml');
       response.send(twiml.toString());
 });
-      
+
 router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(request, response){
 
   var Contact = Parse.Object.extend("Contact");
