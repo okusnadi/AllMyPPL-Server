@@ -1,3 +1,4 @@
+'use strict'
 // Example express application adding the parse-server module to expose Parse
 // compatible API routes.
 
@@ -24,13 +25,15 @@ var api = new ParseServer({
   cloud: process.env.CLOUD_CODE_MAIN || __dirname + '/cloud/main.js',
   appId: process.env.APP_ID || 'appId',
   masterKey: process.env.MASTER_KEY || 'masterKey', //Add your master key here. Keep it secret!
-  serverURL: process.env.SERVER_URL || 'https://localhost:1337/parse',  // Don't forget to change to https if needed
+  serverURL: process.env.SERVER_URL || 'http://localhost:1337/parse',  // Don't forget to change to https if needed
   liveQuery: {
     classNames: ["Contact"] // List of classes to support for query subscriptions
   },
-  publicServerURL: process.env.SERVER_URL || 'https://localhost:1337/parse',
+  allowClientClassCreation:true,
+  publicServerURL: process.env.SERVER_URL || 'http://localhost:1337/parse',
   appName: process.env.APP_NAME || 'appName',
   verifyUserEmails:true,
+  clientKey: process.env.CLIENT_KEY || 'clientKey',
   emailAdapter: {
     module: 'parse-server-mailgun',
     options: {
@@ -418,7 +421,7 @@ app.post('/smsReceived', function(req, res) {
                   to: req.body.From, // Any number Twilio can deliver to
                   from: allMyPPLPhoneNumber, // A number you bought from Twilio and can use for outbound communication
                   body: "AllMyPPL is a text message based contact storage service to allow you access to your contacts when you are unable to access your own phone.\n\nAllMyPPL SMS & Emergency Caller\n6502062610\n\nThe AllMyPPL iOS App allows you to manage your Contacts, import the contacts from your iPhone and select an Emergency Contact to use with AllMyPPL Emergency Caller.\n\nAllMyPPL iOS App:\nSign Up\nLogin\nHome\nAdd Contact\nEdit Contact\nDelete Contact\nSet Emergency Contact\nAccount\nAbout\n\nAllMyPPL SMS, activates when you text message in to AllMyPPL, with it, you can manage your Contacts from any phone or select a new Emergency Contact.\n\nAllMyPPL SMS:\nSign Up\nMenu\nAbout\nAdd Contact\nEdit Contact\nSearch Contact\nList All Contacts\nDelete Contact\nSet Emergency Contact\nShow Emergency Contact\n\nCalling into AllMyPPL, activates AllMyPPL Emergency Caller, which, after you've selected an Emergency Contact using AllMyPPL SMS or the AllMyPPL iOS App, forwards the call to Emergency Contact. It calls using your account's phone number for the caller ID instead of the phone you call in with, letting your Emergency Contact know who's really calling.\n\nYou can change your Emergency Contact at any time using AllMyPPL SMS or the iOS app, your current Emergency Contact is the only Contact who you are forwarded to.\n\nAllMyPPL Emergency Caller:\nPIN Verify\nCall Emergency Contact\n\nWe take your security seriously, and require your credentials with every interaction, please take your own security seriously and delete your text messages with AllMyPPL SMS if you are using a borrowed device as your PIN could be compromised.\n\nVisit us online at:\nwww.allmyppl.com\n\nAllMyPPL was created in 2016\nby Patrick Blaine"
-                  
+
         }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                   if (!err) {
