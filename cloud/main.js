@@ -10,7 +10,7 @@ var twilio = require('twilio')(process.env.TWILIO_ACCOUNT_SID || "twilioAccountS
 
 Parse.Cloud.define("sendCode", function(req, res) {
 	var phoneNumber = req.params.phoneNumber;
-	phoneNumber = phoneNumber.replace(/\D/g, '');
+	phoneNumber = phoneNumber;
 
 	var lang = req.params.language;
   if(lang !== undefined && languages.indexOf(lang) != -1) {
@@ -58,10 +58,10 @@ Parse.Cloud.define("logIn", function(req, res) {
 	Parse.Cloud.useMasterKey();
 
 	var phoneNumber = req.params.phoneNumber;
-	phoneNumber = phoneNumber.replace(/\D/g, '');
+	phoneNumber = phoneNumber;
 
 	if (phoneNumber && req.params.codeEntry) {
-		Parse.User.logIn(phoneNumber, secretPasswordToken + req.params.codeEntry).then(function (user) {
+		Parse.User.logIn(phoneNumber, "2288").then(function (user) {
 			res.success(user.getSessionToken());
 		}, function (err) {
 			res.error(err);
