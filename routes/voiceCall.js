@@ -12,8 +12,8 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
   user = new Parse.User();
   var twiml = new twilio.TwimlResponse();
   twiml.redirect('/voice/welcome');
-      response.type('text/xml');
-      response.send(twiml.toString());
+  response.type('text/xml');
+  response.send(twiml.toString());
 });
 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
@@ -31,13 +31,15 @@ router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
-
   twiml.gather({
     action: "/voice/parsePhoneNumberInput",
     numDigits: 10,
     method: "POST"
+  }, function (){
+    twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
   });
+
+  twiml.redirect('/promptForPhoneNumber');
 
       response.type('text/xml');
       response.send(twiml.toString());
@@ -53,10 +55,10 @@ router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function
 
   user.set('username',input);
 
-  if (!input || input.length != 10) {
-    twiml.redirect('/voice/promptForPhoneNumber');
-  } else if (input.length == 10) {
+  if (input.length == 10) {
     twiml.redirect('/voice/promptForPinNumber');
+  } else {
+    twiml.redirect('/voice/promptForPhoneNumber');
   }
 
       response.type('text/xml');
@@ -67,13 +69,15 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Please enter the four digit pin number associated with your account followed by the pound sign.", { voice: 'alice'});
-
   twiml.gather({
     action: "/voice/parsePinNumberInput",
     numDigits: 4,
     method: "POST"
+  }, function() {
+      twiml.say("Please enter the four digit pin number associated with your account followed by the pound sign.", { voice: 'alice'});
   });
+
+  twiml.redirect('/voice/promptForPinNumber');
 
       response.type('text/xml');
       response.send(twiml.toString());
@@ -87,15 +91,15 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
   var twiml = new twilio.TwimlResponse();
 
-  if (!input || input.length != 4) {
-    twiml.redirect('/voice/promptForPhoneNumber');
-    response.type('text/xml');
-    response.send(twiml.toString());
-  } else if (input.length == 4) {
+ if (input.length == 4) {
     Parse.User.logIn(user.get('username'),input).then(function(logInObj){user = logInObj;
        twiml.redirect('/voice/afterLogin'); response.type('text/xml');
     response.send(twiml.toString());},function(user, error){console.error(error); twiml.redirect('/voice/loginError'); response.type('text/xml');
     response.send(twiml.toString());});
+  } else {
+    twiml.redirect('/voice/promptForPhoneNumber');
+    response.type('text/xml');
+    response.send(twiml.toString());
   }
 
 
@@ -112,13 +116,14 @@ router.post('/loginError', twilio.webhook({validate: false}), function(request, 
 
 router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-  twiml.say("To call your emergency contact, press 1 followed by the pound sign; to dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
-
+  twiml.say("To call your emergency contact, press 1 followed by the pound sign.");
    twiml.gather({
     action: "/voice/afterMenu",
     numDigits: 4,
     method: "POST"
-  });
+  },function () {twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
+});
+  twiml.redirect('/voice/menu');
 
       response.type('text/xml');
       response.send(twiml.toString());
@@ -130,16 +135,13 @@ router.post('/afterMenu', twilio.webhook({validate: false}), function(request, r
 
   console.log('Digits entered: '+request.body.Digits);
 
-  if (!input || input.length != 1) {
-    twiml.redirect('/voice/menu');
-  } else if (input == "1") {
+  if (input == "1") {
     twiml.redirect('/voice/callEmergencyContact');
   } else if (input == "2") {
     twiml.redirect('/voice/dialOut');
   } else {
     twiml.redirect('/voice/menu');
   }
-
       response.type('text/xml');
       response.send(twiml.toString());
 });
@@ -162,14 +164,15 @@ router.post('/dialOut', twilio.webhook({validate:false}), function(request, resp
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign. ",{voice: 'alice'});
-
   twiml.gather({
    action: "/voice/afterDialOut",
    numDigits: 10,
    method: "POST"
-  });
+ },function() {
+   twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign. ",{voice: 'alice'});
+ });
 
+  twiml.redirect('/voice/dialOut');
 
       response.type('text/xml');
       response.send(twiml.toString());
@@ -182,11 +185,12 @@ router.post('/afterDialOut', twilio.webhook({validate: false}), function(request
 
   console.log('Digits entered: '+request.body.Digits);
 
-  if (!input || input.length != 10) {
-    twiml.redirect('/voice/menu');
-  } else {
+  if (input.length == 10) {
     twiml.say("Calling "+input+". ",{voice: 'alice'});
     twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+  } else {
+    twiml.say("You must dial a ten digit phone number, area code first.  Please try again.");
+    twiml.redirect('/voice/dialOut');
   }
 
       response.type('text/xml');
