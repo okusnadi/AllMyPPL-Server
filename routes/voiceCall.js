@@ -19,7 +19,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To All My People Emergency Caller; call from your own number not the phone you're using.", { voice: 'alice'});;
+    twiml.say("Welcome To The All My People Emergency Caller, call as yourself, not the phone you're using.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -34,6 +34,7 @@ router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(
   twiml.gather({
     action: "/voice/parsePhoneNumberInput",
     numDigits: 10,
+    timeout: 10,
     method: "POST"
   }, function (){
     twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
@@ -72,6 +73,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
   twiml.gather({
     action: "/voice/parsePinNumberInput",
     numDigits: 4,
+    timeout: 10,
     method: "POST"
   }, function() {
       twiml.say("Please enter the four digit pin number associated with your account followed by the pound sign.", { voice: 'alice'});
@@ -118,10 +120,12 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
   var twiml = new twilio.TwimlResponse();
   twiml.gather({
     action: "/voice/afterMenu",
-    numDigits: 4,
+    numDigits: 1,
+    timeout: 10,
     method: "POST"
-  },function () {twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
-   twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
+  },function () {
+    twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
+   twiml.say("To dial out to a number you provide, press 2 followed by the pound sign. Choose now.",{voice:'alice'});
 });
   twiml.redirect('/voice/menu');
 
@@ -167,9 +171,10 @@ router.post('/dialOut', twilio.webhook({validate:false}), function(request, resp
   twiml.gather({
    action: "/voice/afterDialOut",
    numDigits: 10,
+   timeout: 10,
    method: "POST"
  },function() {
-   twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign. ",{voice: 'alice'});
+   twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign.",{voice: 'alice'});
  });
 
   twiml.redirect('/voice/dialOut');
@@ -197,6 +202,48 @@ router.post('/afterDialOut', twilio.webhook({validate: false}), function(request
       response.send(twiml.toString());
 });
 
+router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(request, response){
+  var twiml = new twilio.TwimlResponse();
+
+  var input = request.body.Digits;
+
+  var Contact = Parse.Object.extend("Contact");
+
+  var emergencyContactQuery = new Parse.Query(Contact);
+  emergencyContactQuery.equalTo('isEmergencyContact',true);
+  emergencyContactQuery.first({sessionToken:user.get('sessionToken')})
+  .then(function(emergencyContact){
+
+      var number = emergencyContact.get('phone');
+
+      console.log(JSON.stringify(request.body));
+      if (input == "1") {
+        twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+      } else {
+        twiml.redirect('/voice/menu');
+      }
+
+      return Parse.Promise.as(emergencyContact);
+    }
+
+  }).then(function(emergencyContact){
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+
+    },function(error) {
+    console.error(error.code+" : "+error.message);
+
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
+
+    twiml.redirect('/voice/menu');
+
+        response.type('text/xml');
+        response.send(twiml.toString());
+  });
+});
+
+
 router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(request, response){
   var twiml = new twilio.TwimlResponse();
 
@@ -213,18 +260,15 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
       twiml.say("Your emergency contact is named "+emergencyContact.get('name')+", and has a phone number of "+emergencyContact.get('phone')+".",{voice: 'alice'});
 
       twiml.gather({
-       action: "/voice/menu",
+       action: "/voice/dialEmergencyContact",
        numDigits: 1,
+       timeout: 10,
        method: "POST"
      },function() {
-       twiml.say("Press any key to return to the main menu, or stay on the line to be connected to your emergency Contact.",{voice: 'alice'});
+       twiml.say("Stay on the line or skip the wait with a pound sign to return to the main menu, or press 1 followed by the pound sign to be connected to your emergency Contact. Choose now.",{voice: 'alice'});
      });
 
-      var number = emergencyContact.get('phone');
-
-      console.log(JSON.stringify(request.body));
-
-      twiml.dial(number, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+      twiml.redirect('/voice/menu');
 
       return Parse.Promise.as(emergencyContact);
     }
@@ -251,7 +295,7 @@ router.post('/goodbye', twilio.webhook({validate:false}), function(request, resp
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Thank you for using the all my people emergency caller. Goodbye.",{voice:'alice'});
+  twiml.say("Thank you for using the all my people emergency caller, call as yourself, not the phone you're using. Goodbye.",{voice:'alice'});
 
   twiml.redirect('/voice/hangup');
 
