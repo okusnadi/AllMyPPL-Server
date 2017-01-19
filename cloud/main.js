@@ -1,5 +1,3 @@
-var app = require('cloud/app.js');
-
 var twilioPhoneNumber = '+16502062610';
 var secretPasswordToken = '0000';
 
