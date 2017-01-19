@@ -429,6 +429,7 @@ app.post('/smsReceived', function(req, res) {
                     console.error("Could not send sms to " + req.body.From + ". Error: \"" + err);
                   }
         });
+        resultPromise.resolve(resultData);
           break;
         case "contact":
           if (resultData.result){
@@ -461,6 +462,7 @@ app.post('/smsReceived', function(req, res) {
                   }
         });
         }
+        resultPromise.resolve(resultData);
           break;
         case "signup":
             twilio.sendMessage({
