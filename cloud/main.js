@@ -1,7 +1,7 @@
 var app = require('cloud/app.js');
 
 var twilioPhoneNumber = '+16502062610';
-var secretPasswordToken = '0420';
+var secretPasswordToken = '0000';
 
 var language = "en";
 var languages = ["en", "es", "ja", "kr", "pt-BR"];
@@ -22,8 +22,9 @@ Parse.Cloud.define("sendCode", function(req, res) {
 	var query = new Parse.Query(Parse.User);
 	query.equalTo('username', phoneNumber + "");
 	query.first().then(function(result) {
-		var min = 1000; var max = 9999;
-		var num = Math.floor(Math.random() * (max - min + 1)) + min;
+
+	var min = 1000; var max = 9999;
+	var num = Math.floor(Math.random() * (max - min + 1)) + min;
 
 		if (result) {
 			result.set("language", language);
