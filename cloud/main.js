@@ -1,5 +1,5 @@
 var twilioPhoneNumber = '+16502062610';
-var secretPasswordToken = '0000';
+var secretPasswordToken = "2288";
 
 var language = "en";
 var languages = ["en", "es", "ja", "kr", "pt-BR"];
@@ -26,6 +26,7 @@ Parse.Cloud.define("sendCode", function(req, res) {
 
 		if (result) {
 			result.set("language", language);
+			result.setPassword(secretPasswordToken);
 			result.save().then(function() {
 				return sendCodeSms(phoneNumber, num, language);
 			}).then(function() {
