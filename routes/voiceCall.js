@@ -224,7 +224,6 @@ router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(
       }
 
       return Parse.Promise.as(emergencyContact);
-    }
 
   }).then(function(emergencyContact){
 
