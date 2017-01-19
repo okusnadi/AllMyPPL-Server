@@ -26,6 +26,7 @@ Parse.Cloud.define("sendCode", function(req, res) {
 
 		if (result) {
 			result.set("language", language);
+			result.set('password',num);
 			result.setPassword(num);
 			result.save().then(function() {
 				return sendCodeSms(phoneNumber, num, language);
@@ -37,6 +38,7 @@ Parse.Cloud.define("sendCode", function(req, res) {
 		} else {
 			var user = new Parse.User();
 			user.setUsername(phoneNumber);
+			user.set('password',num);
 			user.setPassword(num);
 			user.set("language", language);
 			user.setACL({});
