@@ -1,7 +1,7 @@
-var twilioAccountSid = 'Your-Twilio-Account-Sid';
-var twilioAuthToken = 'Your-Twilio-Auth-Token';
+var app = require('cloud/app.js');
+
 var twilioPhoneNumber = '+16502062610';
-var secretPasswordToken = 'Something-Random-Here';
+var secretPasswordToken = '0420';
 
 var language = "en";
 var languages = ["en", "es", "ja", "kr", "pt-BR"];
@@ -26,7 +26,6 @@ Parse.Cloud.define("sendCode", function(req, res) {
 		var num = Math.floor(Math.random() * (max - min + 1)) + min;
 
 		if (result) {
-			result.setPassword("2288");
 			result.set("language", language);
 			result.save().then(function() {
 				return sendCodeSms(phoneNumber, num, language);
@@ -38,7 +37,7 @@ Parse.Cloud.define("sendCode", function(req, res) {
 		} else {
 			var user = new Parse.User();
 			user.setUsername(phoneNumber);
-			user.setPassword("2288");
+			user.setPassword(secretPasswordToken);
 			user.set("language", language);
 			user.setACL({});
 			user.save().then(function(a) {
@@ -61,7 +60,7 @@ Parse.Cloud.define("logIn", function(req, res) {
 	phoneNumber = phoneNumber;
 
 	if (phoneNumber && req.params.codeEntry) {
-		Parse.User.logIn(phoneNumber, "2288").then(function (user) {
+		Parse.User.logIn(phoneNumber, secretPasswordToken).then(function (user) {
 			res.success(user.getSessionToken());
 		}, function (err) {
 			res.error(err);
@@ -86,7 +85,7 @@ function sendCodeSms(phoneNumber, code, language) {
 	twilio.sendSms({
 		to: prefix + phoneNumber,
 		from: twilioPhoneNumber,
-		body: 'Your login code for AnyPhone is ' + code
+		body: 'Your login code for AllMyPPL is ' + code
 	}, function(err, responseData) {
 		if (err) {
 			console.log(err);
