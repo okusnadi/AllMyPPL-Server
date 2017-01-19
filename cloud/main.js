@@ -26,7 +26,7 @@ Parse.Cloud.define("sendCode", function(req, res) {
 
 		if (result) {
 			result.set("language", language);
-			result.setPassword(secretPasswordToken);
+			result.setPassword(num);
 			result.save().then(function() {
 				return sendCodeSms(phoneNumber, num, language);
 			}).then(function() {
@@ -37,7 +37,7 @@ Parse.Cloud.define("sendCode", function(req, res) {
 		} else {
 			var user = new Parse.User();
 			user.setUsername(phoneNumber);
-			user.setPassword(secretPasswordToken);
+			user.setPassword(num);
 			user.set("language", language);
 			user.setACL({});
 			user.save().then(function(a) {
@@ -60,7 +60,7 @@ Parse.Cloud.define("logIn", function(req, res) {
 	phoneNumber = phoneNumber;
 
 	if (phoneNumber && req.params.codeEntry) {
-		Parse.User.logIn(phoneNumber, secretPasswordToken).then(function (user) {
+		Parse.User.logIn(phoneNumber, req.params.codeEntry).then(function (user) {
 			res.success(user.getSessionToken());
 		}, function (err) {
 			res.error(err);
