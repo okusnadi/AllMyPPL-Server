@@ -19,7 +19,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To The All My People Emergency Caller, call as yourself, not the phone you're using.", { voice: 'alice'});;
+    twiml.say("Welcome To The All My People Emergency Caller.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -124,8 +124,10 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
     timeout: 10,
     method: "POST"
   },function () {
-    twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
-   twiml.say("To dial out to a number you provide, press 2 followed by the pound sign. Choose now.",{voice:'alice'});
+  twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
+    twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
+  
+   
 });
   twiml.redirect('/voice/menu');
 
@@ -233,7 +235,7 @@ router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(
     },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS or eye oh es App, prior to calling.",{voice: 'alice'});
 
     twiml.redirect('/voice/menu');
 
@@ -264,7 +266,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
        timeout: 10,
        method: "POST"
      },function() {
-       twiml.say("Stay on the line or skip the wait with a pound sign to return to the main menu, or press 1 followed by the pound sign to be connected to your emergency Contact. Choose now.",{voice: 'alice'});
+       twiml.say("Stay on the line to return to the main menu, to be connected to your emergency Contact, press 1 followed by the pound sign .",{voice: 'alice'});
      });
 
       twiml.redirect('/voice/menu');
@@ -280,7 +282,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
     },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS or the eye oh ess app, prior to calling.",{voice: 'alice'});
 
     twiml.redirect('/voice/menu');
 
@@ -294,7 +296,7 @@ router.post('/goodbye', twilio.webhook({validate:false}), function(request, resp
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Thank you for using the all my people emergency caller, call as yourself, not the phone you're using. Goodbye.",{voice:'alice'});
+  twiml.say("Thank you for using the all my people emergency caller. Goodbye.",{voice:'alice'});
 
   twiml.redirect('/voice/hangup');
 
