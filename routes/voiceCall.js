@@ -121,13 +121,30 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
   twiml.gather({
     action: "/voice/afterMenu",
     numDigits: 1,
-    timeout: 10,
+    timeout: 5,
     method: "POST"
   },function () {
   twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
+
+
+});
+  twiml.redirect('/voice/menuTwo');
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/menuTwo', twilio.webhook({validate: false}), function(request, response) {
+  var twiml = new twilio.TwimlResponse();
+  twiml.gather({
+    action: "/voice/afterMenuTwo",
+    numDigits: 1,
+    timeout: 10,
+    method: "POST"
+  },function () {
     twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
-  
-   
+
+
 });
   twiml.redirect('/voice/menu');
 
@@ -135,7 +152,26 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
       response.send(twiml.toString());
 });
 
+
+
 router.post('/afterMenu', twilio.webhook({validate: false}), function(request, response) {
+  var twiml = new twilio.TwimlResponse();
+  var input = request.body.Digits;
+
+  console.log('Digits entered: '+request.body.Digits);
+
+  if (input == "1") {
+    twiml.redirect('/voice/callEmergencyContact');
+  } else if (input == "2") {
+    twiml.redirect('/voice/dialOut');
+  } else {
+    twiml.redirect('/voice/menuTwo');
+  }
+      response.type('text/xml');
+      response.send(twiml.toString());
+});
+
+router.post('/afterMenuTwo', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   var input = request.body.Digits;
 
