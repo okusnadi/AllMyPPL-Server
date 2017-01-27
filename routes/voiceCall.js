@@ -128,7 +128,7 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
 
 
 });
-  twiml.redirect('/voice/menuTwo');
+  twiml.redirect('/voice/menu');
 
       response.type('text/xml');
       response.send(twiml.toString());
@@ -162,10 +162,12 @@ router.post('/afterMenu', twilio.webhook({validate: false}), function(request, r
 
   if (input == "1") {
     twiml.redirect('/voice/callEmergencyContact');
-  } else if (input == "2") {
-    twiml.redirect('/voice/dialOut');
-  } else {
-    twiml.redirect('/voice/menuTwo');
+  } 
+  //else if (input == "2") {
+    //twiml.redirect('/voice/dialOut');
+  //} 
+  else {
+    twiml.redirect('/voice/menu');
   }
       response.type('text/xml');
       response.send(twiml.toString());
