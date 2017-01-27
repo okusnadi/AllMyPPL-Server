@@ -124,7 +124,7 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
     timeout: 5,
     method: "POST"
   },function () {
-  twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
+  twiml.say("Main Menu.  To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
 
 
 });
@@ -139,7 +139,7 @@ router.post('/menuTwo', twilio.webhook({validate: false}), function(request, res
   twiml.gather({
     action: "/voice/afterMenuTwo",
     numDigits: 1,
-    timeout: 10,
+    timeout: 5,
     method: "POST"
   },function () {
     twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
@@ -192,7 +192,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Welcome, "+user.get('username')+".",{voice: 'alice'});
+  twiml.say("Welcome.",{voice: 'alice'});
 
 twiml.redirect('/voice/menu');
 
@@ -299,7 +299,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
       twiml.gather({
        action: "/voice/dialEmergencyContact",
        numDigits: 1,
-       timeout: 10,
+       timeout: 5,
        method: "POST"
      },function() {
        twiml.say("Stay on the line to return to the main menu, to be connected to your emergency Contact, press 1 followed by the pound sign .",{voice: 'alice'});
