@@ -1,5 +1,4 @@
 var twilioPhoneNumber = '+16502062610';
-var secretPasswordToken = "2288";
 
 var language = "en";
 var languages = ["en", "es", "ja", "kr", "pt-BR"];
