@@ -57,16 +57,18 @@ Parse.Cloud.define("logIn", function(req, res) {
 	Parse.Cloud.useMasterKey();
 
 	var phoneNumber = req.params.phoneNumber;
-	phoneNumber = phoneNumber;
 
-	if (phoneNumber && req.params.codeEntry) {
-		Parse.User.logIn(phoneNumber, ""+req.params.codeEntry).then(function (user) {
-			res.success(user.getSessionToken());
-		}, function (err) {
-			res.error(err);
-		});
+  if (!phoneNumber) {
+
+      res.error("phone number");
+	else if (!req.params.codeEntry) {
+    res.error("code entry")
 	} else {
-		res.error('Invalid parameters.');
+    Parse.User.logIn(phoneNumber, req.params.codeEntry).then(function (user) {
+    res.success(user.getSessionToken());
+  }, function (err) {
+    res.error(err);
+  });
 	}
 });
 
