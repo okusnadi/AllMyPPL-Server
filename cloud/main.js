@@ -52,6 +52,33 @@ Parse.Cloud.define("sendCode", function(req, res) {
 	});
 });
 
+Parse.Cloud.define("doesUserExist", function(req, res) {
+	var phoneNumber = req.params.phoneNumber;
+	phoneNumber = phoneNumber;
+
+	var lang = req.params.language;
+  if(lang !== undefined && languages.indexOf(lang) != -1) {
+		language = lang;
+	}
+
+	if (!phoneNumber || (phoneNumber.length != 10 && phoneNumber.length != 11)) return res.error('Invalid Parameters');
+	Parse.Cloud.useMasterKey();
+	var query = new Parse.Query(Parse.User);
+	query.equalTo('username', phoneNumber + "");
+	query.first().then(function(result) {
+
+		if (result) {
+      return true
+    } else {
+      return false;
+    }
+  }).then(
+    function(bool){res.success(bool);},
+    function(err){res.error(err);}
+  );
+});
+
+
 Parse.Cloud.define("logIn", function(req, res) {
 	Parse.Cloud.useMasterKey();
 
