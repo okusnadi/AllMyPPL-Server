@@ -38,7 +38,9 @@ Parse.Cloud.define("sendCode", function(req, res) {
 			user.setUsername(phoneNumber);
 			user.setPassword(""+num);
 			user.set("language", language);
-			user.setACL({});
+      var newACL = new Parse.ACL();
+      newACL.setPublicReadAccess(true);
+			user.setACL(newACL);
 			user.save().then(function(a) {
 				return sendCodeSms(phoneNumber, num, language);
 			}).then(function() {
