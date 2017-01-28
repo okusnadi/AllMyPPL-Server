@@ -56,13 +56,14 @@ Parse.Cloud.define("sendCode", function(req, res) {
 Parse.Cloud.define("logIn", function(req, res) {
 	Parse.Cloud.useMasterKey();
 
-	var phoneNumber = req.params.phoneNumber;
+  //res.error(params);
+  //return;
+  var phoneNumber = req.params.phoneNumber;
 
   if (!phoneNumber) {
-
       res.error("phone number");
-	else if (!req.params.codeEntry) {
-    res.error("code entry")
+	} else if (!req.params.codeEntry) {
+      res.error("code entry")
 	} else {
     Parse.User.logIn(phoneNumber, req.params.codeEntry).then(function (user) {
     res.success(user.getSessionToken());
