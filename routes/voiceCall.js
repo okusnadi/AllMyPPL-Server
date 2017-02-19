@@ -152,10 +152,10 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
             twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'})
           });
         }
-    },function(){
+    }).then(function(){
           response.type('text/xml');
           response.send(twiml.toString());
-    }), function(error) {
+    }, function(error) {
         twiml.redirect('/goodbye');
             response.type('text/xml');
             response.send(twiml.toString());
