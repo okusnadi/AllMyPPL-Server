@@ -247,3 +247,31 @@ Parse.Cloud.beforeSave(Parse.User, (req, res) => {
 	}
 	res.success();
 });
+
+// Deletes user by phone number
+
+Parse.Cloud.define("deleteUserByPhoneNumber", function(req, res) {
+	var phoneNumber = req.params.phoneNumber;
+	phoneNumber = phoneNumber;
+
+	if (!phoneNumber || (phoneNumber.length != 10) return res.error('Invalid Parameters');
+	Parse.Cloud.useMasterKey();
+	var query = new Parse.Query(Parse.User);
+	query.equalTo('username', phoneNumber + "");
+	query.first().then(function(result) {
+
+		if (result) {
+			result.destroy().then(function() {
+				return;
+			}).then(function() {
+				res.success("User destroyed for " + phoneNumber);
+			}, function(err) {
+				res.error(err);
+			});
+		} else {
+				res.error("User not found for " + phoneNumber + ".");
+		}
+	}, function (err) {
+		res.error(err);
+	});
+});
