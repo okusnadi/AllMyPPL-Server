@@ -139,7 +139,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
   if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
   else if (numeral <= 0) { twiml.say("Listing contacts.",{voice:'alice'}); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
   else {
-    var query = Parse.Query("Contact");
+    var query = new Parse.Query("Contact");
     query.equalTo("numeral",numeral);
     query.first().then(function(contact){
         if (!contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
@@ -173,7 +173,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
 
   var numeral = request.params.numeral;
 
-  var query = Parse.Query("Contact");
+  var query = new Parse.Query("Contact");
   query.equalTo("numeral",input+"");
   query.first().then(function(contact){
     if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
