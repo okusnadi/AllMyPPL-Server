@@ -254,7 +254,7 @@ Parse.Cloud.define("deleteUserByPhoneNumber", function(req, res) {
 	var phoneNumber = req.params.phoneNumber;
 	phoneNumber = phoneNumber;
 
-	if (!phoneNumber || (phoneNumber.length != 10) { return res.error('Invalid Parameters'); }
+	if (!phoneNumber || (phoneNumber.length != 10)) { return res.error('Invalid Parameters'); }
 	Parse.Cloud.useMasterKey();
 	var query = new Parse.Query(Parse.User);
 	query.equalTo('username', phoneNumber + "");
