@@ -152,6 +152,8 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
           }, function(){
             twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'});
           });
+
+          twiml.redirect("/voice/menu/"+(numeral+1));
         }
     }).then(function(){
           response.type('text/xml');
