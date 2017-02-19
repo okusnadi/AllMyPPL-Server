@@ -182,11 +182,12 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       twiml.redirect("/menu/"+(numeral+1))} else {
         twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
       }
-  }, function(error) {twiml.say("I'm sorry, an error occurred.",{voice:'alice'}); twiml.redirect('/voice/goodbye');})
+        response.type('text/xml');
+        response.send(twiml.toString());
+  }, function(error) {twiml.say("I'm sorry, an error occurred.",{voice:'alice'}); twiml.redirect('/voice/goodbye');
+    response.type('text/xml');
+    response.send(twiml.toString());})
 
-
-  response.type('text/xml');
-  response.send(twiml.toString());
 });
 
 // menu methods for 1.0.1
