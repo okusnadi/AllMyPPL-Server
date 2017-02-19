@@ -7,6 +7,8 @@ var Parse = require('parse/node');
     Parse.serverURL = process.env.SERVER_URL;
 
     var user;
+    var allMyPPLPhoneNumber = "+16502062610"
+    var servicingHours = "48"
 
 router.post('/', twilio.webhook({validate: false}), function(request, response) {
   user = new Parse.User();
@@ -19,7 +21,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To The All My People Emergency Caller, call as yourself, not the phone you're using.", { voice: 'alice'});;
+    twiml.say("Welcome To All My People.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -125,7 +127,7 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
     method: "POST"
   },function () {
     twiml.say("To call your emergency contact, press 1 followed by the pound sign.",{voice:'alice'});
-   twiml.say("To dial out to a number you provide, press 2 followed by the pound sign. Choose now.",{voice:'alice'});
+   twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
 });
   twiml.redirect('/voice/menu');
 
@@ -154,7 +156,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Welcome, "+user.get('username')+".",{voice: 'alice'});
+  twiml.say("Welcome.",{voice: 'alice'});
 
 twiml.redirect('/voice/menu');
 
@@ -164,43 +166,7 @@ twiml.redirect('/voice/menu');
 
       });
 
-router.post('/dialOut', twilio.webhook({validate:false}), function(request, response){
-
-  var twiml = new twilio.TwimlResponse();
-
-  twiml.gather({
-   action: "/voice/afterDialOut",
-   numDigits: 10,
-   timeout: 10,
-   method: "POST"
- },function() {
-   twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign.",{voice: 'alice'});
- });
-
-  twiml.redirect('/voice/dialOut');
-
-      response.type('text/xml');
-      response.send(twiml.toString());
-
-      });
-
-router.post('/afterDialOut', twilio.webhook({validate: false}), function(request, response) {
-  var twiml = new twilio.TwimlResponse();
-  var input = request.body.Digits;
-
-  console.log('Digits entered: '+request.body.Digits);
-
-  if (input.length == 10) {
-    twiml.say("Calling "+input+". ",{voice: 'alice'});
-    twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
-  } else {
-    twiml.say("Invalid input, you must dial a ten digit phone number, area code first.  Returning to the main menu.",{voice:'alice'});
-    twiml.redirect('/voice/menu');
-  }
-
-      response.type('text/xml');
-      response.send(twiml.toString());
-});
+// EmergencyContact Methods for 1.0.1
 
 router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(request, response){
   var twiml = new twilio.TwimlResponse();
@@ -294,7 +260,7 @@ router.post('/goodbye', twilio.webhook({validate:false}), function(request, resp
 
   var twiml = new twilio.TwimlResponse();
 
-  twiml.say("Thank you for using the all my people emergency caller, call as yourself, not the phone you're using. Goodbye.",{voice:'alice'});
+  twiml.say("Thank you for using All My People. Goodbye.",{voice:'alice'});
 
   twiml.redirect('/voice/hangup');
 
@@ -314,6 +280,60 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 
   user = undefined;
 
+});
+
+//  dialOut methods
+
+router.post('/dialOut', twilio.webhook({validate:false}),function(request, response){
+
+  var twiml = new twilio.TwimlResponse();
+  if user.get('whitelisted') {
+    twiml.say("Your phone number has not been whitelisted yet and you will be unable to dial out as your account's phone number until it is, this process can take up to " + servicingHours + " hours.  If you've been waiting longer than " + servicingHours + " hours, please contact all my people support, support at all my P P L dot com.", {voice:'alice'});
+    twiml.redirect('/voice/menu');
+  } else {
+    twiml.redirect('/voice/dialOutOkayed');
+  }
+
+  response.type('text/xml');
+  response.send(twiml.toString());
+})
+
+router.post('/dialOutOkayed', twilio.webhook({validate:false}), function(request, response){
+
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.gather({
+   action: "/voice/afterDialOut",
+   numDigits: 10,
+   timeout: 10,
+   method: "POST"
+ },function() {
+   twiml.say("Please enter the 10 digit phone number you would like to dial, area code first followed by the pound sign.",{voice: 'alice'});
+ });
+
+  twiml.redirect('/voice/dialOut');
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+
+      });
+
+router.post('/afterDialOut', twilio.webhook({validate: false}), function(request, response) {
+  var twiml = new twilio.TwimlResponse();
+  var input = request.body.Digits;
+
+  console.log('Digits entered: '+request.body.Digits);
+
+  if (input.length == 10) {
+    twiml.say("Calling "+input+". ",{voice: 'alice'});
+      twiml.dial(input, { callerId : user.get('username'), timeout: 30, action: '/voice/goodbye', method: "POST" });
+  } else {
+    twiml.say("Invalid input, you must dial a ten digit phone number, area code first.  Returning to the main menu.",{voice:'alice'});
+    twiml.redirect('/voice/menu');
+  }
+
+      response.type('text/xml');
+      response.send(twiml.toString());
 });
 
 module.exports = router;

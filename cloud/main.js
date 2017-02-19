@@ -1,4 +1,5 @@
 var twilioPhoneNumber = '+16502062610';
+var supportPhoneNumber = '+16505878510';
 
 var language = "en";
 var languages = ["en", "es", "ja", "kr", "pt-BR"];
@@ -215,4 +216,33 @@ Parse.Cloud.beforeSave("Contact", (req, res) => {
   if (!obj) {console.log("no object passed in, aborting..."); res.error(new Parse.Error(Parse.Error.OBJECT_NOT_FOUND,"No req.object found."));}
   else {console.log("beforeSave triggered on Contact ",obj.toJSON()); obj.set('nameLowercase', obj.get("name").toLowerCase()); res.success();}
 
+});
+
+Parse.Cloud.beforeSave(Parse.User, (req, res) => {
+
+  const obj = req.object;
+
+	if (!obj.existed()) {
+
+		let Body = obj.get('username') + " just signed up with AllMyPPL, please whitelist them with Twilio.";
+    let To = supportPhoneNumber;
+    let From = allMyPPLPhoneNumber;
+    let accountSid = process.env.TWILIO_ACCOUNT_SID; // Your Account SID from www.twilio.com/console
+    let authToken = process.env.TWILIO_AUTH_TOKEN;   // Your Auth Token from www.twilio.com/console
+
+    var twilio = require('twilio');
+    var client = new twilio.RestClient(accountSid, authToken);
+
+    client.messages.create({
+          body: Body,
+          to: To,
+          from: From
+      }, function(err, message) {
+				if (!err) {	// message sent
+				} else { // message failed
+				}
+			});
+
+	}
+	res.success();
 });
