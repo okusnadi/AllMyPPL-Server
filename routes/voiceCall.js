@@ -140,7 +140,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
   else if (numeral <= 0) { twiml.say("Listing contacts.",{voice:'alice'}); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
   else {
     var query = new Parse.Query("Contact");
-    query.equalTo("numeral",numeral);
+    query.equalTo("numeral",numeral+"");
     query.first().then(function(contact){
         if (!contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
         else {
