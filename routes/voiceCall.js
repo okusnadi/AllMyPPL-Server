@@ -287,7 +287,7 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 router.post('/dialOut', twilio.webhook({validate:false}),function(request, response){
 
   var twiml = new twilio.TwimlResponse();
-  if user.get('whitelisted') {
+  if (user.get('whitelisted')) {
     twiml.say("Your phone number has not been whitelisted yet and you will be unable to dial out as your account's phone number until it is, this process can take up to " + servicingHours + " hours.  If you've been waiting longer than " + servicingHours + " hours, please contact all my people support, support at all my P P L dot com.", {voice:'alice'});
     twiml.redirect('/voice/menu');
   } else {
