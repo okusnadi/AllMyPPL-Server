@@ -1,5 +1,6 @@
 var twilioPhoneNumber = '+16502062610';
 var supportPhoneNumber = '+16505878510';
+var allMyPPLPhoneNumber = '+16502062610';
 
 var language = "en";
 var languages = ["en", "es", "ja", "kr", "pt-BR"];
