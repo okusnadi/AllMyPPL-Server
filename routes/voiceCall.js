@@ -136,7 +136,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
   var twiml = new twilio.TwimlResponse();
 
   var numeral = parseInt(request.params.numeral);
-  if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
+  if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.  If you're hearing this message right after starting the list, you haven't set up any contacts to be one of your people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
   else if (numeral <= 0) { twiml.say("Listing contacts.",{voice:'alice'}); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
   else {
     var query = new Parse.Query("Contact");
