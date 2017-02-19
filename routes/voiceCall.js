@@ -109,6 +109,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
 });
 
+
 router.post('/loginError', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   twiml.say("Invalid phone number and pin combination, you'll need to re-enter your credentials.",{voice:'alice'})
@@ -118,8 +119,77 @@ router.post('/loginError', twilio.webhook({validate: false}), function(request, 
 });
 
 
-router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
+router.post('/afterLogin', twilio.webhook({validate:false}), function(request, response){
+
   var twiml = new twilio.TwimlResponse();
+
+  twiml.say("Welcome.",{voice: 'alice'});
+
+  twiml.redirect('/voice/menu/1');
+
+      response.type('text/xml');
+      response.send(twiml.toString());
+
+      });
+
+router.post('/menu/:numeral', twilio.webhook({validate: false}), function(request, response) {
+  var twiml = new twilio.TwimlResponse();
+
+  var numeral = parseInt(req.params.numeral);
+  if (numeral >= 10 || numeral <= 0) {twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
+  else {
+    var query = Parse.Query("Contact");
+    query.equalTo("numeral",numeral);
+    query.first().then(function(contact){
+        if (!contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
+        else {
+          twiml.gather({
+            action: "/voice/menu/"+numeral+"/afterMenu",
+            numDigits: 1,
+            timeout: 5,
+            method: "POST"
+          }, function(){
+            twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'})
+          });
+        }
+    },function(){
+          response.type('text/xml');
+          response.send(twiml.toString());
+    }), function(error) {
+        twiml.redirect('/goodbye');
+            response.type('text/xml');
+            response.send(twiml.toString());
+    });
+  }
+});
+
+outer.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
+  var input = request.body.Digits;
+
+  console.log('Digits entered: '+request.body.Digits);
+
+  var twiml = new twilio.TwimlResponse();
+
+  var numeral = req.params.numeral;
+
+  var query = Parse.Query("Contact");
+  query.equalTo("numeral",input+"");
+  query.first().then(function(contact){
+    if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
+      twiml.redirect("/menu/"+(numeral+1))} else {
+        twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
+      }
+  })
+
+
+  response.type('text/xml');
+  response.send(twiml.toString());
+});
+
+// menu methods for 1.0.1
+/*
+router.post('/menu', twilio.webhook({validate: false}), function(request, response) {
+
   twiml.gather({
     action: "/voice/afterMenu",
     numDigits: 1,
@@ -130,17 +200,15 @@ router.post('/menu', twilio.webhook({validate: false}), function(request, respon
    twiml.say("To dial out to a number you provide, press 2 followed by the pound sign.",{voice:'alice'});
 });
   twiml.redirect('/voice/menu');
-
-      response.type('text/xml');
+  response.type('text/xml');
       response.send(twiml.toString());
+
 });
 
 router.post('/afterMenu', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   var input = request.body.Digits;
-
   console.log('Digits entered: '+request.body.Digits);
-
   if (input == "1") {
     twiml.redirect('/voice/callEmergencyContact');
   } else if (input == "2") {
@@ -148,24 +216,10 @@ router.post('/afterMenu', twilio.webhook({validate: false}), function(request, r
   } else {
     twiml.redirect('/voice/menu');
   }
-      response.type('text/xml');
-      response.send(twiml.toString());
+  response.type('text/xml');
+  response.send(twiml.toString());
 });
-
-router.post('/afterLogin', twilio.webhook({validate:false}), function(request, response){
-
-  var twiml = new twilio.TwimlResponse();
-
-  twiml.say("Welcome.",{voice: 'alice'});
-
-twiml.redirect('/voice/menu');
-
-
-      response.type('text/xml');
-      response.send(twiml.toString());
-
-      });
-
+*/
 // EmergencyContact Methods for 1.0.1
 
 router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(request, response){
@@ -285,20 +339,6 @@ router.post('/hangup', twilio.webhook({validate:false}), function(request, respo
 //  dialOut methods
 
 router.post('/dialOut', twilio.webhook({validate:false}),function(request, response){
-
-  var twiml = new twilio.TwimlResponse();
-  if (user.get('whitelisted')) {
-    twiml.say("Your phone number has not been whitelisted yet and you will be unable to dial out as your account's phone number until it is, this process can take up to " + servicingHours + " hours.  If you've been waiting longer than " + servicingHours + " hours, please contact all my people support, support at all my P P L dot com.", {voice:'alice'});
-    twiml.redirect('/voice/menu');
-  } else {
-    twiml.redirect('/voice/dialOutOkayed');
-  }
-
-  response.type('text/xml');
-  response.send(twiml.toString());
-})
-
-router.post('/dialOutOkayed', twilio.webhook({validate:false}), function(request, response){
 
   var twiml = new twilio.TwimlResponse();
 
