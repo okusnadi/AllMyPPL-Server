@@ -125,7 +125,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 
   twiml.say("Welcome.",{voice: 'alice'});
 
-  twiml.redirect('/voice/menu/1');
+  twiml.redirect('/voice/menu/0');
 
       response.type('text/xml');
       response.send(twiml.toString());
@@ -136,7 +136,8 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
   var twiml = new twilio.TwimlResponse();
 
   var numeral = parseInt(request.params.numeral);
-  if (numeral >= 10 || numeral <= 0) {twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
+  if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
+  else if (numeral <= 0) { twiml.say("Listing contacts.",{voice:'alice'}); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
   else {
     var query = Parse.Query("Contact");
     query.equalTo("numeral",numeral);
