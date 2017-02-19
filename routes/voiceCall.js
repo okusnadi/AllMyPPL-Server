@@ -163,7 +163,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
   }
 });
 
-outer.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
+router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
   var input = request.body.Digits;
 
   console.log('Digits entered: '+request.body.Digits);
