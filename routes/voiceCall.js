@@ -141,7 +141,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
   else {
     var query = new Parse.Query("Contact");
     query.equalTo("numeral",numeral+"");
-    query.first().then(function(contact){
+    query.first({sessionToken:user.getSessionToken()}).then(function(contact){
         if (!contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
         else {
           twiml.gather({
