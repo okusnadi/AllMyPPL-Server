@@ -1,6 +1,6 @@
 {
   "name": "AllMyPPL",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The server of www.allmyppl.com. An example of how you can integrate twilio and parse-server-mailgun, parse, parse-server and express modules with a heroku hosted nodejs server to accomplish an email sending, text messaging interface for managing your contacts.",
   "main": "index.js",
   "repository": {
