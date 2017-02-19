@@ -180,6 +180,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
   query.first({sessionToken:user.getSessionToken()}).then(function(contact){
     if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
       twiml.redirect("/menu/"+(numeral+1))} else {
+        twiml.say("Connecting to "+contact.get('name'),{voice:'alice'});
         twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
       }
         response.type('text/xml');
