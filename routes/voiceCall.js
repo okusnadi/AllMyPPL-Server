@@ -135,7 +135,7 @@ router.post('/afterLogin', twilio.webhook({validate:false}), function(request, r
 router.post('/menu/:numeral', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
 
-  var numeral = parseInt(req.params.numeral);
+  var numeral = parseInt(request.params.numeral);
   if (numeral >= 10 || numeral <= 0) {twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
   else {
     var query = Parse.Query("Contact");
@@ -170,7 +170,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
 
   var twiml = new twilio.TwimlResponse();
 
-  var numeral = req.params.numeral;
+  var numeral = request.params.numeral;
 
   var query = Parse.Query("Contact");
   query.equalTo("numeral",input+"");
