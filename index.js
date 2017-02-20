@@ -32,7 +32,7 @@ var api = new ParseServer({
   allowClientClassCreation:true,
   publicServerURL: process.env.SERVER_URL || 'http://localhost:1337/parse',
   appName: process.env.APP_NAME || 'appName',
-  verifyUserEmails:true,
+  verifyUserEmails:false,
   emailAdapter: {
     module: 'parse-server-mailgun',
     options: {
