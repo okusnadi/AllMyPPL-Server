@@ -3,7 +3,7 @@ var router = express.Router();
 var twilio = require('twilio');
 var Parse = require('parse/node');
 
-    Parse.initialize(process.env.App_ID);
+    Parse.initialize(process.env.APP_ID);
     Parse.serverURL = process.env.SERVER_URL;
 
     var user;
@@ -21,7 +21,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To All My People.", { voice: 'alice'});;
+    twiml.say("Welcome To All My People, please wait for the periods of silence to make your entries.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -147,7 +147,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 3,
+            timeout: 2,
             method: "POST"
           }, function(){
             twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'});
