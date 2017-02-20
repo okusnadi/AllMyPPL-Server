@@ -137,7 +137,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
 
   var numeral = parseInt(request.params.numeral);
   if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.  If you're hearing this message right after starting the list, you haven't set up any contacts to be one of your people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
-  else if (numeral <= 0) { twiml.say("Listing contacts.",{voice:'alice'}); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
+  else if (numeral <= 0) { twiml.say("Listing contacts, if you know the selection you want you can enter any time during silence.",{voice:'alice'}); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());}
   else {
     var query = new Parse.Query("Contact");
     query.equalTo("numeral",numeral+"");
@@ -147,10 +147,10 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 2,
+            timeout: 3,
             method: "POST"
           }, function(){
-            twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'});
+            twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +".",{voice:'alice'});
           });
 
           twiml.redirect("/voice/menu/"+(numeral+1));
