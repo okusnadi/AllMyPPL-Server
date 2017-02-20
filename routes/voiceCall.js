@@ -142,12 +142,12 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
     var query = new Parse.Query("Contact");
     query.equalTo("numeral",numeral+"");
     query.first({sessionToken:user.getSessionToken()}).then(function(contact){
-        if (!contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
+        if (contact == null || contact == undefined || !contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
         else {
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 5,
+            timeout: 2,
             method: "POST"
           }, function(){
             twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'});
