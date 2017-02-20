@@ -147,7 +147,7 @@ router.post('/menu/:numeral', twilio.webhook({validate: false}), function(reques
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 2,
+            timeout: 3,
             method: "POST"
           }, function(){
             twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +", followed by the pound sign.",{voice:'alice'});
