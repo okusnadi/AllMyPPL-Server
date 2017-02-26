@@ -21,7 +21,7 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
     var twiml = new twilio.TwimlResponse();
 
-    twiml.say("Welcome To All My People, please wait for the periods of silence to make your entries.", { voice: 'alice'});;
+    twiml.say("Welcome To CAll My People, a free service from All My People, please wait for the periods of silence to make your entries.", { voice: 'alice'});;
 
     twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -185,9 +185,38 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       }
         response.type('text/xml');
         response.send(twiml.toString());
-  }, function(error) {twiml.say("I'm sorry, an error occurred.",{voice:'alice'}); twiml.redirect('/voice/goodbye');
+  }, function(error) {
+    console.log(error);
+    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/goodbye');
     response.type('text/xml');
     response.send(twiml.toString());})
+
+});
+
+router.post('/goodbye', twilio.webhook({validate:false}), function(request, response){
+  console.log(JSON.stringify(request.body));
+
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.say("Thank you for using CAll My People, a free service from All My PeoPLe. Goodbye.",{voice:'alice'});
+
+  twiml.redirect('/voice/hangup');
+
+  response.type('text/xml');
+  response.send(twiml.toString());
+
+});
+
+router.post('/hangup', twilio.webhook({validate:false}), function(request, response){
+
+  var twiml = new twilio.TwimlResponse();
+
+  twiml.hangup();
+
+  response.type('text/xml');
+  response.send(twiml.toString());
+
+  user = undefined;
 
 });
 
@@ -312,33 +341,6 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
         response.type('text/xml');
         response.send(twiml.toString());
   });
-});
-
-router.post('/goodbye', twilio.webhook({validate:false}), function(request, response){
-  console.log(JSON.stringify(request.body));
-
-  var twiml = new twilio.TwimlResponse();
-
-  twiml.say("Thank you for using All My People. Goodbye.",{voice:'alice'});
-
-  twiml.redirect('/voice/hangup');
-
-  response.type('text/xml');
-  response.send(twiml.toString());
-
-});
-
-router.post('/hangup', twilio.webhook({validate:false}), function(request, response){
-
-  var twiml = new twilio.TwimlResponse();
-
-  twiml.hangup();
-
-  response.type('text/xml');
-  response.send(twiml.toString());
-
-  user = undefined;
-
 });
 
 //  dialOut methods
