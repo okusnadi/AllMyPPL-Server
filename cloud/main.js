@@ -185,7 +185,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 		queries[1].startsWith("nameLowercase","b");
 		queries[2].startsWith("nameLowercase","c");
 		queries[3].startsWith("nameLowercase","2");
-		var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3]);
+		var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3]);
 		digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "3":
@@ -193,7 +193,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[1].startsWith("nameLowercase","e");
 			queries[2].startsWith("nameLowercase","f");
 			queries[3].startsWith("nameLowercase","3");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "4":
@@ -201,7 +201,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[1].startsWith("nameLowercase","h");
 			queries[2].startsWith("nameLowercase","i");
 			queries[3].startsWith("nameLowercase","4");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "5":
@@ -209,7 +209,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[1].startsWith("nameLowercase","k");
 			queries[2].startsWith("nameLowercase","l");
 			queries[3].startsWith("nameLowercase","5");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "6":
@@ -217,7 +217,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[1].startsWith("nameLowercase","n");
 			queries[2].startsWith("nameLowercase","o");
 			queries[3].startsWith("nameLowercase","6");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "7":
@@ -226,7 +226,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[2].startsWith("nameLowercase","r");
 			queries[3].startsWith("nameLowercase","s");
 			queries[4].startsWith("nameLowercase","7");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3], queries[4]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3], queries[4]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "8":
@@ -234,7 +234,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[1].startsWith("nameLowercase","u");
 			queries[2].startsWith("nameLowercase","v");
 			queries[3].startsWith("nameLowercase","8");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 			case "9":
@@ -243,7 +243,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[2].startsWith("nameLowercase","y");
 			queries[3].startsWith("nameLowercase","z");
 			queries[4].startsWith("nameLowercase","9");
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3],queries[4]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3],queries[4]);
 			digitQuery.find().then(function(results) {res.success(results);})
 			break;
 		default:
@@ -255,7 +255,7 @@ Parse.Cloud.define("getAllContactsForDigit", function(req, res) {
 			queries[5].startsWith("nameLowercase","(");
 			queries[6].startsWith("nameLowercase","'");
 			queries[7].startsWith("nameLowercase",'"');
-			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],[queries[3],queries[4],queries[5],queries[6],queries[7]);
+			var digitQuery = Parse.Query.or(queries[0],queries[1],queries[2],queries[3],queries[4],queries[5],queries[6],queries[7]);
 			digitQuery.find().then(function(results) {res.success(results);})
 	}
 }
