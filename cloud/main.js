@@ -271,6 +271,17 @@ Parse.Cloud.define("getActiveParty", (req,res) => {
 	});
 });
 
+Parse.Cloud.define("getActiveHostedParty", (req,res) => {
+	var user = req.user;
+	var partyQuery = new Parse.Query("Party")
+	partyQuery.equalTo("host",user);
+	partyQuery.first().then(function(result) {
+		res.success(result);
+	},function(error) {
+		res.error(error);
+	});
+});
+
 Parse.Cloud.define("joinParty", (req,res) => {
 	var user = req.user;
 	const partyID = req.params.partyID;
