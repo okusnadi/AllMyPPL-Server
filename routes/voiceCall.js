@@ -148,14 +148,14 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         query.notEqualTo("host",user);
         query.first().then(function(result) {
           if (!result) {} else {
-          twiml.say("Press 0 to join your joined party during any period of silence.",{voice:'alice'});
+          twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
           }
           twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         },function(error) {
           twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         });
     } else {
-      twiml.say("Press 0 to join your hosted party during any period of silence.",{voice:'alice'});
+      twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
       twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
     }
     },function(error) {
@@ -256,7 +256,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     query.get(partyID,{sessionToken:user.getSessionToken()}).then(function(party) {
       var users = party.get("users");
       var contact = users[iterator];
-      if (iterator == 0) { twiml.say("Welcome to your party. Press 0 to return to the main menu.",{voice:'alice'}); }
+      if (iterator == 0) { twiml.say("Listing Party contacts. Press 0 to return to the main menu.",{voice:'alice'}); }
       if (iterator < users.length) {
         twiml.gather({
           action: "/voice/listParty/"+partyID+"/"+iterator+"/afterMenu",
@@ -278,12 +278,19 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       })
         });
       } else {
+        twiml.gather({
+          action: "/voice/listParty/"+partyID+"/"+iterator+"/afterMenu",
+          numDigits: 1,
+          timeout: 2,
+          method: "POST"
+        }, function(){});
         twiml.redirect("/voice/listParty/"+partyID+"/0")
         response.type('text/xml');
         response.send(twiml.toString());
       }
     },function(error) {
-      twiml.say("I'm sorry, an error occurred.",{voice:'alice'}); twiml.redirect('/voice/menu/0');
+      twiml.say("I'm sorry, an error occurred.",{voice:'alice'});
+      twiml.redirect('/voice/menu/0');
       response.type('text/xml');
       response.send(twiml.toString());
     });
@@ -305,14 +312,23 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     query.get(partyID,{sessionToken:user.getSessionToken()}).then(function(party){
       if (!party) {twiml.say("I'm sorry, we couldn't connect to your party, please try again later.",{voice:'alice'});
       twiml.redirect("/voice/goodbye");
+      response.type('text/xml');
+      response.send(twiml.toString());
     } else {
       var users = party.get("users");
       var contact = users[parseInt(input)-1];
+      contact.fetch().then(function(obj){
+        twiml.say("Connecting to "+obj.get("displayName") + ".",{voice:'alice'});
+        twiml.dial(obj.username, { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
+    response.type('text/xml');
+    response.send(twiml.toString());
+        }, function(error) {twiml.say("I'm sorry, we couldn't connect to your party, please try again later.",{voice:'alice'});
+      twiml.redirect("/voice/goodbye");
+      response.type('text/xml');
+      response.send(twiml.toString());
       twiml.say("Connecting to "+contact.get("displayName"),{voice:'alice'});
       twiml.dial(contact.username, { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
     }
-    response.type('text/xml');
-    response.send(twiml.toString());
   }, function(error) {
     console.log(error);
     twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
