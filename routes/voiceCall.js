@@ -246,8 +246,10 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
         }
       });
     }
+  });
     return
   }
+
 
   var query = new Parse.Query("Contact");
   query.equalTo("numeral",input+"");
