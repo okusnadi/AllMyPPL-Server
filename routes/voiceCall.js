@@ -246,9 +246,6 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
         }
       });
     }
-    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
-    response.type('text/xml');
-    response.send(twiml.toString());});
     return
   }
 
