@@ -138,12 +138,12 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     var numeral = parseInt(request.params.numeral);
     if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.  If you're hearing this message right after starting the list, you haven't set up any contacts to be one of your people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
     else if (numeral <= 0) { twiml.say("Listing contacts, if you know the selection you want you can enter any time during silence.",{voice:'alice'});
-    Parse.Cloud.run("getActiveHostedParty").then(function(party){
+    Parse.Cloud.run("getActiveHostedParty", {sessionToken:user.getSessionToken()}).then(function(party){
       if (party != null) {
         twiml.say("Press 0 to join your hosted party during any period of silence."); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         return;
       } else {
-        Parse.Cloud.run("getActiveParty").then(function(party){
+        Parse.Cloud.run("getActiveParty", {sessionToken:user.getSessionToken()}).then(function(party){
           if (party != null) {
             twiml.say("Press 0 to join your joined party during any period of silence."); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
             return;
@@ -200,7 +200,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
 
 
 
-  if input == "0" {
+  if (input == "0") {
 
     Parse.Cloud.run("getActiveHostedParty",{sessionToken:user.getSessionToken()}).then(
       function (result) {
