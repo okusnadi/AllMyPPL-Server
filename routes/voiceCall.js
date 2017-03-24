@@ -182,7 +182,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       response.type('text/xml');
       response.send(twiml.toString());
     }, function(error) {
-      twiml.redirect('/goodbye');
+      twiml.redirect('/voice/goodbye');
       response.type('text/xml');
       response.send(twiml.toString());
     });
@@ -205,7 +205,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     Parse.Cloud.run("getActiveHostedParty",{sessionToken:user.getSessionToken()}).then(
       function (result) {
         if (result != null) {
-          twiml.redirect("/listParty/"+result.id+"/0");
+          twiml.redirect("/voice/listParty/"+result.id+"/0");
       response.type('text/xml');
       response.send(twiml.toString());
       return;
@@ -213,7 +213,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       Parse.Cloud.run("getActiveParty",{sessionToken:user.getSessionToken()}).then(
           function (result) {
             if (result != null) {
-              twiml.redirect("/listParty/"+result.id+"/0");
+              twiml.redirect("/voice/listParty/"+result.id+"/0");
           response.type('text/xml');
           response.send(twiml.toString());
           return;
@@ -260,8 +260,8 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     query.get(partyID,{sessionToken:user.getSessionToken()}).then(function(party) {
       var users = party.get("users");
       var contact = users[iterator];
-      if iterator == 0 { twiml.say("Welcome to your party, listing contacts.",{voice:'alice'}); }
-      if iterator < users.length {
+      if (iterator == 0) { twiml.say("Welcome to your party, listing contacts.",{voice:'alice'}); }
+      if (iterator < users.length) {
         twiml.gather({
           action: "/voice/listParty/"+partyID+"/"+iterator+"/afterMenu",
           numDigits: 1,
