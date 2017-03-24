@@ -212,7 +212,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
         }
       Parse.Cloud.run("getActiveParty",{sessionToken:user.getSessionToken()}).then(
           function (result) {
-            if result != null {
+            if (result != null) {
               twiml.redirect("/listParty/"+result.id+"/0");
           response.type('text/xml');
           response.send(twiml.toString());
