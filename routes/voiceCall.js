@@ -210,7 +210,6 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       response.send(twiml.toString());
       return;
         }
-      }
       Parse.Cloud.run("getActiveParty",{sessionToken:user.getSessionToken()}).then(
           function (result) {
             if result != null {
@@ -222,10 +221,16 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
           },
           function (error) {console.error("no active party +" error);twiml.redirect("/menu/"+(numeral+1));
       response.type('text/xml');
-      response.send(twiml.toString());}
-        )
+      response.send(twiml.toString());
+      return
+        });
+
+      },function (error) {console.error("no active party +" error);twiml.redirect("/menu/"+(numeral+1));
+    response.type('text/xml');
+    response.send(twiml.toString());
     return
-  }
+      });
+    }
 
   var query = new Parse.Query("Contact");
   query.equalTo("numeral",input+"");
@@ -241,7 +246,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     console.log(error);
     twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/goodbye');
     response.type('text/xml');
-    response.send(twiml.toString());})
+    response.send(twiml.toString());});
 
   });
 
