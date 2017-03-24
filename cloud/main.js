@@ -264,6 +264,7 @@ Parse.Cloud.define("getActiveParty", (req,res) => {
 	var user = req.user;
 	var partyQuery = new Parse.Query("Party")
 	partyQuery.equalTo("users",user);
+	partyQuery.notEqualTo("host",user);
 	partyQuery.first().then(function(result) {
 		res.success(result);
 	},function(error) {
