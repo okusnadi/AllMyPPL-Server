@@ -219,18 +219,18 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
           return;
             }
           },
-          function (error) {console.error("no active party "+ error);twiml.redirect("/menu/"+(numeral+1));
+          function (error) {console.error("no active party "+ error.message);twiml.redirect("/menu/"+(numeral+1));
       response.type('text/xml');
       response.send(twiml.toString());
       return
         });
 
-      },function (error) {console.error("no active party "+ error);twiml.redirect("/menu/"+(numeral+1));
+      },function (error) {console.error("no active party "+ error.message);twiml.redirect("/menu/"+(numeral+1));
     response.type('text/xml');
     response.send(twiml.toString());
     return
       });
-      
+
   }
 
   var query = new Parse.Query("Contact");
