@@ -324,17 +324,18 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     response.send(twiml.toString());
         }, function(error) {twiml.say("I'm sorry, we couldn't connect to your party, please try again later.",{voice:'alice'});
       twiml.redirect("/voice/goodbye");
-      response.type('text/xml');
-      response.send(twiml.toString());
       twiml.say("Connecting to "+contact.get("displayName"),{voice:'alice'});
       twiml.dial(contact.username, { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
+      response.type('text/xml');
+      response.send(twiml.toString());
+      });
     }
-  }, function(error) {
+    }, function(error) {
     console.log(error);
     twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
     response.type('text/xml');
-    response.send(twiml.toString());})
-
+    response.send(twiml.toString());
+  });
   });
 
   router.post('/goodbye', twilio.webhook({validate:false}), function(request, response){
