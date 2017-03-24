@@ -319,7 +319,8 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       var contact = users[parseInt(input)-1];
       contact.fetch().then(function(obj){
         twiml.say("Connecting to "+obj.get("displayName") + ".",{voice:'alice'});
-        twiml.dial(obj.username, { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
+        console.error(obj.username + " " + obj.get("username"));
+        twiml.dial(obj.get('username'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
     response.type('text/xml');
     response.send(twiml.toString());
         }, function(error) {twiml.say("I'm sorry, we couldn't connect to your party, please try again later.",{voice:'alice'});
