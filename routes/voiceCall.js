@@ -138,28 +138,53 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     var numeral = parseInt(request.params.numeral);
     if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.  If you're hearing this message right after starting the list, you haven't set up any contacts to be one of your people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
     else if (numeral <= 0) { twiml.say("Listing contacts, if you know the selection you want you can enter any time during silence.",{voice:'alice'});
-    Parse.Cloud.run("getActiveHostedParty",{}, {sessionToken:user.getSessionToken()}).then(function(party){
-      if (party != null) {
-        twiml.say("Press 0 to join your hosted party during any period of silence."); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
-        return;
-      } else {
-        Parse.Cloud.run("getActiveParty",{}, {sessionToken:user.getSessionToken()}).then(function(party){
-          if (party != null) {
-            twiml.say("Press 0 to join your joined party during any period of silence."); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
-            return;
-          } else {
-            twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
-            return
-          }
-        }, function (error) {
-          twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
-          return
-        });
-      }
-    }, function (error) {
+
+    var partyQuery = new Parse.Query("Party")
+    partyQuery.equalTo("host",user);
+    partyQuery.first().then(function(result) {
+      if (result != null) {
+      twiml.say("Press 0 to join your hosted party during any period of silence.");
+      twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    } else {
+      var query = new Parse.Query("Party");
+      query.equalTo("users", user);
+      query.notEqualTo("host",user);
+      query.first().then(function(result) {
+        if (result != null) {
+        twiml.say("Press 0 to join your joined party during any period of silence.");
+        }
         twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
-        return
+      },function(error) {
+        twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+      });
+    }
+      twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    },function(error) {
+      twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
     });
+    // Parse.Cloud.run("getActiveHostedParty",{}, {sessionToken:user.getSessionToken()}).then(function(party){
+    //
+    //   if (party != null) {
+    //     twiml.say("Press 0 to join your hosted party during any period of silence."); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    //     return;
+    //   } else {
+    //     Parse.Cloud.run("getActiveParty",{}, {sessionToken:user.getSessionToken()}).then(function(party){
+    //       if (party != null) {
+    //         twiml.say("Press 0 to join your joined party during any period of silence."); twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    //         return;
+    //       } else {
+    //         twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    //         return
+    //       }
+    //     }, function (error) {
+    //       twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    //       return
+    //     });
+    //   }
+    // }, function (error) {
+    //     twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+    //     return
+    // });
   }
   else {
     var query = new Parse.Query("Contact");
@@ -202,35 +227,29 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
 
   if (input == "0") {
 
-    Parse.Cloud.run("getActiveHostedParty",{},{sessionToken:user.getSessionToken()}).then(
-      function (result) {
-        if (result != null) {
-          twiml.redirect("/voice/listParty/"+result.id+"/0");
-      response.type('text/xml');
-      response.send(twiml.toString());
-      return;
-        }
-      Parse.Cloud.run("getActiveParty",{},{sessionToken:user.getSessionToken()}).then(
-          function (result) {
-            if (result != null) {
-              twiml.redirect("/voice/listParty/"+result.id+"/0");
-          response.type('text/xml');
-          response.send(twiml.toString());
-          return;
-            }
-          },
-          function (error) {console.error("no active party "+ error.message);twiml.redirect("/menu/"+(numeral+1));
-      response.type('text/xml');
-      response.send(twiml.toString());
+    var partyQuery = new Parse.Query("Party")
+    partyQuery.equalTo("host",user);
+    partyQuery.first().then(function(result) {
+      if (result != null) {
+      twiml.redirect("/voice/listParty/"+result.id+"/0");
+      response.type('text/xml'); response.send(twiml.toString());
       return
-        });
-
-      },function (error) {console.error("no active party "+ error.message);twiml.redirect("/menu/"+(numeral+1));
-    response.type('text/xml');
-    response.send(twiml.toString());
-    return
+    } else {
+      var query = new Parse.Query("Party");
+      query.equalTo("users", user);
+      query.notEqualTo("host",user);
+      query.first().then(function(result) {
+        if (result != null) {
+        twiml.redirect("/voice/listParty/"+result.id+"/0");
+        response.type('text/xml'); response.send(twiml.toString());
+        return
+        }
       });
-
+    }
+    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
+    response.type('text/xml');
+    response.send(twiml.toString());});
+    return
   }
 
   var query = new Parse.Query("Contact");
@@ -245,7 +264,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     response.send(twiml.toString());
   }, function(error) {
     console.log(error);
-    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/goodbye');
+    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
     response.type('text/xml');
     response.send(twiml.toString());});
 
@@ -280,7 +299,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
       response.type('text/xml');
       response.send(twiml.toString());
     },function(error) {
-      twiml.say("I'm sorry, an error occurred.",{voice:'alice'}); twiml.redirect('/voice/goodbye');
+      twiml.say("I'm sorry, an error occurred.",{voice:'alice'}); twiml.redirect('/voice/menu/0');
       response.type('text/xml');
       response.send(twiml.toString());
     });
@@ -307,7 +326,7 @@ router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), funct
     response.send(twiml.toString());
   }, function(error) {
     console.log(error);
-    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/goodbye');
+    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
     response.type('text/xml');
     response.send(twiml.toString());})
 
