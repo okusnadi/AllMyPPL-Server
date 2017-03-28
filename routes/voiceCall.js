@@ -157,7 +157,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
               timeout: 2,
               method: "POST"
             }, function(){
-              twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
+              twiml.say("Press 0 to connect to your party.",{voice:'alice'});
             });
           }
           twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
@@ -171,7 +171,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         timeout: 2,
         method: "POST"
       }, function(){
-        twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
+        twiml.say("Press 0 to connect to your party.",{voice:'alice'});
       });
       twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
     }
