@@ -21,7 +21,9 @@ router.post('/', twilio.webhook({validate: false}), function(request, response) 
 router.post('/welcome', twilio.webhook({validate: false}), function (request, response) {
   var twiml = new twilio.TwimlResponse();
 
+
   twiml.say("Welcome To CAll My People, a free service from All My People, please wait for the periods of silence to make your entries.", { voice: 'alice'});;
+
 
   twiml.redirect('/voice/promptForPhoneNumber');
 
@@ -125,6 +127,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
     twiml.say("Welcome.",{voice: 'alice'});
 
+
     twiml.redirect('/voice/menu/0');
 
     response.type('text/xml');
@@ -161,6 +164,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     },function(error) {
       twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
     });
+
 
   }
   else {
@@ -401,7 +405,7 @@ response.send(twiml.toString());
 });
 */
 // EmergencyContact Methods for 1.0.1
-
+/*
 router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(request, response){
   var twiml = new twilio.TwimlResponse();
 
@@ -433,7 +437,7 @@ router.post('/dialEmergencyContact', twilio.webhook({validate:false}), function(
   },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS or eye oh es App, prior to calling.",{voice: 'alice'});
 
     twiml.redirect('/voice/menu');
 
@@ -480,7 +484,7 @@ router.post('/callEmergencyContact', twilio.webhook({validate:false}), function(
   },function(error) {
     console.error(error.code+" : "+error.message);
 
-    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS, or the iOS App, prior to calling.",{voice: 'alice'});
+    twiml.say("I could not find an emergency contact for you, please make sure you've set up your emergency contact with All My People SMS or the eye oh ess app, prior to calling.",{voice: 'alice'});
 
     twiml.redirect('/voice/menu');
 
@@ -528,5 +532,5 @@ router.post('/afterDialOut', twilio.webhook({validate: false}), function(request
   response.type('text/xml');
   response.send(twiml.toString());
 });
-
+*/
 module.exports = router;
