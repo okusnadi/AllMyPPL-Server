@@ -152,14 +152,26 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         query.first().then(function(result) {
           if (!result) {} else {
           twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
+          twiml.gather({
+            action: "/voice/menu/"+numeral+"/afterMenu",
+            numDigits: 1,
+            timeout: 2,
+            method: "POST"
+          }, function(){
+          });
           }
-          twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         },function(error) {
           twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         });
     } else {
       twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
-      twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+      twiml.gather({
+        action: "/voice/menu/"+numeral+"/afterMenu",
+        numDigits: 1,
+        timeout: 2,
+        method: "POST"
+      }, function(){
+      });
     }
     },function(error) {
       twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
