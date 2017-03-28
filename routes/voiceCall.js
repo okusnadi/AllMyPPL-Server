@@ -140,7 +140,9 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
     var numeral = parseInt(request.params.numeral);
     if (numeral >= 10) { twiml.say("End of contacts.  Looping back through.  If you're hearing this message right after starting the list, you haven't set up any contacts to be one of your people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
-    else if (numeral <= 0) { twiml.say("Listing contacts, if you know the selection you want you can enter any time during silence.",{voice:'alice'});
+    else if (numeral <= 0) {
+
+       twiml.say("Listing contacts, if you know the selection you want you can enter any time during silence.",{voice:'alice'});
 
     var partyQuery = new Parse.Query("Party")
     partyQuery.equalTo("host",user);
@@ -151,23 +153,42 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         query.notEqualTo("host",user);
         query.first().then(function(result) {
           if (!result) {} else {
+          twiml.gather({
+            action: "/voice/menu/"+numeral+"/afterMenu",
+            numDigits: 1,
+            timeout: 2,
+            method: "POST"
+          }, function(){
           twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
+          });
+
+            twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
           }
-          twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         },function(error) {
           twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
         });
+
+          response.type('text/xml');
+          response.send(twiml.toString());
     } else {
-      twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
-      twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
+      twiml.gather({
+        action: "/voice/menu/"+numeral+"/afterMenu",
+        numDigits: 1,
+        timeout: 2,
+        method: "POST"
+      }, function(){
+        twiml.say("Press 0 to join your party during any period of silence.",{voice:'alice'});
+      });
+        twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
     }
     },function(error) {
       twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
     });
 
+      response.type('text/xml');
+      response.send(twiml.toString());
 
-  }
-  else {
+  } else {
     var query = new Parse.Query("Contact");
     query.equalTo("numeral",numeral+"");
     query.first({sessionToken:user.getSessionToken()}).then(function(contact){
