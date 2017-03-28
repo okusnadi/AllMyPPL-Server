@@ -89,11 +89,7 @@ app.use('/voice', voice);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send('<html style="width:100%;height:100%;text-align:center;margin:0;padding:0"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style="margin:0;padding:0"><h1 style=""><p></p>CallMyPPL<p></p>
-
-<p></p><a href="tel:+16502062610">
-6502062610</a><p></p><p>AllMyPPL</p><p><a href="ios.allmyppl.com">ios.allmyppl.com</a></p><p>AllMyPPL Support</p><p><a href="mailto:support@allmyppl.com">support@allmyppl.com</a></p></h1><p>CallMyPPL is a free service that connects you to your contacts without you having to memorize their numbers.</p><p>To use CallMyPPL, you must dial into 6502062610.</p><p></p><p>&nbsp;After entering your phone and pin numbers, you'll be able to connect to anyone you've designated as one of MyPPL or any member of your Party.</p><p></p><p>To start, you must have set up an account on the AllMyPPL app.</p>
-</body></html>');
+  res.status(200).send('<html style="width:100%;height:100%;text-align:center;margin:0;padding:0"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style="margin:0;padding:0"><h1 style=""><p></p>CallMyPPL<p></p><p></p><a href="tel:+16502062610">6502062610</a><p></p><p>AllMyPPL</p><p><a href="ios.allmyppl.com">ios.allmyppl.com</a></p><p>AllMyPPL Support</p><p><a href="mailto:support@allmyppl.com">support@allmyppl.com</a></p></h1><p>CallMyPPL is a free service that connects you to your contacts without you having to memorize their numbers.</p><p>To use CallMyPPL, you must dial into 6502062610.</p><p></p><p>&nbsp;After entering your phone and pin numbers, you\'ll be able to connect to anyone you\'ve designated as one of MyPPL or any member of your Party.</p><p></p><p>To start, you must have set up an account on the AllMyPPL app.</p></body></html>');
 });
 
 app.post('/smsReceived', function(req, res) {
