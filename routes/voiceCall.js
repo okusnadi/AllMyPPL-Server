@@ -185,7 +185,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
       });
       return;
-      case 2:
+      /*case 2:
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
@@ -194,7 +194,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       }, function(){
         twiml.say("Press 2 to search for a contact.",{voice:'alice'});
       });
-      break;
+      break;*/
       case 1:
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
