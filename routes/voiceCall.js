@@ -410,23 +410,24 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
     response.type('text/xml');
     response.send(twiml.toString());
     return;
-  }
-  var query = new Parse.Query("Contact");
-  query.equalTo("numeral",numeral+"");
-  query.first({sessionToken:user.getSessionToken()}).then(function(contact){
-    if (contact == null || contact == undefined || !contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
-    else {
-      twiml.gather({
-        action: "/voice/MyPPL/"+numeral+"/afterMenu",
-        numDigits: 1,
-        timeout: 2,
-        method: "POST"
-      }, function(){
-        twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +".",{voice:'alice'});
-      });
+  } else {
+    var query = new Parse.Query("Contact");
+    query.equalTo("numeral",numeral+"");
+    query.first({sessionToken:user.getSessionToken()}).then(function(contact){
+      if (contact == null || contact == undefined || !contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
+      else {
+        twiml.gather({
+          action: "/voice/MyPPL/"+numeral+"/afterMenu",
+          numDigits: 1,
+          timeout: 2,
+          method: "POST"
+        }, function(){
+          twiml.say("Press "+numeral+" to connect to "+ contact.get('name') +".",{voice:'alice'});
+        });
 
-      twiml.redirect("/voice/MyPPL/"+(numeral+1));
-    }
+        twiml.redirect("/voice/MyPPL/"+(numeral+1));
+      }
+  }
   }).then(function(){
     response.type('text/xml');
     response.send(twiml.toString());
@@ -459,7 +460,7 @@ router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), func
   query.equalTo("numeral",input+"");
   query.first({sessionToken:user.getSessionToken()}).then(function(contact){
     if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
-    twiml.redirect("/MyPPL/"+(numeral+1))} else {
+    twiml.redirect("/voice/MyPPL/"+(numeral+1))} else {
       twiml.say("Connecting to "+contact.get('name'),{voice:'alice'});
       twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
     }
@@ -467,7 +468,8 @@ router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), func
     response.send(twiml.toString());
   }, function(error) {
     console.log(error);
-    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'}); twiml.redirect('/voice/menu/0');
+    twiml.say("I'm sorry, an error occurred. ",{voice:'alice'});
+    twiml.redirect('/voice/MyPPL/'+(numeral+1));
     response.type('text/xml');
     response.send(twiml.toString());
   });
