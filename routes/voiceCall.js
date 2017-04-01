@@ -414,7 +414,7 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
     var query = new Parse.Query("Contact");
     query.equalTo("numeral",numeral+"");
     query.first({sessionToken:user.getSessionToken()}).then(function(contact){
-      if (contact == null || contact == undefined || !contact) {twiml.redirect('/voice/menu/'+(numeral+1))}
+      if (contact == null || contact == undefined || !contact) {twiml.redirect('/voice/MyPPL/'+(numeral+1))}
       else {
         twiml.gather({
           action: "/voice/MyPPL/"+numeral+"/afterMenu",
@@ -427,7 +427,6 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
 
         twiml.redirect("/voice/MyPPL/"+(numeral+1));
       }
-  }
   }).then(function(){
     response.type('text/xml');
     response.send(twiml.toString());
@@ -436,6 +435,7 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
     response.type('text/xml');
     response.send(twiml.toString());
   });
+  }
 });
 
 router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
