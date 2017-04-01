@@ -396,10 +396,23 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
 router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-  twiml.say("my people");
   var numeral = parseInt(request.params.numeral);
   if (numeral >= 10) { twiml.say("End of My people. Returning to the main menu.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString()); return;}
-  else if (numeral == 0) { twiml.say("Listing my people.",{voice:'alice'});twiml.redirect('/voice/MyPPL/1'); response.type('text/xml'); response.send(twiml.toString()); return;}
+  else if (numeral == 0) {
+    twiml.say("Listing my people.",{voice:'alice'});
+    twiml.gather({
+      action: "/voice/MyPPL/"+numeral+"/afterMenu",
+      numDigits: 1,
+      timeout: 2,
+      method: "POST"
+    }, function () {
+      twiml.say("Press 0 to return to the main menu.",{voice:'alice'})
+    });
+    twiml.redirect('/voice/MyPPL/1');
+    response.type('text/xml');
+    response.send(twiml.toString());
+    return;
+  }
   var query = new Parse.Query("Contact");
   query.equalTo("numeral",numeral+"");
   query.first({sessionToken:user.getSessionToken()}).then(function(contact){
@@ -448,7 +461,7 @@ router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), func
   query.equalTo("numeral",input+"");
   query.first({sessionToken:user.getSessionToken()}).then(function(contact){
     if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
-    twiml.redirect("/menu/"+(numeral+1))} else {
+    twiml.redirect("/MyPPL/"+(numeral+1))} else {
       twiml.say("Connecting to "+contact.get('name'),{voice:'alice'});
       twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
     }
