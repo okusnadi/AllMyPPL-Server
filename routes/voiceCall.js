@@ -397,7 +397,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
   var numeral = parseInt(request.params.numeral);
-  if (numeral >= 10) { twiml.say("End of My people. Returning to the main menu.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString()); return;}
+  if (numeral >= 10) { twiml.say(twiml.redirect('/voice/MyPPL/0'); response.type('text/xml'); response.send(twiml.toString()); return;}
   else if (numeral == 0) {
     twiml.say("Listing my people.",{voice:'alice'});
     twiml.gather({
