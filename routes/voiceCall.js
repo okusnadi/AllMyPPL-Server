@@ -252,16 +252,16 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       });
     } else if (numeral == 1) {
       twiml.say("1");
-      twiml.redirect('/voice/search//0');
+      twiml.redirect("/voice/search/X/0");
       response.type('text/xml');
       response.send(twiml.toString());
-      return
+      return;
     } else {
       twiml.say("2");
-      twiml.redirect('/voice/MyPPL/0');
+      twiml.redirect("/voice/MyPPL/0");
       response.type('text/xml');
       response.send(twiml.toString());
-      return
+      return;
     }
 
   });
@@ -307,7 +307,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     var index = parseInt(request.params.index);
 
     var twiml =  new twilio.TwimlResponse();
-    if (!searchString || searchString == "") {
+    if (!searchString || searchString == "" || searchString = x) {
       twiml.gather({
         action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
         numDigits:5,
