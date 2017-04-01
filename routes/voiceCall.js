@@ -208,9 +208,14 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       }, function(){
         twiml.say("Press 2 to connect to My people.",{voice:'alice'});
       });
+      break;
       default:
       twiml.redirect('/voice/menu/0');
+      response.type('text/xml');
+      response.send(twiml.toString());
+      return
     }
+    twiml.redirect('/voice/menu/'+(numeral+1));
     response.type('text/xml');
     response.send(twiml.toString());
   });
