@@ -253,7 +253,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       });
       return
     } else if (input == "1") {
-      twiml.redirect('/voice/search//0'/);
+      twiml.redirect('/voice/search//0');
     } else if (input == "2") {
       twiml.redirect('/voice/MyPPL/0');
     }
