@@ -353,12 +353,10 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           twiml.say("Press "+(index+1)+" to connect to "+contact.get('name')+".",{voice:'alice'});
           });
           twiml.redirect('/voice/search/'+searchString+"/"+(index+1));
-          response.type('text/xml');
-          response.send(twiml.toString());
           return;
         } else {
           twiml.redirect("/voice/search/"+searchString+"/0");
-          return
+          return;
         }
 
         }).then(function(){
@@ -373,13 +371,8 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           response.send(twiml.toString());
           return;
         });
-      });
-
-      twiml.redirect('/voice/search/'+searchString+"/"+(index+1));
-    }
-    response.type('text/xml');
-    response.send(twiml.toString());
-  });
+      }
+    });
 
   router.post('/search/:searchString/:index/afterMenu', twilio.webhook({validate: false}), function(request, response) {
     var searchString = request.params.searchString;
