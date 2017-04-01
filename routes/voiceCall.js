@@ -231,7 +231,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         if (result != null) {
           twiml.redirect("/voice/listParty/"+result.id+"/0");
           response.type('text/xml'); response.send(twiml.toString());
-          return
+          return;
         } else {
           var query = new Parse.Query("Party");
           query.equalTo("users", user);
@@ -240,12 +240,12 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
             if (result != null) {
               twiml.redirect("/voice/listParty/"+result.id+"/0");
               response.type('text/xml'); response.send(twiml.toString());
-              return
+              return;
             } else {
               twiml.say("I'm sorry, An error occured.", {voice:'alice'});
               twiml.redirect('/voice/menu/0');
               response.type('text/xml'); response.send(twiml.toString());
-              return
+              return;
             }
           });
         }
@@ -445,7 +445,7 @@ router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), func
     twiml.redirect("/voice/menu/0");
     response.type('text/xml');
     response.send(twiml.toString());
-    return
+    return;
   }
 
 
