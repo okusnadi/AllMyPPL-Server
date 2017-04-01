@@ -218,7 +218,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
   router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
     var input = request.body.Digits;
-    
+
     var twiml = new twilio.TwimlResponse();
 
     var numeral = parseInt(input);
@@ -251,13 +251,17 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         }
       });
     } else if (numeral == 1) {
+      twiml.say("1");
       twiml.redirect('/voice/search//0');
       response.type('text/xml');
       response.send(twiml.toString());
+      return
     } else {
+      twiml.say("2");
       twiml.redirect('/voice/MyPPL/0');
       response.type('text/xml');
       response.send(twiml.toString());
+      return
     }
 
   });
@@ -392,7 +396,10 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
 router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(request, response) {
   var twiml = new twilio.TwimlResponse();
-
+  twiml.say("my people");
+  response.type('text/xml');
+  response.send(twiml.toString());
+  return;
   var numeral = parseInt(request.params.numeral);
   if (numeral >= 10) { twiml.say("End of My people.  Looping back through.  If you're hearing this message right after starting the list, you haven't designated anyone as My people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
   else if (numeral <= 0) { twiml.say("Listing my people, if you know the selection you want you can enter it any time during silence.",{voice:'alice'});}
