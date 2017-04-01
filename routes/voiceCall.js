@@ -318,30 +318,57 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         return;
       });
 
-      twiml.redirect("/voice/search/"+searchString+"/"+index);
+      twiml.redirect("/voice/search/X/0");
+      response.type('text/xml');
+      response.send(twiml.toString());
+      return;
     } else {
       if (index == 0) {
-        twiml.say("Press 0 followed by the pound sign at any silent time to go back to the main menu.",{voice:'alice'});
+        twiml.gather({
+          action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
+          numDigits: 2,
+          timeout: 3,
+          method: "POST"
+        }, function() {
+          twiml.say("Press 0 followed by the pound sign at any silent time to go back to the main menu.",{voice:'alice'});
+        });
       }
-      twiml.gather({
-        action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-        numDigits: 2,
-        timeout: 3,
-        method: "POST"
-      }, function() {
         var query = new Parse.Query("Contact");
         var regexFromDigits = regexFromDigits(searchString);
         query.find({sessionToken:user.getSessionToken()}).then(function(results){
-          results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));})
+          if (!results) {
+          twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
+          twiml.redirect("/voice/search/X/0");
+          return;
+        }
+          results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));});
+          if (index < results.length) {
           var contact = results[index];
+          twiml.gather({
+            action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
+            numDigits: 2,
+            timeout: 3,
+            method: "POST"
+          }, function() {
           twiml.say("Press "+(index+1)+" to connect to "+contact.get('name')+".",{voice:'alice'});
+          });
+          twiml.redirect('/voice/search/'+searchString+"/"+(index+1));
           response.type('text/xml');
           response.send(twiml.toString());
           return;
-        }, function(error){
+        } else {
+          twiml.redirect("/voice/search/"+searchString+"/0");
+          return
+        }
+
+        }).then(function(){
+        response.type('text/xml');
+        response.send(twiml.toString());
+        return;
+      }, function(error){
           print(error);
           twiml.say("I'm sorry, an error occured.",{voice:'alice'});
-          twiml.redirect('/voice/menu/0');
+          twiml.redirect('/voice/search/X/0');
           response.type('text/xml');
           response.send(twiml.toString());
           return;
@@ -365,22 +392,37 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       twiml.redirect('/voice/menu/0');
     response.type('text/xml');
     response.send(twiml.toString());
-  } else if (!searchString || searchString == "") {
+    return;
+  } else if (!searchString || searchString != "" || searchString != "X") {
     searchString = input;
     twiml.redirect('/voice/search/'+searchString+"/0");
     response.type('text/xml');
     response.send(twiml.toString());
+     return;
   } else {
     var numeral = parseInt(input)
     var query = new Parse.Query("Contact");
     var regexFromDigits = regexFromDigits(searchString);
     query.find({sessionToken:user.getSessionToken()}).then(function(results){
-      results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));})
+      if (!results) {
+      twiml.redirect("/voice/search/X/0");
+      response.type('text/xml');
+      response.send(twiml.toString());
+      return;
+    }
+      results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));});
+      if ((numeral -1 ) < results.length ) {
       var contact = results[numeral-1];
       twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
       response.type('text/xml');
       response.send(twiml.toString());
       return;
+    } else {
+      twiml.say("Invalid selection.",{voice:'alice'});
+      twiml.redirect('/voice/search/'+searchString+"/"+(index+1));
+      response.type('text/xml');
+      response.send(twiml.toString());
+    }
     }, function(error){
       print(error);
       twiml.say("I'm sorry, an error occured.",{voice:'alice'});
