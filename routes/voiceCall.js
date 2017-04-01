@@ -227,9 +227,9 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
     var twiml = new twilio.TwimlResponse();
 
-    var numeral = parseInt(request.params.numeral);
+    var numeral = parseInt(input);
 
-    if (input == "0") {
+    if (numeral == 0) {
 
       var partyQuery = new Parse.Query("Party")
       partyQuery.equalTo("host",user);
@@ -256,14 +256,15 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           });
         }
       });
-      return
-    } else if (input == "1") {
-      twiml.redirect('/voice/search//0');
-    } else if (input == "2") {
-      twiml.redirect('/voice/MyPPL/0');
+    } else if (numeral == 1) {
+      twiml.say('1');
+      response.type('text/xml');
+      response.send(twiml.toString());
+    } else {
+      twiml.say('2');
+      response.type('text/xml');
+      response.send(twiml.toString());
     }
-    response.type("text/xml");
-    response.send(twiml.toString());
 
   });
 
@@ -364,7 +365,8 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
     var twiml = new twilio.TwimlResponse();
 
-    if (input == "0") {twiml.redirect('/voice/menu/0');
+    if (input == "0") {
+      twiml.redirect('/voice/menu/0');
     response.type('text/xml');
     response.send(twiml.toString());
   } else if (!searchString || searchString == "") {
@@ -399,9 +401,8 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
 
   var numeral = parseInt(request.params.numeral);
   if (numeral >= 10) { twiml.say("End of My people.  Looping back through.  If you're hearing this message right after starting the list, you haven't designated anyone as My people in the All my people eye oh ess app.",{voice:'alice'}); twiml.redirect('/voice/menu/0'); response.type('text/xml'); response.send(twiml.toString());}
-  else if (numeral <= 0) { twiml.say("Listing my people, if you know the selection you want you can enter it any time during silence.",{voice:'alice'});
-}
-else {
+  else if (numeral <= 0) { twiml.say("Listing my people, if you know the selection you want you can enter it any time during silence.",{voice:'alice'});}
+  else {
   var query = new Parse.Query("Contact");
   query.equalTo("numeral",numeral+"");
   query.first({sessionToken:user.getSessionToken()}).then(function(contact){
