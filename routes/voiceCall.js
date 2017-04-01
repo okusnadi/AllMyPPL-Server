@@ -257,11 +257,11 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         }
       });
     } else if (numeral == 1) {
-      twiml.say('1');
+      twiml.redirect('/voice/search//0');
       response.type('text/xml');
       response.send(twiml.toString());
     } else {
-      twiml.say('2');
+      twiml.redirect('/voice/MyPPL/0');
       response.type('text/xml');
       response.send(twiml.toString());
     }
