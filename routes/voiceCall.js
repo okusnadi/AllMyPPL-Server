@@ -63,8 +63,6 @@ router.post('/parsePhoneNumberInput', twilio.webhook({validate:false}), function
 
   var input = request.body.Digits;
 
-  console.log('Digits entered: '+request.body.Digits);
-
   var twiml = new twilio.TwimlResponse();
 
   user.set('username',input);
@@ -101,8 +99,6 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
 router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(request, response){
 
   var input = request.body.Digits;
-
-  console.log('Digits entered: '+request.body.Digits);
 
   var twiml = new twilio.TwimlResponse();
 
@@ -222,9 +218,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
   router.post('/menu/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
     var input = request.body.Digits;
-
-    console.log('Digits entered: '+request.body.Digits);
-
+    
     var twiml = new twilio.TwimlResponse();
 
     var numeral = parseInt(input);
@@ -433,8 +427,6 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
 router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
   var input = request.body.Digits;
 
-  console.log('Digits entered: '+request.body.Digits);
-
   var twiml = new twilio.TwimlResponse();
 
   var numeral = parseInt(request.params.numeral);
@@ -522,8 +514,6 @@ router.post('/listParty/:partyID/:iterator/afterMenu', twilio.webhook({validate:
   var twiml = new twilio.TwimlResponse()
   var input = request.body.Digits;
 
-  console.log('Digits entered: '+request.body.Digits);
-
   const partyID = request.params.partyID;
   const iterator = request.params.iterator;
   if (input == "0") {twiml.redirect('/voice/menu/0');
@@ -610,7 +600,6 @@ response.send(twiml.toString());
 router.post('/afterMenu', twilio.webhook({validate: false}), function(request, response) {
 var twiml = new twilio.TwimlResponse();
 var input = request.body.Digits;
-console.log('Digits entered: '+request.body.Digits);
 if (input == "1") {
 twiml.redirect('/voice/callEmergencyContact');
 } else if (input == "2") {
@@ -736,8 +725,6 @@ response.send(twiml.toString());
 router.post('/afterDialOut', twilio.webhook({validate: false}), function(request, response) {
 var twiml = new twilio.TwimlResponse();
 var input = request.body.Digits;
-
-console.log('Digits entered: '+request.body.Digits);
 
 if (input.length == 10) {
 twiml.say("Calling "+input+". ",{voice: 'alice'});
