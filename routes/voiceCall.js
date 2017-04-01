@@ -424,7 +424,6 @@ router.post('/MyPPL/:numeral', twilio.webhook({validate: false}), function(reque
     response.type('text/xml');
     response.send(twiml.toString());
   });
-}
 });
 
 router.post('/MyPPL/:numeral/afterMenu', twilio.webhook({validate: false}), function(request, response) {
