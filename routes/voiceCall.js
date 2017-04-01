@@ -7,8 +7,8 @@ Parse.initialize(process.env.APP_ID);
 Parse.serverURL = process.env.SERVER_URL;
 
 var user;
-var allMyPPLPhoneNumber = "+16502062610"
-var servicingHours = "48"
+var allMyPPLPhoneNumber = "+16502062610";
+var servicingHours = "48";
 
 /*
 router.post('/routeName/:routeParameter', twilio.webhook({validate: false}), function(request, response) {
@@ -87,7 +87,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
     timeout: 5,
     method: "POST"
   }, function() {
-    twiml.say("Please enter the four digit pin number associated with your account followed by the pound sign.", { voice: 'alice'});
+    twiml.say("Please enter your four digit pin number followed by the pound sign.", { voice: 'alice'});
   });
 
   twiml.redirect('/voice/promptForPinNumber');
@@ -160,7 +160,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
               twiml.gather({
                 action: "/voice/menu/"+numeral+"/afterMenu",
                 numDigits: 1,
-                timeout: 2,
+                timeout: 3,
                 method: "POST"
               }, function(){
                 twiml.say("Press 0 to connect to your party.",{voice:'alice'});
@@ -174,7 +174,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 2,
+            timeout: 3,
             method: "POST"
           }, function(){
             twiml.say("Press 0 to connect to your party.",{voice:'alice'});
@@ -189,7 +189,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
-        timeout: 2,
+        timeout: 3,
         method: "POST"
       }, function(){
         twiml.say("Press 1 to search for a contact.",{voice:'alice'});
@@ -199,7 +199,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
-        timeout: 2,
+        timeout: 3,
         method: "POST"
       }, function(){
         twiml.say("Press 2 to connect to My people.",{voice:'alice'});
