@@ -185,16 +185,6 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
       });
       return;
-      case 1:
-      twiml.gather({
-        action: "/voice/menu/"+numeral+"/afterMenu",
-        numDigits: 1,
-        timeout: 3,
-        method: "POST"
-      }, function(){
-        twiml.say("Press 1 to search for a contact.",{voice:'alice'});
-      });
-      break;
       case 2:
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
@@ -202,7 +192,17 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         timeout: 3,
         method: "POST"
       }, function(){
-        twiml.say("Press 2 to connect to My people.",{voice:'alice'});
+        twiml.say("Press 2 to search for a contact.",{voice:'alice'});
+      });
+      break;
+      case 1:
+      twiml.gather({
+        action: "/voice/menu/"+numeral+"/afterMenu",
+        numDigits: 1,
+        timeout: 3,
+        method: "POST"
+      }, function(){
+        twiml.say("Press 1 to connect to My people.",{voice:'alice'});
       });
       break;
       default:
@@ -251,12 +251,15 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         }
       });
     } else if (numeral == 1) {
-      twiml.redirect("/voice/search/X/0");
+      twiml.redirect("/voice/MyPPL/0");
       response.type('text/xml');
       response.send(twiml.toString());
       return;
-    } else {
-      twiml.redirect("/voice/MyPPL/0");
+    }
+//   else if {twiml.redirect('/voice/search/X/0');response.type('text/xml');response.send(twiml.toString());}
+     else {
+      twiml.say("Invalid selection.",{voice:'alice'});
+      twiml.redirect("/voice/menu/0");
       response.type('text/xml');
       response.send(twiml.toString());
       return;
