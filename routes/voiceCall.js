@@ -478,7 +478,7 @@ router.post('/listParty/:partyID/:iterator', twilio.webhook({validate: false}), 
   query.get(partyID,{sessionToken:user.getSessionToken()}).then(function(party) {
     var users = party.get("users");
     var contact = users[iterator];
-    if (iterator == 0) { twiml.say("Listing Party contacts. Press 0 to return to the main menu.",{voice:'alice'}); }
+    if (iterator == 0) { twiml.say("Listing Party participants. Press 0 to return to the main menu.",{voice:'alice'}); }
     if (iterator < users.length) {
       twiml.gather({
         action: "/voice/listParty/"+partyID+"/"+iterator+"/afterMenu",
