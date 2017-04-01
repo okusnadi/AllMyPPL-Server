@@ -31,7 +31,7 @@ router.post('/welcome', twilio.webhook({validate: false}), function (request, re
   var twiml = new twilio.TwimlResponse();
 
 
-  twiml.say("Welcome To CAll My People, a free service from All My People, please wait for the periods of silence to make your entries.", { voice: 'alice'});;
+  twiml.say("Welcome To CAll My People.", { voice: 'alice'});;
 
 
   twiml.redirect('/voice/promptForPhoneNumber');
