@@ -307,7 +307,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     var index = parseInt(request.params.index);
 
     var twiml =  new twilio.TwimlResponse();
-    if (!searchString || searchString == "" || searchString = "X") {
+    if (!searchString || searchString == "" || searchString == "X") {
       twiml.gather({
         action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
         numDigits:5,
