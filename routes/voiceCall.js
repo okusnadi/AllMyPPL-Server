@@ -251,13 +251,11 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         }
       });
     } else if (numeral == 1) {
-      twiml.say("1");
       twiml.redirect("/voice/search/X/0");
       response.type('text/xml');
       response.send(twiml.toString());
       return;
     } else {
-      twiml.say("2");
       twiml.redirect("/voice/MyPPL/0");
       response.type('text/xml');
       response.send(twiml.toString());
@@ -356,7 +354,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     response.send(twiml.toString());
   });
 
-  router.post('/search/:searchString/:index', twilio.webhook({validate: false}), function(request, response) {
+  router.post('/search/:searchString/:index/afterMenu', twilio.webhook({validate: false}), function(request, response) {
     var searchString = request.params.searchString;
     var index = parseInt(request.params.index);
     var input = request.body.Digits;
