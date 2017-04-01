@@ -313,9 +313,6 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         method: "POST"
       }, function() {
         twiml.say("Enter the first five or less letters of the contact's name you wish to search for followed by the pound sign.",{voice:'alice'});
-        response.type('text/xml');
-        response.send(twiml.toString());
-        return;
       });
 
       twiml.redirect("/voice/search/X/0");
