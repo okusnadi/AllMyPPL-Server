@@ -346,13 +346,14 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           var acceptedResults = [];
           for (result in results) {
             var name = result.get('name');
+            var regexFromDigits = getRegexFromDigits(searchString);
             if (regexFromDigits.test(name)) {
               acceptedResults.push(result);
             };
           }
           console.log("after: "+acceptedResults);
 
-          if (index < results.length) {
+          if (index < acceptedResults.length) {
           var contact = acceptedResults[index];
           twiml.gather({
             action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
