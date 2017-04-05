@@ -341,20 +341,24 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           twiml.redirect("/voice/search/X/0");
           return;
         }
-          console.log("before: "+results);
+          console.log("before: "+results.length);
 
           var acceptedResults = [];
-          for (result in results) {
+
+          for (var i = 0; i++; i < results.length) {
+            var result = results[i];
             var name = result.get('name');
-            console.log('name');
+            console.log(name);
             var regexFromDigits = getRegexFromDigits(searchString);
             console.log(regexFromDigits);
             console.log(regexFromDigits.test(name));
             if (regexFromDigits.test(name)) {
-              acceptedResults.push(result);
+              acceptedResults.push(results[i]);
+              console.log("after: "+acceptedResults.length);
             }
           }
-          console.log("after: "+acceptedResults);
+
+          console.log("after: "+acceptedResults.length);
 
           if (index < acceptedResults.length) {
           var contact = acceptedResults[index];
