@@ -343,11 +343,17 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         }
           console.log("before: "+results);
 
-          results = Parse._.filter(results,function(result){var name = result.get('name'); return regexFromDigits.test(name);});
-          console.log("after: "+results);
+          var acceptedResults = [];
+          for result in results {
+            var name = result.get('name');
+            if (regexFromDigits.test(name)) {
+              acceptedResults.push(result);
+            };
+          }
+          console.log("after: "+acceptedResults);
 
           if (index < results.length) {
-          var contact = results[index];
+          var contact = acceptedResults[index];
           twiml.gather({
             action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
             numDigits: 2,
