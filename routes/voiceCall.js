@@ -344,7 +344,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           console.log("before: "+results);
 
           var acceptedResults = [];
-          for result in results {
+          for (result in results) {
             var name = result.get('name');
             if (regexFromDigits.test(name)) {
               acceptedResults.push(result);
