@@ -346,10 +346,13 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           var acceptedResults = [];
           for (result in results) {
             var name = result.get('name');
+            console.log('name');
             var regexFromDigits = getRegexFromDigits(searchString);
+            console.log(regexFromDigits);
+            console.log(regexFromDigits.test(name));
             if (regexFromDigits.test(name)) {
               acceptedResults.push(result);
-            };
+            }
           }
           console.log("after: "+acceptedResults);
 
