@@ -50,7 +50,7 @@ router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(
     timeout: 10,
     method: "POST"
   }, function (){
-    twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
+    twiml.say("Please enter your ten digit phone number.", { voice: 'alice'});
   });
 
   twiml.redirect('/voice/promptForPhoneNumber');
@@ -87,7 +87,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
     timeout: 5,
     method: "POST"
   }, function() {
-    twiml.say("Please enter your four digit pin number followed by the pound sign.", { voice: 'alice'});
+    twiml.say("Please enter your four digit pin number.", { voice: 'alice'});
   });
 
   twiml.redirect('/voice/promptForPinNumber');
@@ -160,7 +160,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
               twiml.gather({
                 action: "/voice/menu/"+numeral+"/afterMenu",
                 numDigits: 1,
-                timeout: 3,
+                timeout: 2,
                 method: "POST"
               }, function(){
                 twiml.say("Press 0 to connect to your party.",{voice:'alice'});
@@ -174,7 +174,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 3,
+            timeout: 2,
             method: "POST"
           }, function(){
             twiml.say("Press 0 to connect to your party.",{voice:'alice'});
@@ -189,7 +189,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
-        timeout: 3,
+        timeout: 2,
         method: "POST"
       }, function(){
         twiml.say("Press 2 to search for a contact.",{voice:'alice'});
@@ -199,7 +199,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
-        timeout: 3,
+        timeout: 2,
         method: "POST"
       }, function(){
         twiml.say("Press 1 to connect to My people.",{voice:'alice'});
@@ -268,7 +268,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   });
 
   function getRegexFromDigits(searchString) {
-    var regexString = "";
+    var regexString = "^";
     for (var i = 0; i++; i < searchString.length) {
       var digit = parseInt(regexString[i]);
       switch (digit) {
@@ -300,6 +300,11 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         regexString += "[^A-Za-z2-9_]|[01]"
       }
     }
+    console.log(regexString);
+    var regExp = new RegExp(regexString);
+
+    if (regExp.test('April')) {console.log("matched with April");}
+
     return new RegExp(regexString);
   }
 
@@ -315,7 +320,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         timeout:6,
         method: "POST"
       }, function() {
-        twiml.say("Enter the first five or less letters of the contact's name you wish to search for followed by the pound sign.",{voice:'alice'});
+        twiml.say("Enter the first five or less letters of the contact's name.",{voice:'alice'});
       });
 
       twiml.redirect("/voice/search/X/0");
@@ -327,14 +332,13 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         twiml.gather({
           action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
           numDigits: 2,
-          timeout: 3,
+          timeout: 2,
           method: "POST"
         }, function() {
-          twiml.say("Press 0 followed by the pound sign at any silent time to go back to the main menu.",{voice:'alice'});
+          twiml.say("Press 0 to go back to the main menu.",{voice:'alice'});
         });
       }
         var query = new Parse.Query("Contact");
-        var regexFromDigits = getRegexFromDigits(searchString);
         query.find({sessionToken:user.getSessionToken()}).then(function(results){
           if (!results || results.length == 0) {
           twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
@@ -342,14 +346,12 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           return;
         }
           console.log("before: "+results.length);
-          console.log(regexFromDigits.test('April'));
+          console.log(results[0].get('name'));
           var acceptedResults = [];
 
+          var regexFromDigits = getRegexFromDigits(searchString);
           for (var i = 0; i++; i < results.length) {
-          console.error(results[i].get('name'));
-            var result = results[i];
-            var name = result.get('name');
-            if (regexFromDigits.test(name)) {
+            if (regexFromDigits.test(results[i].get('name'))) {
               acceptedResults.push(results[i]);
               console.error("added");
             }
