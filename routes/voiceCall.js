@@ -342,19 +342,16 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           return;
         }
           console.log("before: "+results.length);
-
+          console.log(regexFromDigits.test('April'));
           var acceptedResults = [];
 
           for (var i = 0; i++; i < results.length) {
+          console.error(results[i].get('name'));
             var result = results[i];
             var name = result.get('name');
-            console.log(name);
-            var regexFromDigits = getRegexFromDigits(searchString);
-            console.log(regexFromDigits);
-            console.log(regexFromDigits.test(name));
             if (regexFromDigits.test(name)) {
               acceptedResults.push(results[i]);
-              console.log("after: "+acceptedResults.length);
+              console.error("added");
             }
           }
 
