@@ -356,8 +356,13 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           }
 
           console.log("after: "+acceptedResults.length);
+          if (acceptedResults.length == 0) {
+          twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
+          twiml.redirect("/voice/search/X/0");
+          return;
+          }
 
-          if (index < acceptedResults.length) {
+        if (index < acceptedResults.length) {
           var contact = acceptedResults[index];
           twiml.gather({
             action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
