@@ -328,7 +328,7 @@ function getRegexFromDigit(digit) {
       if (index == 0) {
         twiml.gather({
           action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-          numDigits: 2,
+          numDigits: 1,
           timeout: 2,
           method: "POST"
         }, function() {
