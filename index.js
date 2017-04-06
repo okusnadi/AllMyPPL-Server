@@ -651,7 +651,7 @@ app.post('/smsReceived', function(req, res) {
   twilio.sendMessage({
     to:req.body.From,
     from: allMyPPLPhoneNumber,
-    body: "CallMyPPL is a free service that connects you to your contacts without you having to memorize their numbers.\n\nTo use CallMyPPL, you must dial into 6502062610.\n\nAfter entering your phone and pin numbers, you'll be able to connect to anyone you've designated as one of MyPPL or any member of your Party.\n\nTo start, you must have set up an account on the AllMyPPL app:\n\nhttp://ios.allmyppl.com"
+    body: "CallMyPPL is a free service that connects you to your contacts without having to memorize their numbers.\n\nTo use CallMyPPL, just call into (650) 206-2610.\n\nAfter entering your phone and pin numbers, you'll be able to connect to anyone in your contacts by searching the contact names for a match, anyone you've designated as MyPPL or if you're in a Party, any member of your Party.\n\nTo start, you must have set up an account on the AllMyPPL app:\n\nhttp://ios.allmyppl.com"
   }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                    if (!err) {
