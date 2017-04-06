@@ -270,33 +270,24 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   function getRegexFromDigits(searchString) {
     var regexString = "^";
     for (var i = 0; i++; i < searchString.length) {
-      var digit = parseInt(searchString[i]);
-      switch (digit) {
-        case 2:
+      var digit = searchString[i];
+      console.log(digit);
+      if (digit == "2") {
         regexString += "[A-Ca-c2]";
-        break;
-        case 3:
+      } else if (digit == "3") {
         regexString += "[D-Fd-f3]";
-        break;
-        case 4:
+    } else if (digit == "4") {
         regexString += "[G-Ig-i4]";
-        break;
-        case 5:
-        regexString += "[J-Lj-l5]";
-        break;
-        case 6:
+      } else if (digit == "5") {  regexString += "[J-Lj-l5]";
+    } else if (digit == "6") {
         regexString += "[M-Om-o6]";
-        break;
-        case 7:
+      } else if (digit == "7") {
         regexString += "[P-Sp-s7]";
-        break;
-        case 8:
+      }  else if (digit == "8") {
         regexString += "[T-Vt-v8]";
-        break;
-        case 9:
+      } else if (digit == "9") {
         regexString += "[W-Zw-z9]";
-        break;
-        default:
+      } else {
         regexString += "[^A-Za-z2-9_]|[01]"
       }
     }
@@ -305,7 +296,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
     if (regExp.test('April')) {console.log("matched with April");}
 
-    return new RegExp(regexString);
+    return regexString;
   }
 
   router.post('/search/:searchString/:index', twilio.webhook({validate: false}), function(request, response) {
@@ -348,7 +339,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           console.log("before: "+results.length);
           var acceptedResults = [];
 
-          var regexFromDigits = getRegexFromDigits(searchString);
+          var regexFromDigits = new RegExp(getRegexFromDigits(searchString));
           for (var i = 0; i++; i < results.length) {
             if (regexFromDigits.test(results[i].get('name'))) {
               acceptedResults.push(results[i]);
