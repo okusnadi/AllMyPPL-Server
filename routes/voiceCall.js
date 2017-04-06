@@ -614,6 +614,7 @@ router.post('/listParty/:partyID/:iterator/afterMenu', twilio.webhook({validate:
     response.send(twiml.toString());
   } else {
     var users = party.get("users");
+    if (parseInt(input)-1) < users.length) {
     var contact = users[parseInt(input)-1];
     contact.fetch().then(function(obj){
       twiml.say("Connecting to "+obj.get("displayName") + ".",{voice:'alice'});
@@ -628,6 +629,12 @@ router.post('/listParty/:partyID/:iterator/afterMenu', twilio.webhook({validate:
     response.type('text/xml');
     response.send(twiml.toString());
   });
+} else {
+  twiml.say("invalid selection.", {voice:'alice'});
+  twiml.redirect("/voice/listParty/"+partyID+"/"+(iterator+1));
+  response.type('text/xml');
+  response.send(twiml.toString());
+}
 }
 }, function(error) {
   console.log(error);
