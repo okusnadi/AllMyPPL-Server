@@ -270,7 +270,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   function getRegexFromDigits(searchString) {
     var regexString = "^";
     for (var i = 0; i++; i < searchString.length) {
-      var digit = parseInt(regexString[i]);
+      var digit = parseInt(searchString[i]);
       switch (digit) {
         case 2:
         regexString += "[A-Ca-c2]";
@@ -346,14 +346,13 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           return;
         }
           console.log("before: "+results.length);
-          console.log(results[0].get('name'));
           var acceptedResults = [];
 
           var regexFromDigits = getRegexFromDigits(searchString);
           for (var i = 0; i++; i < results.length) {
             if (regexFromDigits.test(results[i].get('name'))) {
               acceptedResults.push(results[i]);
-              console.error("added");
+              console.log("added");
             }
           }
 
