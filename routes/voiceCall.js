@@ -349,6 +349,8 @@ function getRegexFromDigit(digit) {
             if (regexFromDigits.test(name)) {
               acceptedResults.push(result);
               console.log("added");
+            } else {
+              console.log(regexString+" not matched to "+name);
             }
           }
           console.log("after: "+acceptedResults.length);
