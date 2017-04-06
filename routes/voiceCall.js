@@ -5,8 +5,8 @@ var Parse = require('parse/node');
 
 Parse.initialize(process.env.APP_ID);
 Parse.serverURL = process.env.SERVER_URL;
+
 var allMyPPLPhoneNumber = "+16502062610";
-var servicingHours = "48";
 
 /*
 router.post('/routeName/:routeParameter', twilio.webhook({validate: false}), function(request, response) {
@@ -347,7 +347,7 @@ function getRegexFromDigit(digit) {
           timeout: 2,
           method: "POST"
         }, function() {
-          twiml.say("Listing search results. Press 0 to go back to the main menu.",{voice:'alice'});
+          twiml.say("Listing search results. Press 0 to return to the main menu.",{voice:'alice'});
         });
       }
         var query = new Parse.Query("Contact");
