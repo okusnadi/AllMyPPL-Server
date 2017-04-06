@@ -260,7 +260,7 @@ router.post('/parsePinNumberInput/:phoneNumber', twilio.webhook({validate:false}
               return;
             } else {
               twiml.say("I'm sorry, An error occured.", {voice:'alice'});
-              twiml.redirect('/voice/menu/0/'++userID+'/'escapedSessionToken);
+              twiml.redirect('/voice/menu/0/'+userID+'/'escapedSessionToken);
               response.type('text/xml'); response.send(twiml.toString());
               return;
             }
