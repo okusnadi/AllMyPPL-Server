@@ -345,17 +345,13 @@ function getRegexFromDigit(digit) {
           console.log("before: "+results.length);
           var acceptedResults = [];
           var regexString = getRegexFromDigits(searchString);
-          console.log(regexString);
           var regexFromDigits = new RegExp(regexString);
           var i=0;
           while (i < results.length) {var result = results[i];
             var name = result.get('nameLowercase');
-            console.log(name+"|"+regexString);
             if (regexFromDigits.test(name)) {
               acceptedResults.push(result);
-              console.log("added");
             } else {
-              console.log(regexString+" not matched to "+name);
             }
             i++;}
 
@@ -425,15 +421,29 @@ function getRegexFromDigit(digit) {
     var regexFromDigits = getRegexFromDigits(searchString);
     console.log(input+" = "+regexFromDigits);
     query.find({sessionToken:user.getSessionToken()}).then(function(results){
-      if (!results) {
+      if (!results || results.length == 0) {
       twiml.redirect("/voice/search/X/0");
       response.type('text/xml');
       response.send(twiml.toString());
       return;
     }
-      results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));});
-      if ((numeral -1 ) < results.length ) {
-      var contact = results[numeral-1];
+    console.log("before: "+results.length);
+    var acceptedResults = [];
+    var regexString = getRegexFromDigits(searchString);
+    var regexFromDigits = new RegExp(regexString);
+    var i=0;
+    while (i < results.length) {var result = results[i];
+      var name = result.get('nameLowercase');
+      if (regexFromDigits.test(name)) {
+        acceptedResults.push(result);
+      } else {
+      }
+      i++;}
+
+    console.log("after: "+acceptedResults.length);
+
+  if ((numeral-1) < acceptedResults.length) {
+      var contact = acceptedResults[numeral-1];
       twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
       response.type('text/xml');
       response.send(twiml.toString());
