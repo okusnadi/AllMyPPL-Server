@@ -274,7 +274,7 @@ function getRegexFromDigit(digit) {
     return "[D-Fd-f3]";
 } else if (digit == "4") {
     return "[G-Ig-i4]";
-  } else if (digit == "5") {  regexString = regexString + "[J-Lj-l5]";
+  } else if (digit == "5") {  return "[J-Lj-l5]";
 } else if (digit == "6") {
     return "[M-Om-o6]";
   } else if (digit == "7") {
@@ -317,7 +317,7 @@ function getRegexFromDigit(digit) {
         timeout:4,
         method: "POST"
       }, function() {
-        twiml.say("Enter the first 3 letters of the contact's name.",{voice:'alice'});
+        twiml.say("Enter the first three letters of the contact's name.",{voice:'alice'});
       });
 
       twiml.redirect("/voice/search/X/0");
