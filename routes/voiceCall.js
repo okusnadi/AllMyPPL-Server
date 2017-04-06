@@ -304,11 +304,11 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     if (!searchString || searchString == "" || searchString == "X") {
       twiml.gather({
         action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-        numDigits:5,
+        numDigits:1,
         timeout:6,
         method: "POST"
       }, function() {
-        twiml.say("Enter the first five or less letters of the contact's name.",{voice:'alice'});
+        twiml.say("Enter the first letter of the contact's name.",{voice:'alice'});
       });
 
       twiml.redirect("/voice/search/X/0");
