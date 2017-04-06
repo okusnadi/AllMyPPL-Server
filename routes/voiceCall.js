@@ -407,7 +407,7 @@ function getRegexFromDigit(digit) {
     response.type('text/xml');
     response.send(twiml.toString());
     return;
-  } else if (!searchString || searchString != "" || searchString != "X") {
+  } else if (searchString == "X" || !searchString || searchString == "") {
     searchString = input;
     var searchURL = '/voice/search/'+searchString+"/0"
     console.log(searchURL);
