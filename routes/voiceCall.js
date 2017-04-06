@@ -710,7 +710,7 @@ router.post('/checkMinutes/:outgoingNumber/:userID/:sessionToken', twilio.webhoo
       }).then(function(timeout) {
         const secondsLeft = timeout.get("secondsLeft");
         if (secondsLeft > 0) {
-          twiml.dial(outgoingNumber, { callerId : allMyPPLPhoneNumber, timeout: 30, timeLimit: secondsLeft, action: '/voice/deductSeconds/'+userID+"/"+escapedSessionToken, method:"POST"})
+          twiml.dial(outgoingNumber, { callerId : allMyPPLPhoneNumber, timeout: 30, timeLimit: secondsLeft, action: '/voice/deductSeconds/'+userID+"/"+escapedSessionToken, method:"POST"});
         } else {
           twiml.say("I'm sorry, but you do not have enough minutes to make an outbound call; you can add more time to your account in the All My People eye oh ess app.",{voice:'alice'});
           twiml.redirect("/voice/goodbye");
@@ -731,8 +731,6 @@ router.post('/checkMinutes/:outgoingNumber/:userID/:sessionToken', twilio.webhoo
 router.post('/deductSeconds/:userID/:sessionToken', twilio.webhook({validate:false}), function (request,response) {
 
     var twiml = new twilio.TwimlResponse();
-
-    console.log(request.body);
 
       const userID = request.params.userID;
         const escapedSessionToken = request.params.sessionToken;
@@ -755,18 +753,17 @@ router.post('/deductSeconds/:userID/:sessionToken', twilio.webhook({validate:fal
             if (timeout.get('secondsLeft') < 0) {timeout.set('secondsLeft',0);}
             return timeout.save();
           }
-
-          result.set("secondsLeft",(result.get('secondsLeft')-callDuration));
-          if (result.get('secondsLeft') < 0) {result.set('secondsLeft',0);}
+          const secondsLeft = result.get('secondsLeft');
+          result.set("secondsLeft",(secondsLeft-callDuration));
+          if (secondsLeft < 0) {result.set('secondsLeft',0);}
           return result.save();
         }).then(function(timeout) {
-          twiml.say("You have "+ parseInt(timeout.get('secondsLeft') / 60 ) + " minutes left on your account.");
+          twiml.say("You have "+ parseInt(timeout.get('secondsLeft') / 60 ) + " minutes left on your account.",{voice:'alice'});
           twiml.redirect("/voice/goodbye");
-          return;
-        }).then(function() {
-                      respose.type('text/xml');
-                      response.send(twiml.toString());
-                    }).error(function(error){
+                        respose.type('text/xml');
+                        response.send(twiml.toString());
+                    },function(error) {
+                      twiml.say("i'm sorry, an error occured.",{voice:'alice'});
                       twiml.redirect("/voice/goodbye");
                       response.type('text/xml');
                       response.send(twiml.toString());
