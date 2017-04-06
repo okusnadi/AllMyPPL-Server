@@ -715,11 +715,11 @@ router.post('/checkMinutes/:outgoingNumber/:userID/:sessionToken', twilio.webhoo
           twiml.say("I'm sorry, but you do not have enough minutes to make an outbound call; you can add more time to your account in the All My People eye oh ess app.",{voice:'alice'});
           twiml.redirect("/voice/goodbye");
         }
-        return;
+        return Parse.Promise.as();
       }).then(function() {
                     respose.type('text/xml');
                     response.send(twiml.toString());
-                  }).error(function(error){
+                  },function(error){
                     twiml.say("I'm sorry, an error has occured.",{voice:'alice'});
                     twiml.redirect("/voice/goodbye");
                     response.type('text/xml');
