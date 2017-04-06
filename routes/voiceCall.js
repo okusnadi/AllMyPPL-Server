@@ -268,30 +268,32 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   });
 
   function getRegexFromDigits(searchString) {
+    console.log(searchString);
+      console.log(searchString[0]);
     var regexString = "^";
     for (var i = 0; i++; i < searchString.length) {
       var digit = searchString[i];
       console.log(digit);
       if (digit == "2") {
-        regexString += "[A-Ca-c2]";
+        regexString = regexString + "[A-Ca-c2]";
       } else if (digit == "3") {
-        regexString += "[D-Fd-f3]";
+        regexString = regexString + "[D-Fd-f3]";
     } else if (digit == "4") {
-        regexString += "[G-Ig-i4]";
-      } else if (digit == "5") {  regexString += "[J-Lj-l5]";
+        regexString = regexString + "[G-Ig-i4]";
+      } else if (digit == "5") {  regexString = regexString + "[J-Lj-l5]";
     } else if (digit == "6") {
-        regexString += "[M-Om-o6]";
+        regexString = regexString + "[M-Om-o6]";
       } else if (digit == "7") {
-        regexString += "[P-Sp-s7]";
+        regexString = regexString + "[P-Sp-s7]";
       }  else if (digit == "8") {
-        regexString += "[T-Vt-v8]";
+        regexString = regexString + "[T-Vt-v8]";
       } else if (digit == "9") {
-        regexString += "[W-Zw-z9]";
+        regexString = regexString + "[W-Zw-z9]";
       } else {
-        regexString += "[^A-Za-z2-9_]|[01]"
+        regexString = regexString + "[^A-Za-z2-9_]|[01]"
       }
+      console.log(regexString);
     }
-    console.log(regexString);
     var regExp = new RegExp(regexString);
 
     if (regExp.test('April')) {console.log("matched with April");}
