@@ -461,9 +461,8 @@ function getRegexFromDigit(digit) {
 
   if ((numeral-1) < acceptedResults.length) {
       var contact = acceptedResults[numeral-1];
-
-            twiml.redirect("/voice/checkMinutes/"+contact.get('phone')+"/"+userID+"/"+escapedSessionToken);
-            response.type('text/xml');
+      twiml.redirect("/voice/checkMinutes/"+contact.get('phone')+"/"+userID+"/"+escapedSessionToken);
+      response.type('text/xml');
       response.send(twiml.toString());
       return;
     } else {
@@ -562,8 +561,8 @@ router.post('/MyPPL/:numeral/afterMenu/:userID/:sessionToken', twilio.webhook({v
     if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
     twiml.redirect("/voice/MyPPL/"+(numeral+1)+"/"+userID+"/"+escapedSessionToken)} else {
       twiml.say("Connecting to "+contact.get('name'),{voice:'alice'});
-
       twiml.redirect("/voice/checkMinutes/"+contact.get('phone')+"/"+userID+"/"+escapedSessionToken);
+    }
     response.type('text/xml');
     response.send(twiml.toString());
   }, function(error) {
