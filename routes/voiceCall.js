@@ -614,7 +614,7 @@ router.post('/listParty/:partyID/:iterator/afterMenu', twilio.webhook({validate:
     response.send(twiml.toString());
   } else {
     var users = party.get("users");
-    if (parseInt(input)-1) < users.length) {
+    if ((parseInt(input)-1) < users.length) {
     var contact = users[parseInt(input)-1];
     contact.fetch().then(function(obj){
       twiml.say("Connecting to "+obj.get("displayName") + ".",{voice:'alice'});
