@@ -332,7 +332,7 @@ function getRegexFromDigit(digit) {
           timeout: 2,
           method: "POST"
         }, function() {
-          twiml.say("Press 0 to go back to the main menu.",{voice:'alice'});
+          twiml.say("Listing search results. Press 0 to go back to the main menu.",{voice:'alice'});
         });
       }
         var query = new Parse.Query("Contact");
