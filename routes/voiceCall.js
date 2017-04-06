@@ -289,11 +289,15 @@ function getRegexFromDigit(digit) {
 }
 
   function getRegexFromDigits(searchString) {
+    var regexString = "^";
     if (searchString.length > 0) {
-      var regexString = "";
-      var digit = searchString[0];
+      var i = 0;
+      while (i < searchString.length) {
+      var digit = searchString[i];
       console.log(digit);
-      regexString = "^" + getRegexFromDigit(digit);
+      regexString += getRegexFromDigit(digit);
+      i++
+    }
     console.log(regexString);
     var regExp = new RegExp(regexString);
     if (regExp.test('April')) {console.log("matched with April");}
@@ -309,11 +313,11 @@ function getRegexFromDigit(digit) {
     if (!searchString || searchString == "" || searchString == "X") {
       twiml.gather({
         action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-        numDigits:1,
+        numDigits:5,
         timeout:6,
         method: "POST"
       }, function() {
-        twiml.say("Enter the first letter of the contact's name.",{voice:'alice'});
+        twiml.say("Enter the first up to 5 letters of the contact's name.",{voice:'alice'});
       });
 
       twiml.redirect("/voice/search/X/0");
