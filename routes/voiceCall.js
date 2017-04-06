@@ -343,10 +343,9 @@ function getRegexFromDigit(digit) {
           var regexString = getRegexFromDigits(searchString);
           console.log(regexString);
           var regexFromDigits = new RegExp(regexString);
-          console.log(regexFromDigits);
           for (var result in results) {
             var name = result.get('nameLowercase');
-            console.log(name+"|"+regexFromDigits);
+            console.log(name+"|"+regexString);
             if (regexFromDigits.test(name)) {
               acceptedResults.push(result);
               console.log("added");
