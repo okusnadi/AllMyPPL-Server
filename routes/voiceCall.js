@@ -461,8 +461,9 @@ function getRegexFromDigit(digit) {
 
   if ((numeral-1) < acceptedResults.length) {
       var contact = acceptedResults[numeral-1];
-      twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
-      response.type('text/xml');
+
+            twiml.redirect("/voice/checkMinutes/"+contact.get('phone')+"/"+userID+"/"+escapedSessionToken);}
+            response.type('text/xml');
       response.send(twiml.toString());
       return;
     } else {
@@ -561,8 +562,8 @@ router.post('/MyPPL/:numeral/afterMenu/:userID/:sessionToken', twilio.webhook({v
     if (!contact) {twiml.say("I'm sorry, I couldn't find a contact for that keypad selection.",{voice:'alice'});
     twiml.redirect("/voice/MyPPL/"+(numeral+1)+"/"+userID+"/"+escapedSessionToken)} else {
       twiml.say("Connecting to "+contact.get('name'),{voice:'alice'});
-      twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
-    }
+
+      twiml.redirect("/voice/checkMinutes/"+contact.get('phone')+"/"+userID+"/"+escapedSessionToken);}
     response.type('text/xml');
     response.send(twiml.toString());
   }, function(error) {
@@ -656,13 +657,11 @@ router.post('/listParty/:partyID/:iterator/afterMenu/:userID/:sessionToken', twi
     partyUser.fetch().then(function(obj){
       twiml.say("Connecting to "+obj.get("displayName") + ".",{voice:'alice'});
       console.error(obj.username + " " + obj.get("username"));
-      twiml.dial(obj.get('username'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
+      twiml.redirect("/voice/checkMinutes/"+obj.get("username")+"/"+userID+"/"+escapedSessionToken);
       response.type('text/xml');
       response.send(twiml.toString());
     }, function(error) {twiml.say("I'm sorry, we couldn't connect to your party, please try again later.",{voice:'alice'});
     twiml.redirect("/voice/goodbye");
-    twiml.say("Connecting to "+contact.get("displayName"),{voice:'alice'});
-    twiml.dial(contact.username, { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
     response.type('text/xml');
     response.send(twiml.toString());
   });
@@ -679,6 +678,100 @@ router.post('/listParty/:partyID/:iterator/afterMenu/:userID/:sessionToken', twi
   response.type('text/xml');
   response.send(twiml.toString());
 });
+
+});
+
+router.post('/checkMinutes/:outgoingNumber/:userID/:sessionToken', twilio.webhook({validate:false}), function (request,response) {
+  var twiml = new twilio.TwimlResponse();
+
+  console.log(request.body);
+
+    const outgoingNumber = request.params.outgoingNumber;
+    const userID = request.params.userID;
+      const escapedSessionToken = request.params.sessionToken;
+      var unescapedSessionToken = unescape(escapedSessionToken);
+
+      var user = new Parse.User();
+      user.id = userID;
+
+      var query = new Parse.Query("Timeout");
+      query.equalTo("user",user);
+      query.first({sessionToken:unescapedSessionToken}).then(function(result) {
+
+        if (!result) {
+          var Timeout = Parse.Object.extend("Timeout");
+          var timeout = new Timeout();
+          timeout.set("user",user);
+          timeout.set("secondsLeft",6000);
+          if (timeout.get('secondsLeft') < 0) {timeout.set('secondsLeft',0);}
+          return timeout.save();
+        }
+
+        return result.save();
+      }).then(function(timeout) {
+        const secondsLeft = timeout.get("secondsLeft");
+        if (secondsLeft > 0) {
+          twiml.dial(outgoingNumber, { callerId : allMyPPLPhoneNumber, timeout: 30, timeLimit: secondsLeft, action: '/voice/deductSeconds/'+userID+"/"+escapedSessionToken, method:"POST"})
+        } else {
+          twiml.say("I'm sorry, but you do not have enough minutes to make an outbound call; you can add more time to your account in the All My People eye oh ess app.",{voice:'alice'});
+          twiml.redirect("/voice/goodbye");
+        }
+        return;
+      }).then(function() {
+                    respose.type('text/xml');
+                    response.send(twiml.toString());
+                  }).error(function(error){
+                    twiml.say("I'm sorry, an error has occured.",{voice:'alice'});
+                    twiml.redirect("/voice/goodbye");
+                    response.type('text/xml');
+                    response.send(twiml.toString());
+                  });
+});
+
+
+router.post('/deductSeconds/:userID/:sessionToken', twilio.webhook({validate:false}), function (request,response) {
+
+    var twiml = new twilio.TwimlResponse();
+
+    console.log(request.body);
+
+      const userID = request.params.userID;
+        const escapedSessionToken = request.params.sessionToken;
+        var unescapedSessionToken = unescape(escapedSessionToken);
+
+        const callDuration = parseInt(request.params.DialCallDuration);
+
+        var user = new Parse.User();
+        user.id = userID;
+
+        var query = new Parse.Query("Timeout");
+        query.equalTo("user",user);
+        query.first({sessionToken:unescapedSessionToken}).then(function(result) {
+
+          if (!result) {
+            var Timeout = Parse.Object.extend("Timeout");
+            var timeout = new Timeout();
+            timeout.set("user",user);
+            timeout.set("secondsLeft",(6000-callDuration));
+            if (timeout.get('secondsLeft') < 0) {timeout.set('secondsLeft',0);}
+            return timeout.save();
+          }
+
+          result.set("secondsLeft",(result.get('secondsLeft')-callDuration));
+          if (result.get('secondsLeft') < 0) {result.set('secondsLeft',0);}
+          return result.save();
+        }).then(function(timeout) {
+          twiml.say("You have "+ parseInt(timeout.get('secondsLeft') / 60 ) + " minutes left on your account.");
+          twiml.redirect("/voice/goodbye");
+          return;
+        }).then(function() {
+                      respose.type('text/xml');
+                      response.send(twiml.toString());
+                    }).error(function(error){
+                      twiml.redirect("/voice/goodbye");
+                      response.type('text/xml');
+                      response.send(twiml.toString());
+                    });
 
 });
 
