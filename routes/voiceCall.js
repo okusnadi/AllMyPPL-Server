@@ -343,7 +343,8 @@ function getRegexFromDigit(digit) {
           var regexString = getRegexFromDigits(searchString);
           console.log(regexString);
           var regexFromDigits = new RegExp(regexString);
-          for (var result in results) {
+          var i=0;
+          while (i < results.length) {var result = results[i];
             var name = result.get('nameLowercase');
             console.log(name+"|"+regexString);
             if (regexFromDigits.test(name)) {
@@ -352,7 +353,8 @@ function getRegexFromDigit(digit) {
             } else {
               console.log(regexString+" not matched to "+name);
             }
-          }
+            i++;}
+
           console.log("after: "+acceptedResults.length);
           if (acceptedResults.length == 0) {
           twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
