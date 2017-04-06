@@ -89,7 +89,7 @@ app.use('/voice', voice);
 
 // Parse Server plays nicely with the rest of your web routes
 app.get('/', function(req, res) {
-  res.status(200).send('<html style="width:100%;height:100%;text-align:center;margin:0;padding:0"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style="margin:0;padding:0"><h1 style=""><p></p>CallMyPPL<p></p><p></p><a href="tel:+16502062610">(650) 206-2610</a><p></p><p>AllMyPPL</p><p><a href="ios.allmyppl.com">ios.allmyppl.com</a></p><p>AllMyPPL Support</p><p><a href="mailto:support@allmyppl.com">support@allmyppl.com</a></p><p>CallMyPPL is a free service that connects you to your contacts without you having to memorize their numbers.  To use CallMyPPL, you must dial into <a href="tel:6502062610">(650) 206-2610</a>.  After entering your phone and pin numbers, you\'ll be able to connect to anyone you\'ve designated as one of MyPPL or any member of your Party.  To start, you must have set up an account on the AllMyPPL app.</p></h1></body></html>');
+  res.status(200).send('<html style="width:100%;height:100%;text-align:center;margin:0;padding:0"><head><title>AllMyPPL. Your Contacts. Everywhere.</title></head><body style="margin:0;padding:0"><h1 style=""><p></p>CallMyPPL<p></p><p></p><a href="tel:+16502062610">(650) 206-2610</a><p></p><p>AllMyPPL</p><p><a href="ios.allmyppl.com">ios.allmyppl.com</a></p><p>AllMyPPL Support</p><p><a href="mailto:support@allmyppl.com">support@allmyppl.com</a></p><p>CallMyPPL is a free service that connects you to your contacts without you having to memorize their numbers.  To use CallMyPPL, you just call into <a href="tel:6502062610">(650) 206-2610</a>.  After entering your phone and pin numbers, you\'ll be able to connect to anyone in your contacts by searching their name, anyone you\'ve designated as one of MyPPL or any member of your Party.  To start, you must have set up an account on the AllMyPPL app.</p></h1></body></html>');
 });
 
 app.post('/smsReceived', function(req, res) {
@@ -651,7 +651,7 @@ app.post('/smsReceived', function(req, res) {
   twilio.sendMessage({
     to:req.body.From,
     from: allMyPPLPhoneNumber,
-    body: "CallMyPPL is a free service that connects you to your contacts without having to memorize their numbers.\n\nTo use CallMyPPL, just call into (650) 206-2610.\n\nAfter entering your phone and pin numbers, you'll be able to connect to anyone in your contacts by searching the contact names for a match, anyone you've designated as MyPPL or if you're in a Party, any member of your Party.\n\nTo start, you must have set up an account on the AllMyPPL app:\n\nhttp://ios.allmyppl.com"
+    body: "CallMyPPL is a free service that connects you to your contacts without having to memorize their numbers.\n\nTo use CallMyPPL, just call into (650) 206-2610.\n\nAfter entering your phone and pin numbers, you'll be able to connect to anyone in your contacts by searching their name, anyone you've designated as MyPPL or if you're in a Party, any member of your Party.\n\nTo start, you must have set up an account on the AllMyPPL app:\n\nhttp://ios.allmyppl.com"
   }, function(err, responseData) { //this function is executed when a response is received from Twilio
 
                    if (!err) {
