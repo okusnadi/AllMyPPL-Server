@@ -268,11 +268,8 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
   });
 
   function getRegexFromDigits(searchString) {
-    console.log(searchString);
-      console.log(searchString[0]);
     var regexString = "^";
-    for (var i = 0; i++; i < searchString.length) {
-      var digit = searchString[i];
+      var digit = searchString[0];
       console.log(digit);
       if (digit == "2") {
         regexString = regexString + "[A-Ca-c2]";
@@ -293,9 +290,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         regexString = regexString + "[^A-Za-z2-9_]|[01]"
       }
       console.log(regexString);
-    }
     var regExp = new RegExp(regexString);
-
     if (regExp.test('April')) {console.log("matched with April");}
 
     return regexString;
