@@ -161,7 +161,7 @@ router.post('/parsePinNumberInput/:phoneNumber', twilio.webhook({validate:false}
           query.first().then(function(result) {
             if (!result) {} else {
               twiml.gather({
-                action: "/voice/menu/"+numeral+"/afterMenu/"+userID"/"+escapedSessionToken,
+                action: "/voice/menu/"+numeral+"/afterMenu/"+userID+"/"+escapedSessionToken,
                 numDigits: 1,
                 timeout: 2,
                 method: "POST"
