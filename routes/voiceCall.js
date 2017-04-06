@@ -290,7 +290,7 @@ function getRegexFromDigit(digit) {
 
   function getRegexFromDigits(searchString) {
     if (searchString.length > 0) {
-  var regexString = "^";
+      var regexString = "";
       var digit = searchString[0];
       console.log(digit);
       regexString = "^" + getRegexFromDigit(digit);
@@ -342,13 +342,14 @@ function getRegexFromDigit(digit) {
           var acceptedResults = [];
 
           var regexFromDigits = new RegExp(getRegexFromDigits(searchString));
-          for (var i = 0; i++; i < results.length) {
-            if (regexFromDigits.test(results[i].get('name'))) {
-              acceptedResults.push(results[i]);
+          for (var result in results) {
+            var name = result.get('nameLowercase');
+            console.log(name+"|"+regexFromDigits);
+            if (regexFromDigits.test(name)) {
+              acceptedResults.push(result);
               console.log("added");
             }
           }
-
           console.log("after: "+acceptedResults.length);
           if (acceptedResults.length == 0) {
           twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
