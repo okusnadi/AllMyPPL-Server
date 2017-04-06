@@ -296,7 +296,7 @@ function getRegexFromDigit(digit) {
       var digit = searchString[i];
       console.log(digit);
       regexString += getRegexFromDigit(digit);
-      i++
+      i++;
     }
     console.log(regexString);
     var regExp = new RegExp(regexString);
@@ -313,11 +313,11 @@ function getRegexFromDigit(digit) {
     if (!searchString || searchString == "" || searchString == "X") {
       twiml.gather({
         action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-        numDigits:5,
-        timeout:6,
+        numDigits:3,
+        timeout:4,
         method: "POST"
       }, function() {
-        twiml.say("Enter the first up to 5 letters of the contact's name.",{voice:'alice'});
+        twiml.say("Enter the first 3 letters of the contact's name.",{voice:'alice'});
       });
 
       twiml.redirect("/voice/search/X/0");
