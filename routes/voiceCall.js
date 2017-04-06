@@ -50,7 +50,7 @@ router.post('/promptForPhoneNumber', twilio.webhook({validate:false}), function(
     timeout: 10,
     method: "POST"
   }, function (){
-    twiml.say("Please enter the ten digit phone number associated with your account followed by the pound sign.", { voice: 'alice'});
+    twiml.say("Please enter your ten digit phone number.", { voice: 'alice'});
   });
 
   twiml.redirect('/voice/promptForPhoneNumber');
@@ -87,7 +87,7 @@ router.post('/promptForPinNumber', twilio.webhook({validate:false}), function(re
     timeout: 5,
     method: "POST"
   }, function() {
-    twiml.say("Please enter your four digit pin number followed by the pound sign.", { voice: 'alice'});
+    twiml.say("Please enter your four digit pin number.", { voice: 'alice'});
   });
 
   twiml.redirect('/voice/promptForPinNumber');
@@ -160,7 +160,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
               twiml.gather({
                 action: "/voice/menu/"+numeral+"/afterMenu",
                 numDigits: 1,
-                timeout: 3,
+                timeout: 2,
                 method: "POST"
               }, function(){
                 twiml.say("Press 0 to connect to your party.",{voice:'alice'});
@@ -174,7 +174,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
           twiml.gather({
             action: "/voice/menu/"+numeral+"/afterMenu",
             numDigits: 1,
-            timeout: 3,
+            timeout: 2,
             method: "POST"
           }, function(){
             twiml.say("Press 0 to connect to your party.",{voice:'alice'});
@@ -185,21 +185,21 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
         twiml.redirect('/voice/menu/1'); response.type('text/xml'); response.send(twiml.toString());
       });
       return;
-      /*case 2:
+      case 2:
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
-        timeout: 3,
+        timeout: 2,
         method: "POST"
       }, function(){
         twiml.say("Press 2 to search for a contact.",{voice:'alice'});
       });
-      break;*/
+      break;
       case 1:
       twiml.gather({
         action: "/voice/menu/"+numeral+"/afterMenu",
         numDigits: 1,
-        timeout: 3,
+        timeout: 2,
         method: "POST"
       }, function(){
         twiml.say("Press 1 to connect to My people.",{voice:'alice'});
@@ -256,7 +256,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       response.send(twiml.toString());
       return;
     }
-//   else if {twiml.redirect('/voice/search/X/0');response.type('text/xml');response.send(twiml.toString());}
+   else if (numeral == 2) {twiml.redirect('/voice/search/X/0');response.type('text/xml');response.send(twiml.toString());}
      else {
       twiml.say("Invalid selection.",{voice:'alice'});
       twiml.redirect("/voice/menu/0");
@@ -267,40 +267,42 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
   });
 
+function getRegexFromDigit(digit) {
+  if (digit == "2") {
+    return "[A-Ca-c2]";
+  } else if (digit == "3") {
+    return "[D-Fd-f3]";
+} else if (digit == "4") {
+    return "[G-Ig-i4]";
+  } else if (digit == "5") {  return "[J-Lj-l5]";
+} else if (digit == "6") {
+    return "[M-Om-o6]";
+  } else if (digit == "7") {
+    return "[P-Sp-s7]";
+  }  else if (digit == "8") {
+    return "[T-Vt-v8]";
+  } else if (digit == "9") {
+    return "[W-Zw-z9]";
+  } else {
+    return "[^A-Za-z2-9_]|[01]"
+  }
+}
+
   function getRegexFromDigits(searchString) {
-    var regexString = "";
-    for (var i = 0; i++; i < searchString.length) {
-      var digit = parseInt(regexString[i]);
-      switch (digit) {
-        case 2:
-        regexString += "[A-Ca-c2]";
-        break;
-        case 3:
-        regexString += "[D-Fd-f3]";
-        break;
-        case 4:
-        regexString += "[G-Ig-i4]";
-        break;
-        case 5:
-        regexString += "[J-Lj-l5]";
-        break;
-        case 6:
-        regexString += "[M-Om-o6]";
-        break;
-        case 7:
-        regexString += "[P-Sp-s7]";
-        break;
-        case 8:
-        regexString += "[T-Vt-v8]";
-        break;
-        case 9:
-        regexString += "[W-Zw-z9]";
-        break;
-        default:
-        regexString += "[^A-Za-z2-9_]|[01]"
-      }
+    var regexString = "^";
+    if (searchString.length > 0) {
+      var i = 0;
+      while (i < searchString.length) {
+      var digit = searchString[i];
+      console.log(digit);
+      regexString += getRegexFromDigit(digit);
+      i++;
     }
-    return new RegExp(regexString);
+    console.log(regexString);
+    var regExp = new RegExp(regexString);
+    if (regExp.test('April')) {console.log("matched with April");}
+    return regexString;
+  } return "";
   }
 
   router.post('/search/:searchString/:index', twilio.webhook({validate: false}), function(request, response) {
@@ -311,11 +313,11 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     if (!searchString || searchString == "" || searchString == "X") {
       twiml.gather({
         action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-        numDigits:5,
-        timeout:6,
+        numDigits:3,
+        timeout:4,
         method: "POST"
       }, function() {
-        twiml.say("Enter the first five or less letters of the contact's name you wish to search for followed by the pound sign.",{voice:'alice'});
+        twiml.say("Enter the first three letters of the contact's name.",{voice:'alice'});
       });
 
       twiml.redirect("/voice/search/X/0");
@@ -326,24 +328,42 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
       if (index == 0) {
         twiml.gather({
           action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
-          numDigits: 2,
-          timeout: 3,
+          numDigits: 1,
+          timeout: 2,
           method: "POST"
         }, function() {
-          twiml.say("Press 0 followed by the pound sign at any silent time to go back to the main menu.",{voice:'alice'});
+          twiml.say("Listing search results. Press 0 to go back to the main menu.",{voice:'alice'});
         });
       }
         var query = new Parse.Query("Contact");
-        var regexFromDigits = getRegexFromDigits(searchString);
         query.find({sessionToken:user.getSessionToken()}).then(function(results){
-          if (!results) {
+          if (!results || results.length == 0) {
           twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
           twiml.redirect("/voice/search/X/0");
           return;
         }
-          results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));});
-          if (index < results.length) {
-          var contact = results[index];
+          console.log("before: "+results.length);
+          var acceptedResults = [];
+          var regexString = getRegexFromDigits(searchString);
+          var regexFromDigits = new RegExp(regexString);
+          var i=0;
+          while (i < results.length) {var result = results[i];
+            var name = result.get('nameLowercase');
+            if (regexFromDigits.test(name)) {
+              acceptedResults.push(result);
+            } else {
+            }
+            i++;}
+
+          console.log("after: "+acceptedResults.length);
+          if (acceptedResults.length == 0) {
+          twiml.say("I'm sorry, no contacts could be found for your search.",{voice:'alice'});
+          twiml.redirect("/voice/search/X/0");
+          return;
+          }
+
+        if (index < acceptedResults.length) {
+          var contact = acceptedResults[index];
           twiml.gather({
             action:"/voice/search/"+searchString+"/"+index+"/afterMenu",
             numDigits: 2,
@@ -379,6 +399,7 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     var index = parseInt(request.params.index);
     var input = request.body.Digits;
 
+    console.log("digits entered: "+input);
     var twiml = new twilio.TwimlResponse();
 
     if (input == "0") {
@@ -386,26 +407,41 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
     response.type('text/xml');
     response.send(twiml.toString());
     return;
-  } else if (!searchString || searchString != "" || searchString != "X") {
+  } else if (searchString == "X" || !searchString || searchString == "") {
     searchString = input;
-    twiml.redirect('/voice/search/'+searchString+"/0");
+    var searchURL = '/voice/search/'+searchString+"/0"
+    console.log(searchURL);
+    twiml.redirect(searchURL);
     response.type('text/xml');
     response.send(twiml.toString());
      return;
   } else {
-    var numeral = parseInt(input)
+    var numeral = parseInt(input);
     var query = new Parse.Query("Contact");
-    var regexFromDigits = getRegexFromDigits(searchString);
     query.find({sessionToken:user.getSessionToken()}).then(function(results){
-      if (!results) {
+      if (!results || results.length == 0) {
       twiml.redirect("/voice/search/X/0");
       response.type('text/xml');
       response.send(twiml.toString());
       return;
     }
-      results = Parse._.filter(results,function(result){return regexFromDigits.test(result.get('name'));});
-      if ((numeral -1 ) < results.length ) {
-      var contact = results[numeral-1];
+    console.log("before: "+results.length);
+    var acceptedResults = [];
+    var regexString = getRegexFromDigits(searchString);
+    var regexFromDigits = new RegExp(regexString);
+    var i=0;
+    while (i < results.length) {var result = results[i];
+      var name = result.get('nameLowercase');
+      if (regexFromDigits.test(name)) {
+        acceptedResults.push(result);
+      } else {
+      }
+      i++;}
+
+    console.log("after: "+acceptedResults.length);
+
+  if ((numeral-1) < acceptedResults.length) {
+      var contact = acceptedResults[numeral-1];
       twiml.dial(contact.get('phone'), { callerId : allMyPPLPhoneNumber, timeout: 30, action: '/voice/goodbye', method: "POST" });
       response.type('text/xml');
       response.send(twiml.toString());
@@ -578,6 +614,7 @@ router.post('/listParty/:partyID/:iterator/afterMenu', twilio.webhook({validate:
     response.send(twiml.toString());
   } else {
     var users = party.get("users");
+    if ((parseInt(input)-1) < users.length) {
     var contact = users[parseInt(input)-1];
     contact.fetch().then(function(obj){
       twiml.say("Connecting to "+obj.get("displayName") + ".",{voice:'alice'});
@@ -592,6 +629,12 @@ router.post('/listParty/:partyID/:iterator/afterMenu', twilio.webhook({validate:
     response.type('text/xml');
     response.send(twiml.toString());
   });
+} else {
+  twiml.say("invalid selection.", {voice:'alice'});
+  twiml.redirect("/voice/listParty/"+partyID+"/"+(iterator+1));
+  response.type('text/xml');
+  response.send(twiml.toString());
+}
 }
 }, function(error) {
   console.log(error);
