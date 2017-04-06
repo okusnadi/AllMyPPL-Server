@@ -267,33 +267,38 @@ router.post('/parsePinNumberInput', twilio.webhook({validate:false}), function(r
 
   });
 
+function getRegexFromDigit(digit) {
+  if (digit == "2") {
+    return "[A-Ca-c2]";
+  } else if (digit == "3") {
+    return "[D-Fd-f3]";
+} else if (digit == "4") {
+    return "[G-Ig-i4]";
+  } else if (digit == "5") {  regexString = regexString + "[J-Lj-l5]";
+} else if (digit == "6") {
+    return "[M-Om-o6]";
+  } else if (digit == "7") {
+    return "[P-Sp-s7]";
+  }  else if (digit == "8") {
+    return "[T-Vt-v8]";
+  } else if (digit == "9") {
+    return "[W-Zw-z9]";
+  } else {
+    return "[^A-Za-z2-9_]|[01]"
+  }
+}
+
   function getRegexFromDigits(searchString) {
-    var regexString = "^";
+    if (searchString.length > 0) {
+  var regexString = "^";
       var digit = searchString[0];
       console.log(digit);
-      if (digit == "2") {
-        regexString = regexString + "[A-Ca-c2]";
-      } else if (digit == "3") {
-        regexString = regexString + "[D-Fd-f3]";
-    } else if (digit == "4") {
-        regexString = regexString + "[G-Ig-i4]";
-      } else if (digit == "5") {  regexString = regexString + "[J-Lj-l5]";
-    } else if (digit == "6") {
-        regexString = regexString + "[M-Om-o6]";
-      } else if (digit == "7") {
-        regexString = regexString + "[P-Sp-s7]";
-      }  else if (digit == "8") {
-        regexString = regexString + "[T-Vt-v8]";
-      } else if (digit == "9") {
-        regexString = regexString + "[W-Zw-z9]";
-      } else {
-        regexString = regexString + "[^A-Za-z2-9_]|[01]"
-      }
-      console.log(regexString);
+      regexString = "^" + getRegexFromDigit(digit);
+    console.log(regexString);
     var regExp = new RegExp(regexString);
     if (regExp.test('April')) {console.log("matched with April");}
-
     return regexString;
+  } return "";
   }
 
   router.post('/search/:searchString/:index', twilio.webhook({validate: false}), function(request, response) {
