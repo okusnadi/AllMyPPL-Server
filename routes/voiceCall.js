@@ -416,10 +416,8 @@ function getRegexFromDigit(digit) {
     response.send(twiml.toString());
      return;
   } else {
-    var numeral = parseInt(input)
+    var numeral = parseInt(input);
     var query = new Parse.Query("Contact");
-    var regexFromDigits = getRegexFromDigits(searchString);
-    console.log(input+" = "+regexFromDigits);
     query.find({sessionToken:user.getSessionToken()}).then(function(results){
       if (!results || results.length == 0) {
       twiml.redirect("/voice/search/X/0");
