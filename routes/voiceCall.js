@@ -715,8 +715,6 @@ router.post('/checkMinutes/:outgoingNumber/:userID/:sessionToken', twilio.webhoo
           twiml.say("I'm sorry, but you do not have enough minutes to make an outbound call; you can add more time to your account in the All My People eye oh ess app.",{voice:'alice'});
           twiml.redirect("/voice/goodbye");
         }
-        return Parse.Promise.as();
-      }).then(function() {
                     respose.type('text/xml');
                     response.send(twiml.toString());
                   },function(error){
